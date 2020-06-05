@@ -1,5 +1,5 @@
 function showSidebar() {
-  var template = HtmlService.createTemplateFromFile('sidebarTemplate');
+  var template = HtmlService.createTemplateFromFile('code/sidebarTemplate');
   var page = template.evaluate();
   page.setTitle('Valispace');
   
