@@ -28,8 +28,9 @@ function connectValispace(){
 }
 
 
-function valispaceAskToken(deployment, username, passwd){
+function valispaceAskToken(deployment_name, username, passwd){
   Logger.log("This is the connect");
+  deployment = "https://"+deployment_name+".valispace.com"
   Logger.log(deployment)
   PropertiesService.getScriptProperties().setProperty('deployment', deployment);
   Logger.log(username);
@@ -118,8 +119,13 @@ function promptPassword() {
 function get_projects(){
   Logger.log("Getting projects");
   var allProjects = JSON.parse(getAuthenticatedValispaceUrl('project').getContentText());
-  Logger.log(allProjects.id)
-  return([{name:'Satellite', id:159}]);
+  projectList = "[{\"name\":\"" + allProjects[0].name + "\",\"id\":" + allProjects[0].id +"}"
+  for(i=1; i < allProjects.length; i++){
+    projectList = projectList + ",{\"name\":\"" + allProjects[i].name + "\",\"id\":" + allProjects[i].id +"}"
+  }
+  projectList = projectList + "]"
+  return(JSON.parse(projectList));
+  
 }
 
 

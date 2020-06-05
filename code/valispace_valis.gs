@@ -6,13 +6,13 @@
 
 function getProjectTree(id){
   Logger.log("Bonjour tout le monde get Project tree"); Logger.log(id);
-  var projectID_TEMP = id || 159;
-  Logger.log(projectID_TEMP);
+  var myId = id || 20;
+  Logger.log(myId);
   
   // On get tous les projets qu'on veut. Projet N3SS : id=21
-  var responseComponents = getAuthenticatedValispaceUrl('components/?project=' + projectID_TEMP);
-  var responseMatrices = getAuthenticatedValispaceUrl('matrices/?project=' + projectID_TEMP);
-  var responseValis = getAuthenticatedValispaceUrl('valis/?project=' + projectID_TEMP);
+  var responseComponents = getAuthenticatedValispaceUrl('components/?project=' + myId);
+  var responseMatrices = getAuthenticatedValispaceUrl('matrices/?project=' + myId);
+  var responseValis = getAuthenticatedValispaceUrl('valis/?project=' + myId);
   
   const components = JSON.parse(responseComponents.getContentText());
   const valis = JSON.parse(responseValis.getContentText());
