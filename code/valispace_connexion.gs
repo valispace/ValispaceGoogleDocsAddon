@@ -11,7 +11,7 @@ function connectValispace(){
   var coucou = false;
   var connected = false;
   
-  var template = HtmlService.createTemplateFromFile('connexionDialog');
+  var template = HtmlService.createTemplateFromFile('code/connexionDialog');
   var page = template.evaluate();
   PropertiesService.getUserProperties().setProperty('connexionAttemptDone', 'false');
   
@@ -28,11 +28,13 @@ function connectValispace(){
 }
 
 
-function valispaceAskToken(username, passwd){
+function valispaceAskToken(deployment, username, passwd){
   Logger.log("This is the connect");
+  Logger.log(deployment)
+  PropertiesService.getScriptProperties().setProperty('deployment', deployment);
   Logger.log(username);
   Logger.log(passwd); 
-  var tokenUrl = 'https://demo.valispace.com/o/token/'
+  var tokenUrl = deployment + '/o/token/'
   var payload = {
     grant_type: 'password',
     client_id: 'ValispaceREST',
@@ -115,9 +117,9 @@ function promptPassword() {
 
 function get_projects(){
   Logger.log("Getting projects");
-  //var response = getAuthenticatedValispaceUrl('project');
-  
-  return([{name:'Constants', id:3}, {name:'Satellite__ValiSat', id:24}, {name:'Simulator', id:25},{name:'Rocket__SaturnV', id:2},{name:'Test', id:28}, {name:'N3SS', id:21}]);
+  var allProjects = JSON.parse(getAuthenticatedValispaceUrl('project').getContentText());
+  Logger.log(allProjects.id)
+  return([{name:'Satellite', id:159}]);
 }
 
 
@@ -125,7 +127,8 @@ function get_projects(){
 
 // Fait un UrlFetchApp de l'url valispace avec les options d'authentification
 function getAuthenticatedValispaceUrl(subUrl, opt_options){
-  var completeUrl = 'https://demo.valispace.com/rest/' + subUrl;
+  var deployment = PropertiesService.getScriptProperties().getProperty('deployment');
+  var completeUrl = deployment + '/rest/' + subUrl;
   var fetchOptions = opt_options || {};
   if (!fetchOptions.headers) {
     fetchOptions.headers = {};

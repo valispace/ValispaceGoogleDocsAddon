@@ -6,15 +6,13 @@
 
 function getProjectTree(id){
   Logger.log("Bonjour tout le monde get Project tree"); Logger.log(id);
-  var myId = id || 24;
-  Logger.log(myId);
-  
-  
+  var projectID_TEMP = id || 159;
+  Logger.log(projectID_TEMP);
   
   // On get tous les projets qu'on veut. Projet N3SS : id=21
-  var responseComponents = getAuthenticatedValispaceUrl('project/' + myId + '/components/');
-  var responseMatrices = getAuthenticatedValispaceUrl('matrices/');
-  var responseValis = getAuthenticatedValispaceUrl('valis/', {'project': myId});
+  var responseComponents = getAuthenticatedValispaceUrl('components/?project=' + projectID_TEMP);
+  var responseMatrices = getAuthenticatedValispaceUrl('matrices/?project=' + projectID_TEMP);
+  var responseValis = getAuthenticatedValispaceUrl('valis/?project=' + projectID_TEMP);
   
   const components = JSON.parse(responseComponents.getContentText());
   const valis = JSON.parse(responseValis.getContentText());
@@ -41,6 +39,8 @@ function createTree(components, valis, matrices, parentID){
   var newHtml = "";
   var currentComponent = components.filter(function(d){return d.id === parentID;})[0];
   
+  var deployment = PropertiesService.getScriptProperties().getProperty('deployment');
+  
   // Insert current component as UL
   newHtml += '<li><span class="caret"><i class="valiIcon fas fa-cube"></i>' + currentComponent.name + '</span>';
   newHtml += '<ul class="nested">'
@@ -55,7 +55,7 @@ function createTree(components, valis, matrices, parentID){
   var componentMatrices = matrices.filter(function(d){return ((d.parent === parentID) && (d.name.indexOf('link_') != 0));});
   
   for(i = 0 ; i < componentValis.length ; i++){
-    var compLink = 'https://demo.valispace.com/components/' + parentID + '/properties/vali/' + componentValis[i].id;
+    var compLink = deployment + '/components/' + parentID + '/properties/vali/' + componentValis[i].id;
     newHtml += '<li class="vali" id="' + compLink + '">χ '+ componentValis[i].shortname + '</li>';
   }
   
@@ -68,7 +68,7 @@ function createTree(components, valis, matrices, parentID){
     for(row = 0 ; row < componentMatrices[i].cells.length ; row++){
       for(column = 0 ; column < componentMatrices[i].cells[row].length ; column++){
          var currentVali = valis.filter(function(d){return d.id === parseInt(this);}, componentMatrices[i].cells[row][column])[0];
-         var compLink = 'https://demo.valispace.com/components/' + parentID + '/properties/matrix/' + componentMatrices[i].id + '?/vali/'  + currentVali.id; // Todo a completer
+         var compLink = deployment + '/components/' + parentID + '/properties/matrix/' + componentMatrices[i].id + '?/vali/'  + currentVali.id; // Todo a completer
          newHtml += '<li class="vali" id="' + compLink + '">χ '+ currentVali.shortname + '</li>';
       }
     }
@@ -102,7 +102,7 @@ function coucouMaVali(){
 
 function customizeVali(link){
   var valiId = link.split("/vali/")[1].split('/')[0];
-  var template = HtmlService.createTemplateFromFile('valiDialog');
+  var template = HtmlService.createTemplateFromFile('code/valiDialog');
   template.vali = getValiValue(valiId);
   template.link = link;
   var page = template.evaluate();
@@ -182,6 +182,7 @@ function getValiValue(idVali, allValies){
 
 // Mise à jour de tous les liens valispace
 function updateValies(element, allValies) {
+  var deployment = PropertiesService.getScriptProperties().getProperty('deployment');
   if(!element){
     element = DocumentApp.getActiveDocument().getBody();
     allValies = JSON.parse(getAuthenticatedValispaceUrl('valis').getContentText());
@@ -232,7 +233,7 @@ function updateValies(element, allValies) {
         // L'id vali est contenu en dernière position du lien
         
         // On test si c'est bien une URL de vali:
-        if(curUrl.url.indexOf('https://demo.valispace.com/components/') === 0){
+        if(curUrl.url.indexOf(deployment+'/components/') === 0){
           try{
             Logger.log("On fait le parse:");
             var splitted = curUrl.url.split("/vali/")[1].split('?');

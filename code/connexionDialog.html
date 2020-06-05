@@ -6,6 +6,10 @@
   <body>
     <h2> Connect to Valispace</h2>
     <div>
+      <label for="deployment">Deployment Address:</label>
+      <input type="text" id="deployment" name="deployment" value="https://demo.valispace.com">
+    </div>
+    <div>
       <label for="username">Username:</label>
       <input type="text" id="username" name="username">
     </div>
@@ -28,7 +32,7 @@
           .withFailureHandler(function(error){
             alert(error);
           })
-          .valispaceAskToken($('#username').val(), $('#pass').val());
+          .valispaceAskToken($('#deployment').val(), $('#username').val(), $('#pass').val());
       };
       function closeIt(){
         google.script.host.close()
