@@ -1,0 +1,113 @@
+<script>
+	function addTreeListener(){
+	  var toggler = document.getElementsByClassName("caret");
+	  var i;
+	  for (i = 0; i < toggler.length; i++) {
+		toggler[i].addEventListener("click", function() {
+		  this.parentElement.querySelector(".nested").classList.toggle("active");
+		  this.classList.toggle("caret-down");
+		  
+		});
+	  }
+  
+	  var valis = document.getElementsByClassName("vali");
+	  for(i = 0 ; i < valis.length; i++){
+		valis[i].addEventListener("click", function(){ 
+		  google.script.run
+		  .withFailureHandler(function(error){
+			 alert(error);
+		   }
+		   )
+		   .insertVali(this.id);
+	   });
+	  }
+	  
+	  var requirements = document.getElementsByClassName("requirement");
+	  for(i = 0 ; i < requirements.length; i++){
+		requirements[i].addEventListener("click", function(){ 
+		  google.script.run
+		   .withFailureHandler(function(error){
+			 alert(this.id);
+			 alert(error);
+		   }
+		   )
+		   .insertRequirement(this.id);
+	   });
+	  }
+	  
+	  
+	}
+  </script>
+  
+  
+  
+  
+  
+  
+  <script>
+	function updateTree(id, name){
+	$('#projectTree').html("Loading tree " + name + "....");
+	google.script.run.withSuccessHandler(
+		function(newHtml){
+		  $('#projectTree').html(newHtml);
+		  addTreeListener();
+		}
+	  )
+	  .withFailureHandler(
+	  function(error){
+		  $('#projectTree').html("Failed to load project tree :" + error);
+		})
+	  .getProjectTree(id);
+	}
+	
+	
+	function updateRequirementTree(id, name){
+	  $('#requirementTree').html("Loading requirements for " + name + "....");
+	  google.script.run
+		.withSuccessHandler(
+		  function(newHtml){
+			$('#requirementTree').html(newHtml);
+			addTreeListener();
+		  }
+		)
+		.withFailureHandler(
+		  function(error){
+			$('#requirementTree').html("Failed to load requirement tree :" + error);
+		  }
+		)
+		.getRequirementTree(id);
+	
+	}
+	
+	function updateAllTrees(id, name){
+	  $('#projectTree').html("Loading components for " + name + "....");
+	  $('#requirementTree').html("Loading requirements for " + name + "....");
+	  google.script.run
+		.withSuccessHandler(
+		  function(newHtml){
+			$('#projectTree').html(newHtml);
+			google.script.run
+			  .withSuccessHandler(
+				function(newHtml){
+				  $('#requirementTree').html(newHtml);
+				  addTreeListener();
+				}
+			   )
+			 .withFailureHandler(
+			   function(error){
+				 $('#requirementTree').html("Failed to load requirements :" + error);
+			   }
+			 )
+			 .getRequirementTree(id);
+		  }
+		)
+		.withFailureHandler(
+		  function(error){
+			$('#projectTree').html("Failed to load components :" + error);
+		  })
+		.getProjectTree(id);
+	}
+	  
+	
+  
+  </script>

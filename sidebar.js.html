@@ -1,0 +1,143 @@
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+    <script>
+      /**
+       * On document load, assign click handlers to each button and try to load the
+       * user's origin and destination language preferences if previously set.
+       */
+      $(function() {
+        $('#update-all-valies').click(updateAllValiesScript);
+        $('#update-all-requirements').click(updateAllRequirementsScript);
+        $('#valispace-connect').click(connectValispaceScript);
+        $('#update-tree').click(updateSelectedProjectScript);
+        $('#update-projects').click(updateProjectOptionsScript);
+        
+        $('#options-projects').change(updateSelectedProjectScript);
+        $('#connexionStatus').html("Connexion...");
+        
+        google.script.run
+          .withSuccessHandler(function(connected){
+              if(connected){
+                 $('#connexionStatus').html("Connected");
+                 updateProjectOptionsScript();
+               } else {
+                 $('#connexionStatus').html("Not connected");
+               }
+               
+            }
+          )
+          .withFailureHandler(function(error){
+              alert(error);
+            }
+          )
+          .checkValispaceConnexion();
+          
+          
+        
+//        google.script.run
+//          .withUserObject(this)
+//          .withSuccessHandler(updateProjectOptionsScript)
+//          .get_projects()
+          
+      });
+      
+
+      
+      function updateProjectOptionsScript(){
+        google.script.run
+          .withSuccessHandler(function(options){
+            var insertedHTML = "";
+            var i;
+            for (i = 0 ; i < options.length ; i++){
+              insertedHTML += "<option "
+              insertedHTML += 'value="' + options[i].id + '">';
+              insertedHTML += options[i].name;
+              insertedHTML += "</option>"
+            }
+            $('#options-projects').html(insertedHTML);
+            })
+          .get_projects();
+      }
+      
+      
+      function updateSelectedProjectScript(){
+        var id=$("#options-projects").val();
+        var name= $( "#options-projects option:selected").text();
+        updateAllTrees(id, name);
+        
+
+      }
+      
+      function insertNewValiScript() {
+        google.script.run
+            .withUserObject(this)
+            .insertVali();
+      }
+      
+      function updateAllRequirementsScript(){
+        $('#updating-requirements-status').html("Updating...");
+        google.script.run
+            .withUserObject(this)
+            .withSuccessHandler(
+              function(){
+                $('#updating-requirements-status').html("Done");
+              }
+            )
+            .withFailureHandler(
+              function(error){
+                $('#updating-requirements-status').html("Update failed");
+                alert(error);
+              }
+            )
+            .updateAllRequirements();
+      }
+      
+      function updateAllValiesScript() {
+        $('#updating-valies-status').html("Updating...");
+        google.script.run
+            .withUserObject(this)
+            .withSuccessHandler(
+              function(){
+                $('#updating-valies-status').html("Done");
+              }
+            )
+            .withFailureHandler(
+              function(error){
+                $('#updating-valies-status').html("Update failed");
+                alert(error);
+              }
+            )
+            .updateValies();
+      }
+      function connectValispaceScript(){
+          google.script.run
+            .withUserObject(this)
+            .withSuccessHandler(
+              function(res){
+                if(res){
+                  $('#connexionStatus').html("Connected");
+                  updateProjectOptionsScript();
+                } else {
+                  alert("Connexion failed");
+                  $('#connexionStatus').html("Not connected");
+                }
+              }
+            )
+            .withFailureHandler(
+              function(error){
+                alert(error);
+              }
+            )
+            .connectValispace();
+           
+      }
+      
+     
+      
+     
+
+ 
+      function showError(msg, element) {
+        var div = $('<div id="error" class="error">' + msg + '</div>');
+        $(element).after(div);
+      }
+</script>
