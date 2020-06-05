@@ -36,6 +36,7 @@ function getRequirementTree(id){
 
 
 function createSpecificationTree(specificationRequirementGroups, specRequirements, currentSpecification){
+  var deployment = PropertiesService.getScriptProperties().getProperty('deployment');
   // Crée l'arborescence d'une spécification.
   var specHtml = "<li><span class='caret'><i class=' valiIcon fas fa-clipboard-check'></i>" + currentSpecification.name + "</span><ul class='nested'>";
   
@@ -56,14 +57,14 @@ function createSpecificationTree(specificationRequirementGroups, specRequirement
     for(j = 0 ; j < specificationRequirementGroups[i].requirements.length; j++){
       var req = specRequirements.filter(check_spec_requirement_id, specificationRequirementGroups[i].requirements[j])[0];
       specRequirements = specRequirements.filter(cleanupSpecRequirements, specificationRequirementGroups[i].requirements[j]);
-      var linkReq = "https://demo.valispace.com/specifications/requirements/" + req.id + "/components";
+      var linkReq = deployment + "/specifications/requirements/" + req.id + "/components";
       specHtml+='<li class="requirement" id="' + linkReq + '"><i class="valiIcon fas fa-check"></i>' + req.identifier + '</li>';
     }
     specHtml += "</ul></li>";   
   }
   
   for( j = 0 ; j < specRequirements.length ; j++){
-    var linkReq = "https://demo.valispace.com/specifications/requirements/" + specRequirements[j].id + "/components";
+    var linkReq = deployment + "/specifications/requirements/" + specRequirements[j].id + "/components";
       specHtml+='<li class="requirement" id="' + linkReq + '"><i class="valiIcon fas fa-check"></i>' + specRequirements[j].identifier + '</li>';
   }
   
@@ -223,6 +224,7 @@ function insertRequirement(link){
 
 // Interprète les requirements et renvoie un paragraph 
 function interpretReqText(textReq, cell){
+  var deployment = PropertiesService.getScriptProperties().getProperty('deployment');
   var interpreted = textReq;
   const valiRegex = /<vali[^>]*?\[id\]="([0-9]+?)"[^>]*?>[\s\S]*?<\/vali>/gm
   const findIDregex = /\[id\]="([0-9]+?)"/
@@ -276,9 +278,9 @@ function interpretReqText(textReq, cell){
       
       var link;
       if(vali.parent_model === 'requirement'){
-        link =   'https://demo.valispace.com/specifications/requirements/' + vali.parent_object_id + '/valis';
+        link =   deployment+'/specifications/requirements/' + vali.parent_object_id + '/valis';
       } else {
-        link =  'https://demo.valispace.com/components/'+ vali.parent_object_id + '/properties/vali/' + vali.id;
+        link =  deployment+'/components/'+ vali.parent_object_id + '/properties/vali/' + vali.id;
       }
       var newTxt = para.appendText(valiTxt);
       para.appendText(" ");
@@ -335,7 +337,7 @@ function getReqValue(reqId){
 
 // Fonction récursive de mise à jour des requirements
 function updateAllRequirements(element, req, compReqs, components, verifications, verifMethods){
-  
+  var deployment = PropertiesService.getScriptProperties().getProperty('deployment');
   if(!element){
     element = DocumentApp.getActiveDocument().getBody();
      // On télécharge tous les requirements
@@ -362,7 +364,7 @@ function updateAllRequirements(element, req, compReqs, components, verifications
   if (element.getType() === DocumentApp.ElementType.TABLE) {
      var link = element.getCell(0, 0).getChild(0).getLinkUrl();
     if (link){
-      if (link.indexOf("https://demo.valispace.com/specifications/requirements/") === 0){
+      if (link.indexOf(deployment+"/specifications/requirements/") === 0){
         // On récupère l'id du req
         var reqId = parseInt(link.split("/requirements/")[1].split("/")[0]);
         
