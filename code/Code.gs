@@ -5,8 +5,6 @@ function showSidebar() {
   
   DocumentApp.getUi().showSidebar(page);
   
-  // Todo connect if not connected
-
 }
 
 

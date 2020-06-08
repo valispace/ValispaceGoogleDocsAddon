@@ -2,26 +2,31 @@
 <html>
   <head>
     <base target="_top">
+    <?!=HtmlService.createHtmlOutputFromFile('code/connectionDialog.css').getContent()?>
   </head>
   <body>
-    <h2> Connect to Valispace</h2>
-    <div>
-      <label for="deployment">Deployment Name:</label>
-      <input type="text" id="deployment" name="deployment" value="demo">
+  <div class="login-container">
+    <div class="logo-container">
+      <img src="https://www.valispace.com/wp-content/uploads/2018/06/valispace_logo_grey.png" width="50%" height="50%">
     </div>
-    <div>
+    
+    <div class="login-form">
+      <label for="deployment">Deployment Name:</label>
+      <input class="input-field" type="text" id="deployment" name="deployment" value="demo">
+    </div>
+    <div class="login-form">
       <label for="username">Username:</label>
-      <input type="text" id="username" name="username">
+      <input class="input-field" type="text" id="username" name="username">
     </div>
 
-  <div>
+  <div class="login-form">
     <label for="pass">Password:</label>
-    <input type="password" id="pass" name="password">
+    <input class="input-field" type="password" id="pass" name="password">
   </div>
 
     <input type="submit" value="Connect" class="action" onclick="connect()" >
-    <input type="button" value="Close" onclick="google.script.host.close()" >
-    
+    <input type="button" value="Close" onclick="closeIt()" >
+</div>    
     <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js">
     </script>
     <script>
@@ -34,6 +39,7 @@
           })
           .valispaceAskToken($('#deployment').val(), $('#username').val(), $('#pass').val());
       };
+      
       function closeIt(){
         google.script.host.close()
       };

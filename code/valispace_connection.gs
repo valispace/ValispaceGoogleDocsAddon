@@ -1,29 +1,24 @@
 // ****************************************************************************************
-// Valispace API stuff
+// Valispace API connection
 // ****************************************************************************************
 
 
-// Connection avec valispace, on stocke le access_token dans les paramètres utilisateurs de ce script
+// Connect to Valispace
 function connectValispace(){
   
-  // On ouvre une fenêtre pour la connexion
+  // Open New Window for Connection
   
-  var coucou = false;
-  var connected = false;
-  
-  var template = HtmlService.createTemplateFromFile('code/connexionDialog');
+  var template = HtmlService.createTemplateFromFile('code/connectionDialog');
   var page = template.evaluate();
-  PropertiesService.getUserProperties().setProperty('connexionAttemptDone', 'false');
+  PropertiesService.getUserProperties().setProperty('connectionAttemptDone', 'false');
   
   var dialog = DocumentApp.getUi().showModalDialog(page, 'Connect to Valispace');
   
-  while(PropertiesService.getUserProperties().getProperty('connexionAttemptDone') === 'false'){
+  while(PropertiesService.getUserProperties().getProperty('connectionAttemptDone') === 'false'){
      
   }
   
-  return (PropertiesService.getUserProperties().getProperty('connexionStatus') === 'true');
-  
-  
+  return (PropertiesService.getUserProperties().getProperty('connectionStatus') === 'true');  
   
 }
 
@@ -48,15 +43,15 @@ function valispaceAskToken(deployment_name, username, passwd){
   if (responseData && responseData.access_token) {
     var accessToken = responseData.access_token;
     PropertiesService.getUserProperties().setProperty('access_token',accessToken);
-    PropertiesService.getUserProperties().setProperty('connexionStatus', 'true');
-    PropertiesService.getUserProperties().setProperty('connexionAttemptDone', 'true');
+    PropertiesService.getUserProperties().setProperty('connectionStatus', 'true');
+    PropertiesService.getUserProperties().setProperty('connectionAttemptDone', 'true');
     PropertiesService.getUserProperties().setProperty('valispaceLogin', username); 
     PropertiesService.getUserProperties().setProperty('valispacePwd', passwd);
     Logger.log("Connected, access token");
     Logger.log(accessToken);
   } else {
-    PropertiesService.getUserProperties().setProperty('connexionStatus', 'false');
-    PropertiesService.getUserProperties().setProperty('connexionAttemptDone', 'true');
+    PropertiesService.getUserProperties().setProperty('connectionStatus', 'false');
+    PropertiesService.getUserProperties().setProperty('connectionAttemptDone', 'true');
     throw Error('No access token received: ' + response.getContentText());
   }
   
@@ -64,7 +59,7 @@ function valispaceAskToken(deployment_name, username, passwd){
 }
 
 
-// TODO tester en vrai
+
 function checkValispaceConnexion(){
   Logger.log("Testing valispace connexion");
  
@@ -81,17 +76,17 @@ function checkValispaceConnexion(){
     }
       
     if( responseCode === 200){
-      // On est bien connecté
-      Logger.log("On est bien connecté");
+      // Connected
+      Logger.log("User Connected");
       return true;
     } else if (responseCode === 401) {
-      // Notre access_token n'est plus valable, on en demande un nouveau
-      Logger.log("Oh no return code");
+      // access_token is no longer valid, request a new one
+      Logger.log("No return code");
       var username = PropertiesService.getUserProperties().getProperty('valispaceLogin');
       var pwd = PropertiesService.getUserProperties().getProperty('valispacePwd');
-      Logger.log("Coucou le username");
+      Logger.log("username");
       Logger.log(username); 
-      Logger.log("Coucou le pwd"); 
+      Logger.log("pwd"); 
       Logger.log(pwd);
       if ((username.length > 0) && (pwd.length > 0)){
          valispaceAskToken(username, pwd);
@@ -131,7 +126,7 @@ function get_projects(){
 
 
 
-// Fait un UrlFetchApp de l'url valispace avec les options d'authentification
+// UrlFetchApp with the authentication options
 function getAuthenticatedValispaceUrl(subUrl, opt_options){
   var deployment = PropertiesService.getScriptProperties().getProperty('deployment');
   var completeUrl = deployment + '/rest/' + subUrl;
@@ -142,5 +137,5 @@ function getAuthenticatedValispaceUrl(subUrl, opt_options){
   fetchOptions.headers.Authorization = 'Bearer ' + PropertiesService.getUserProperties().getProperty('access_token');
   Logger.log("Getting URL");
   Logger.log(completeUrl);
-  return  UrlFetchApp.fetch(completeUrl, fetchOptions);
-}
+    return  UrlFetchApp.fetch(completeUrl, fetchOptions);
+  }
