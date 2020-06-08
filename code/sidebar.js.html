@@ -8,19 +8,20 @@
         $('#update-all-valies').click(updateAllValiesScript);
         $('#update-all-requirements').click(updateAllRequirementsScript);
         $('#valispace-connect').click(connectValispaceScript);
+        $('#valispace-disconnect').click(disconnectValispaceScript);
         $('#update-tree').click(updateSelectedProjectScript);
         $('#update-projects').click(updateProjectOptionsScript);
         
         $('#options-projects').change(updateSelectedProjectScript);
-        $('#connexionStatus').html("Connexion...");
+        $('#connectionStatus').html("Connection...");
         
         google.script.run
           .withSuccessHandler(function(connected){
               if(connected){
-                 $('#connexionStatus').html("Connected");
+                 $('#connectionStatus').html("Connected");
                  updateProjectOptionsScript();
                } else {
-                 $('#connexionStatus').html("Not connected");
+                 $('#connectionStatus').html("Not connected");
                }
                
             }
@@ -29,7 +30,7 @@
               alert(error);
             }
           )
-          .checkValispaceConnexion();
+          .checkValispaceconnection();
           
           
         
@@ -114,11 +115,11 @@
             .withSuccessHandler(
               function(res){
                 if(res){
-                  $('#connexionStatus').html("Connected");
+                  $('#connectionStatus').html("Connected");
                   updateProjectOptionsScript();
                 } else {
-                  alert("Connexion failed");
-                  $('#connexionStatus').html("Not connected");
+                  alert("connection failed");
+                  $('#connectionStatus').html("Not connected");
                 }
               }
             )
@@ -131,7 +132,9 @@
            
       }
       
-     
+      function disconnectValispaceScript(){
+      ScriptApp.invalidateAuth();
+      }
       
      
 
