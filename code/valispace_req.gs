@@ -195,27 +195,25 @@ function insertRequirement(link){
     return;
   }
   
-  var templatedoc = DocumentApp.openById('1w2Q8hezg4uRntRpFSCPl-ItY7QO9RT3mXBYz--tpf_A');
+  var templatedoc = DocumentApp.openById('1bDQClCWVcvzPARYl5ohGvBgZlQ519NGGCStqizzK-bU');
   
   var reqTable = body.insertTable(index+1,templatedoc.getChild(1).copy());
-  var reqIdText = reqTable.getCell(0, 0).setText("[" + req.identifier + "]");
+  var reqIdText = reqTable.getCell(1, 0).setText("[" + req.identifier + "]");
   reqIdText.setLinkUrl(link);
   
   
   
   
   // insert formatted text in the cell 
-  interpretReqText(req.text, reqTable.getCell(1, 0));
+  interpretReqText(req.text, reqTable.getCell(1, 1));
   
   if(req.comment !== null){
-    interpretReqText(req.comment, reqTable.getCell(2, 0));
-    reqTable.getCell(2, 0).editAsText().setItalic(true);
+    interpretReqText(req.comment, reqTable.getCell(1, 2));
+    reqTable.getCell(1, 2).editAsText().setItalic(true);
   }
   
   
-  
-  
-  reqTable.getCell(1, 1).setText(req.method);
+  //reqTable.getCell(1, 3).setText(req.method);
       
 //  var newText2 = cursor.insertText(insertedText);
 //  newText2.setLinkUrl(link);
@@ -310,9 +308,8 @@ function getReqValue(reqId){
       var compReq = JSON.parse(responseComponentReq.getContentText());
       var componentResponse = getAuthenticatedValispaceUrl("components/" + compReq.component);
       var componentName = JSON.parse(componentResponse.getContentText()).name;
-      var responseVerif = getAuthenticatedValispaceUrl("requirements/verifications/" + req.component_requirements[i]);
+      var responseVerif = getAuthenticatedValispaceUrl("requirements/verifications/" + compReq.verifications);
       var verificationMethod = JSON.parse(responseVerif.getContentText()).method;
-     
       var verifMethodText;
       if (verificationMethod === null){
         verifMethodText = "NA";
