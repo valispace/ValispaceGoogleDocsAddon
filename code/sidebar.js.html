@@ -5,32 +5,41 @@
        * user's origin and destination language preferences if previously set.
        */
       $(function() {
-        $('#update-all-valies').click(updateAllValiesScript);
-        $('#update-all-requirements').click(updateAllRequirementsScript);
         $('#valispace-connect').click(connectValispaceScript);
         $('#valispace-disconnect').click(disconnectValispaceScript);
-        $('#update-tree').click(updateSelectedProjectScript);
+
+        $('#update-all-valies').click(updateAllValiesScript);
+        $('#update-all-requirements').click(updateAllRequirementsScript);
+
+        $('#update-workspaces').click(updateWorkspacesOptionsScript);
         $('#update-projects').click(updateProjectOptionsScript);
         
-        $('#options-projects').change(updateSelectedProjectScript);
-        $('#connectionStatus').html("Connection...");
         
-        google.script.run
-          .withSuccessHandler(function(connected){
-              if(connected){
-                 $('#connectionStatus').html("Connected");
-                 updateProjectOptionsScript();
-               } else {
-                 $('#connectionStatus').html("Not connected");
-               }
-               
-            }
-          )
-          .withFailureHandler(function(error){
-              alert(error);
-            }
-          )
-          .checkValispaceconnection();
+        
+        $('#update-tree').click(updateSelectedProjectScript);
+        
+        
+        $('#options-workspaces').change(updateSelectedWorkspaceScript);
+        $('#options-projects').change(updateSelectedProjectScript);
+        $('#connectionStatus').html("Not Connected");
+        
+//        google.script.run
+//          .withSuccessHandler(function(connected){
+//              if(connected){
+//                 $('#connectionStatus').html("Connected");
+//                 updateWorkspacesOptionsScript();
+//                 //updateProjectOptionsScript();
+//               } else {
+//                 $('#connectionStatus').html("Not connected");
+//               }
+//               
+//            }
+//          )
+//          .withFailureHandler(function(error){
+//              alert(error);
+//            }
+//          )
+//          .checkValispaceconnection();
           
           
         
@@ -41,9 +50,23 @@
           
       });
       
-
+      function updateWorkspacesOptionsScript(){
+        google.script.run
+          .withSuccessHandler(function(options){
+            var insertedHTML = "";
+            var i;
+            for (i = 0 ; i < options.length ; i++){
+              insertedHTML += "<option "
+              insertedHTML += 'value="' + options[i].id + '">';
+              insertedHTML += options[i].name;
+              insertedHTML += "</option>"
+            }
+            $('#options-workspaces').html(insertedHTML);
+            })
+          .get_workspaces();
+      }
       
-      function updateProjectOptionsScript(){
+      function updateProjectOptionsScript(workspaceID){
         google.script.run
           .withSuccessHandler(function(options){
             var insertedHTML = "";
@@ -56,16 +79,20 @@
             }
             $('#options-projects').html(insertedHTML);
             })
-          .get_projects();
+          .get_projects(workspaceID);
       }
-      
+
+      function updateSelectedWorkspaceScript(){
+        var workspaceID=$("#options-workspaces").val();
+        var name= $("#options-workspaces option:selected").text();
+        updateProjectOptionsScript(workspaceID);
+      }
       
       function updateSelectedProjectScript(){
         var id=$("#options-projects").val();
         var name= $( "#options-projects option:selected").text();
         updateAllTrees(id, name);
         
-
       }
       
       function insertNewValiScript() {
@@ -116,7 +143,7 @@
               function(res){
                 if(res){
                   $('#connectionStatus').html("Connected");
-                  updateProjectOptionsScript();
+                  updateWorkspacesOptionsScript();
                 } else {
                   alert("connection failed");
                   $('#connectionStatus').html("Not connected");
@@ -133,7 +160,7 @@
       }
       
       function disconnectValispaceScript(){
-      ScriptApp.invalidateAuth();
+      
       }
       
      

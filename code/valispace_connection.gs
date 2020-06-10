@@ -111,9 +111,10 @@ function promptPassword() {
 }
 
 
-function get_projects(){
+function get_projects(workspaceID){
   Logger.log("Getting projects");
-  var allProjects = JSON.parse(getAuthenticatedValispaceUrl('project').getContentText());
+  //var allProjects = JSON.parse(getAuthenticatedValispaceUrl('project').getContentText());
+  var allProjects = JSON.parse(getAuthenticatedValispaceUrl('project/?workspace='+workspaceID).getContentText());
   projectList = "[{\"name\":\"" + allProjects[0].name + "\",\"id\":" + allProjects[0].id +"}"
   for(i=1; i < allProjects.length; i++){
     projectList = projectList + ",{\"name\":\"" + allProjects[i].name + "\",\"id\":" + allProjects[i].id +"}"
@@ -123,7 +124,16 @@ function get_projects(){
   
 }
 
-
+function get_workspaces(){
+  Logger.log("Getting Workspaces");
+  var allWorkspaces = JSON.parse(getAuthenticatedValispaceUrl('workspace').getContentText());
+  workspaceList = "[{\"name\":\"" + allWorkspaces[0].name + "\",\"id\":" + allWorkspaces[0].id +"}"
+  for(i=1; i < allWorkspaces.length; i++){
+    workspaceList = workspaceList + ",{\"name\":\"" + allWorkspaces[i].name + "\",\"id\":" + allWorkspaces[i].id +"}"
+  }
+  workspaceList = workspaceList + "]"
+  return(JSON.parse(workspaceList));
+}
 
 
 // UrlFetchApp with the authentication options

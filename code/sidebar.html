@@ -1,32 +1,42 @@
-<div class="sidebarLine" >
+<div class="buttonContainer sidebarLine" >
   <span>
     <button class="valiButton" id="valispace-connect">Connect to Valispace</button>
-    <button class="valiButton" id="valispace-disconnect">Disconnect</button>
+     <!-- <button class="valiButton" id="valispace-disconnect">Disconnect</button> --> 
   </span>
-  <span id="connectionStatus" style="font-size:0.9em; "></span>
+  <p class="connectionStatus" id="connectionStatus">dasdsa</p>
 </div>
+
 <div class="sidebarLine">
+  <p class="selectionTitle">Workspace:</p>
+  <span>
+    <select class="valiButton selecionList" id="options-workspaces"></select>
+  </span>
+  <span>
+    <button mat-raised-button class="valiButton" id="update-workspaces"><i class="fas fa-sync-alt"></i></button>
+  </span>
+</div>
+
+
+<div class="sidebarLine">
+  <p class="selectionTitle">Project:</p>
+  <span>
+    <select class="valiButton selecionList" id="options-projects"></select>
+  </span>
+  <span>
+    <button mat-raised-button class="valiButton" id="update-projects"><i class="fas fa-sync-alt"></i></button>
+  </span>
+</div>
+
+<div class="sidebarLine buttonContainer">
   <span>
     <button class="valiButton" id="update-all-valies">Update all valies</button>
   </span>
   <span id="updating-valies-status" style="font-size:0.9em;"></span>
 </div>
-<div class="sidebarLine">
+<div class="sidebarLine buttonContainer">
   <span>
     <button class="valiButton" id="update-all-requirements">Update all requirements</button>
   </span>
   <span id="updating-requirements-status" style="font-size:0.9em;"></span>
   
-</div>
-
-
-
-<div class="sidebarLine">
-  <span style="font-weight:600;font-size:0.9em;">Project: </span>
-  <span>
-    <select class="valiButton" id="options-projects"></select>
-  </span>
-  <span>
-    <button mat-raised-button class="valiButton" id="update-tree"><i class="fas fa-sync-alt"></i></button>
-  </span>
 </div>
