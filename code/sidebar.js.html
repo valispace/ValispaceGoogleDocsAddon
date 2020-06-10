@@ -7,6 +7,7 @@
       $(function() {
         $('#valispace-connect').click(connectValispaceScript);
         $('#valispace-disconnect').click(disconnectValispaceScript);
+        $('#valispace-options').click(OptionsScript);
 
         $('#update-all-valies').click(updateAllValiesScript);
         $('#update-all-requirements').click(updateAllRequirementsScript);
@@ -161,6 +162,10 @@
       
       function disconnectValispaceScript(){
       
+      }
+      
+      function OptionsScript(){
+      google.script.run.withUserObject(this).openOptionDialog();
       }
       
      

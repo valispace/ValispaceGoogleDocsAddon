@@ -7,7 +7,6 @@
 function connectValispace(){
   
   // Open New Window for Connection
-  
   var template = HtmlService.createTemplateFromFile('code/connectionDialog');
   var page = template.evaluate();
   PropertiesService.getUserProperties().setProperty('connectionAttemptDone', 'false');

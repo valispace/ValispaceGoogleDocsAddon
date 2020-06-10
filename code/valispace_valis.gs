@@ -1,15 +1,9 @@
-// ****************************************************************************************
-// Fonctions de creation de l'arborescence des composants valispace pour les valis
-// ****************************************************************************************
-
-
 
 function getProjectTree(id){
-  Logger.log("Bonjour tout le monde get Project tree"); Logger.log(id);
-  var myId = id || 20;
+  var myId = id;
   Logger.log(myId);
   
-  // On get tous les projets qu'on veut. Projet N3SS : id=21
+  // Return Valis from Specific project
   var responseComponents = getAuthenticatedValispaceUrl('components/?project=' + myId);
   var responseMatrices = getAuthenticatedValispaceUrl('matrices/?project=' + myId);
   var responseValis = getAuthenticatedValispaceUrl('valis/?project=' + myId);
@@ -18,7 +12,6 @@ function getProjectTree(id){
   const valis = JSON.parse(responseValis.getContentText());
   const matrices = JSON.parse(responseMatrices.getContentText());
   
-  // Pour l'instant on ne garde que les types vali (pas function et dataset)
   const cleanedValis = valis.filter(function(d){return (d.data_type === 'vali')});
   
   const parents = components.filter(function(d){return !d.parent;});
@@ -86,33 +79,28 @@ function createTree(components, valis, matrices, parentID){
 
 
 // ****************************************************************************************
-// Fonctions de manipulation des valis
+// Vali Manipulation
 // ****************************************************************************************
 
 function insertVali(link){
-  
-  customizeVali(link); // Will call the real insert stuff
-
-}
-
-function coucouMaVali(){
-  return "tyoupi youpi yeah";
-}
-
-
-function customizeVali(link){
   var valiId = link.split("/vali/")[1].split('/')[0];
   var template = HtmlService.createTemplateFromFile('code/valiDialog');
   template.vali = getValiValue(valiId);
   template.link = link;
   var page = template.evaluate();
-  page.setTitle('Import vali');
+  page.setTitle('Import Vali');
   page.setHeight(400);
   
-  var dialog = DocumentApp.getUi().showModalDialog(page, 'Import vali');
+  var dialog = DocumentApp.getUi().showModalDialog(page, 'Import Vali');
+
 }
 
-function insertValiWithParams(link, valiJSON , field, displayUnit){
+
+function customizeVali(link){
+
+}
+
+function insertValiWithParams(link, valiJSON , field, displayUnit, decimalPlaces){
   var cursor = DocumentApp.getActiveDocument().getCursor();
   Logger.log("JSON vali");
   Logger.log(displayUnit);
@@ -124,7 +112,7 @@ function insertValiWithParams(link, valiJSON , field, displayUnit){
   if(field === 'margin_minus'){
      insertedText += "-";
   }
-  insertedText += vali[field].toFixed(2);
+  insertedText += vali[field].toFixed(decimalPlaces);
   
   if (displayUnit){
     if((field==='value') || (field==='wc_plus') || (field==='wc_minus')){
@@ -153,7 +141,7 @@ function insertValiWithParams(link, valiJSON , field, displayUnit){
   
   var insertedLink = link;
   insertedLink += "?valiField=" + field + " displayUnit=" + (displayUnit ? "true" : "false"); 
-  insertedLink += " nbDecimals=" + 2;
+  insertedLink += " nbDecimals=" + decimalPlaces;
   
   delete attributes.LINK_URL;
   
@@ -161,7 +149,9 @@ function insertValiWithParams(link, valiJSON , field, displayUnit){
   newText2.setLinkUrl(insertedLink);
   newText2.setAttributes(attributes); 
   
-
+  //if highlight true{
+  //newText2.setBackgroundColor('#ff0000');
+  //}
 }
 
 
@@ -180,7 +170,7 @@ function getValiValue(idVali, allValies){
 
 
 
-// Mise à jour de tous les liens valispace
+// Update All Vali links present in the text
 function updateValies(element, allValies) {
   var deployment = PropertiesService.getScriptProperties().getProperty('deployment');
   if(!element){
@@ -199,7 +189,6 @@ function updateValies(element, allValies) {
       var url = textObj.getLinkUrl(ch);
       if (url != null) {
         if (!inUrl) {
-          // On vient de rentrer dans le lien
           inUrl = true;
           var curUrl = {};
           var start = ch;
@@ -210,19 +199,17 @@ function updateValies(element, allValies) {
           
         }
         else {
-          // On est dans l'url
-          // On met à jour la fin de l'url tant qu'on n'en est pas sortis
           curUrl.endOffsetInclusive = ch;
         }
         
-        // Si on a fini l'élement text, on considère que l'url est finie
+        // If text element finished, URL Finished
         if (ch === txtLength - 1){
           urlJustFinished = true;
           inUrl = false;
         }
         
       }
-      // On n'est plus dans l'url
+      // Finished URL
       else {
         if (inUrl) {
           urlJustFinished = true;
@@ -230,9 +217,9 @@ function updateValies(element, allValies) {
         }
       }
       if (urlJustFinished){
-        // L'id vali est contenu en dernière position du lien
+        // The Vali ID is at the last position of the link
         
-        // On test si c'est bien une URL de vali:
+        // Test if this is a valid URL.
         if(curUrl.url.indexOf(deployment+'/components/') === 0){
           try{
             Logger.log("On fait le parse:");
@@ -250,7 +237,7 @@ function updateValies(element, allValies) {
             var nbDecimals;
             try{
               nbDecimals = parseInt(params[2].split("=")[1]);
-            } catch (e) { // Pour être compatible de l'ancienne version où il n'y avait pas ça
+            } catch (e) { // If decimal is not defined.
               nbDecimals = 2;
               curUrl.url += " nbDecimals=2"
             }
@@ -297,17 +284,18 @@ function updateValies(element, allValies) {
             
             textObj.setAttributes(curUrl.startOffset, endtxt, curUrl.attributes);
             
+            //if highlight true{
+            //newText2.setBackgroundColor('#ff0000');
+            //}
             
-            // On a inséré du texte, la longueur a potentiellement changé
+            // Updating text length and Position
             txtLength = txtLength + newTextToInsert.length - 1 - (curUrl.endOffsetInclusive - curUrl.startOffset);
-            
-            // La position aussi 
             ch = ch + newTextToInsert.length - 1 - (curUrl.endOffsetInclusive - curUrl.startOffset);
           }
           catch (e){
             DocumentApp.getUi().alert(" Problem with vali\n Link: " + curUrl.url + "\nText: " + curUrl.element.getText());
           }
-        } // sinon on ne fait rien
+        }
         urlJustFinished = false;
       }
       ch += 1;
