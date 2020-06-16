@@ -7,6 +7,7 @@
       $(function() {
         $('#valispace-connect').click(connectValispaceScript);
         $('#valispace-disconnect').click(disconnectValispaceScript);
+        $('#valispace-options').click(OptionsScript);
 
         $('#update-all-valies').click(updateAllValiesScript);
         $('#update-all-requirements').click(updateAllRequirementsScript);
@@ -107,7 +108,7 @@
             .withUserObject(this)
             .withSuccessHandler(
               function(){
-                $('#updating-requirements-status').html("Done");
+                $('#updating-requirements-status').html("");
               }
             )
             .withFailureHandler(
@@ -125,7 +126,7 @@
             .withUserObject(this)
             .withSuccessHandler(
               function(){
-                $('#updating-valies-status').html("Done");
+               $('#updating-valies-status').html("");
               }
             )
             .withFailureHandler(
@@ -161,6 +162,10 @@
       
       function disconnectValispaceScript(){
       
+      }
+      
+      function OptionsScript(){
+      google.script.run.withUserObject(this).openOptionDialog();
       }
       
      

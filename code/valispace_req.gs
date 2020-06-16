@@ -1,14 +1,6 @@
-// ****************************************************************************************
-// Fonctions de creation de l'arborescence des requirements
-// ****************************************************************************************
-
-
 
 function getRequirementTree(id){
-  Logger.log("Bonjour tout le monde get Requirements tree"); Logger.log(id);
   const myId = id ;
-  
-  Logger.log(myId);
   
   const responseLabels = getAuthenticatedValispaceUrl('requirements/specifications/labels/');
   const responseRequirementGroups = getAuthenticatedValispaceUrl('requirements/groups/');
@@ -26,7 +18,7 @@ function getRequirementTree(id){
   }
   
   var projectLabels = labels.filter(checkProjectId,  myId);
-  // requirementGroups ne peut pas être filtré par projets, on le garde en entier...
+  // requirement Groups cannot be filtered by projects, we keep it all
   var projectSpecifications = specification.filter(checkProjectId,  myId);
   var projectRequirements = requirements.filter(checkProjectId,  myId);
  
@@ -37,7 +29,7 @@ function getRequirementTree(id){
 
 function createSpecificationTree(specificationRequirementGroups, specRequirements, currentSpecification){
   var deployment = PropertiesService.getScriptProperties().getProperty('deployment');
-  // Crée l'arborescence d'une spécification.
+  // Create the specifications tree
   var specHtml = "<li><span class='caret'><i class=' valiIcon fas fa-clipboard-check'></i>" + currentSpecification.name + "</span><ul class='nested'>";
   
   
@@ -76,8 +68,7 @@ function createSpecificationTree(specificationRequirementGroups, specRequirement
 
 function createRequirementTree(projectLabels, requirementGroups, projectSpecifications, projectRequirements, parentLabel, profondeur){
   
-  Logger.log("Creating requirement tree profondeur"); 
-  Logger.log(profondeur); Logger.log(parentLabel);
+  //Logger.log(profondeur); Logger.log(parentLabel);
   
   var parentLabelThis;
   if (parentLabel === null){
@@ -87,7 +78,7 @@ function createRequirementTree(projectLabels, requirementGroups, projectSpecific
   }  
   
   //////////////////////////////////////////////////
-  // Fonctions de filtrage
+  // Filtering Function
   function checkLabelParent(element){
     var parentLabelLocal = parseInt(this);
     if(parentLabelLocal === -666){
@@ -105,7 +96,7 @@ function createRequirementTree(projectLabels, requirementGroups, projectSpecific
   
   function checkSpecificationLabel(element){
     if(element.labels.length === 0){
-      return parseInt(this) === -666;// Si la spec  n'a pas de parent c'est qu'elle est à la racine
+      return parseInt(this) === -666;// If the spec has no parent, it is at the root
     } else {
       return element.labels.indexOf(parseInt(this)) > -1;
     } 
@@ -123,14 +114,13 @@ function createRequirementTree(projectLabels, requirementGroups, projectSpecific
   
   
   
-  // On charge les valeurs du niveau en cours
+  // We load the values of the current level
   var currentLabels = projectLabels.filter(checkLabelParent, parentLabelThis);
   var currentSpecifications = projectSpecifications.filter(checkSpecificationLabel, parentLabelThis);
 
-  // On crée l'output
   var newHtml = "";
   
-  if (parentLabelThis === -666){ // Si on est à la racine du projet
+  if (parentLabelThis === -666){ // If we are at the root of the project
     newHtml = '<ul class="topUl">';
   } else {
     var currentParentLabel = projectLabels.filter(checkLabelId, parentLabelThis)[0];
@@ -141,19 +131,19 @@ function createRequirementTree(projectLabels, requirementGroups, projectSpecific
   
   var i;
   
-  // On met d'abord les labels
+  // Put the Labels First
   for(i = 0 ; i < currentLabels.length ; i++){
     newHtml += createRequirementTree(projectLabels, requirementGroups, projectSpecifications, projectRequirements, currentLabels[i].id, profondeur + 1) ; 
   }
   
-  // On met ensuite les specifications
+  // Specifications
   for(i = 0 ; i < currentSpecifications.length ; i++){
     var specificationRequirementGroups = requirementGroups.filter(checkIsSpecificationRequirementGroup, currentSpecifications[i]);
     var specificationRequirements = projectRequirements.filter(checkIsSpecificationRequirement, currentSpecifications[i]);
     newHtml += createSpecificationTree(specificationRequirementGroups, specificationRequirements,  currentSpecifications[i]);
   }
   
-  // on ferme les tags
+  // Closing Tags
   if (parentLabelThis === -666){
     newHtml += "</ul>";
   } else {
@@ -165,13 +155,12 @@ function createRequirementTree(projectLabels, requirementGroups, projectSpecific
 }
 
 
-// fonction d'insertion d'un requirement dans un document
+// Insert a Requirement into the Document
 function insertRequirement(link){
+  //Logger.log(link);
   
-  Logger.log("INsert requirementsssssstrgjfdkgsmfdlkjg "); Logger.log(link);
   
-  
-  // L'id requirements est contenu juste après /requirements/ dans l'url
+  // The id requirements is contained just after / requirements / in the url
   var reqId = link.split("/requirements/")[1].split("/")[0];
 
   
@@ -220,7 +209,7 @@ function insertRequirement(link){
 }
 
 
-// Interprète les requirements et renvoie un paragraph 
+// Interpret the requirements and return a paragraph
 function interpretReqText(textReq, cell){
   var deployment = PropertiesService.getScriptProperties().getProperty('deployment');
   var interpreted = textReq;
@@ -230,23 +219,23 @@ function interpretReqText(textReq, cell){
   var valis = textReq.match(valiRegex);
   var count = 0;
   
-  interpreted = interpreted.replace(valiRegex,"$$$$VALI$$$$"); // Il faut 4 dollars, je ne sais pas trop bine pourquoi mais ensuite il n'en reste que 2
+  interpreted = interpreted.replace(valiRegex,"$$$$VALI$$$$");
   
-  // on enleve les balises <p>/
+  // we remove the tags <p>/
   const pReplacementRegex = /<\/?p[^>]*?>/g
   interpreted = interpreted.replace(pReplacementRegex, "")
   
   
-  // On enlève les balises <span>
+  // we remove the tags <span>
   const spanReplacementRegex = /<\/?span[^>]*?>/g
   interpreted = interpreted.replace(spanReplacementRegex, "")
   
-  // On remplace les balises <br> par des sauts de ligne
+  // We replace the <br> tags with line breaks
   const brReplacementRegex = /<\/?br[^>]*?>/g
   interpreted = interpreted.replace(brReplacementRegex, "\n")
   
-  // On remplace les listes
-   const ulOpenReplacementRegex = /<\/?ul[^>]*?>/g
+  // Replace the lists
+  const ulOpenReplacementRegex = /<\/?ul[^>]*?>/g
   interpreted = interpreted.replace(ulOpenReplacementRegex, "");
   const liOpenReplacementRegex = /<li[^>]*?>/g
   interpreted = interpreted.replace(liOpenReplacementRegex, "\n\t - ");
@@ -332,24 +321,24 @@ function getReqValue(reqId){
 
 
 
-// Fonction récursive de mise à jour des requirements
+// Recursive requirements update function
 function updateAllRequirements(element, req, compReqs, components, verifications, verifMethods){
   var deployment = PropertiesService.getScriptProperties().getProperty('deployment');
   if(!element){
     element = DocumentApp.getActiveDocument().getBody();
-     // On télécharge tous les requirements
+     // Download all requirements
     var responseReq = getAuthenticatedValispaceUrl('requirements');
     req = JSON.parse(responseReq.getContentText());
-    // On télécharge tous les component_requirement
+    // Download all components_requirements
     var responseComponentReq = getAuthenticatedValispaceUrl("requirements/component-requirements");
     compReqs = JSON.parse(responseComponentReq.getContentText());
-    // On télécharge tous les composants
+    // Download all components
     var componentResponse = getAuthenticatedValispaceUrl("components");
     components = JSON.parse(componentResponse.getContentText());
-    // On télécharge les verifications
+    // Download all veritications
     var responseVerif = getAuthenticatedValispaceUrl("requirements/verifications");
     verifications = JSON.parse(responseVerif.getContentText());
-    // On télécharge les verification methods
+    // Download all verification methods
     var responseVerifMethod = getAuthenticatedValispaceUrl("requirements/verification-methods");
     verifMethods = JSON.parse(responseVerifMethod.getContentText());
   } 
@@ -362,10 +351,10 @@ function updateAllRequirements(element, req, compReqs, components, verifications
      var link = element.getCell(0, 0).getChild(0).getLinkUrl();
     if (link){
       if (link.indexOf(deployment+"/specifications/requirements/") === 0){
-        // On récupère l'id du req
+        //Get the requirement id
         var reqId = parseInt(link.split("/requirements/")[1].split("/")[0]);
         
-        // On récupère le requirement et on insère le texte qui va bien
+        // Retrieve the requirement and insert text
         var currentReq = req.filter(function(d){return d.id === parseInt(this); }, reqId);
         
         //DocumentApp.getUi().alert(currentReq[0]);
@@ -388,7 +377,7 @@ function updateAllRequirements(element, req, compReqs, components, verifications
         
   
         
-        // Maintenant on met à jour les vérifications
+        // Update the checks
         var childrenComponentRequirementIds = currentReq[0].component_requirements;
         var textValidation = ""
         
