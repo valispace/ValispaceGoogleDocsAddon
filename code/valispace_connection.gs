@@ -23,12 +23,9 @@ function connectValispace(){
 
 
 function valispaceAskToken(deployment_name, username, passwd){
-  Logger.log("This is the connect");
   deployment = "https://"+deployment_name+".valispace.com"
-  Logger.log(deployment)
+  Logger.log("Connected to: "+deployment)
   PropertiesService.getScriptProperties().setProperty('deployment', deployment);
-  Logger.log(username);
-  Logger.log(passwd); 
   var tokenUrl = deployment + '/o/token/'
   var payload = {
     grant_type: 'password',
@@ -46,14 +43,13 @@ function valispaceAskToken(deployment_name, username, passwd){
     PropertiesService.getUserProperties().setProperty('connectionAttemptDone', 'true');
     PropertiesService.getUserProperties().setProperty('valispaceLogin', username); 
     PropertiesService.getUserProperties().setProperty('valispacePwd', passwd);
-    Logger.log("Connected, access token");
-    Logger.log(accessToken);
+    Logger.log("Connected");
+
   } else {
     PropertiesService.getUserProperties().setProperty('connectionStatus', 'false');
     PropertiesService.getUserProperties().setProperty('connectionAttemptDone', 'true');
     throw Error('No access token received: ' + response.getContentText());
-  }
-  
+  }  
   
 }
 
@@ -61,7 +57,6 @@ function valispaceAskToken(deployment_name, username, passwd){
 
 function checkValispaceConnexion(){
   Logger.log("Testing valispace connexion");
- 
   
   try{
     var response;
