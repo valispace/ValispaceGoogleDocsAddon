@@ -9,7 +9,7 @@
         $('#valispace-disconnect').click(disconnectValispaceScript);
         $('#valispace-options').click(OptionsScript);
 
-        $('#update-all-valies').click(updateAllValiesScript);
+        $('#update-all-valis').click(updateAllValisScript);
         $('#update-all-requirements').click(updateAllRequirementsScript);
 
         $('#update-workspaces').click(updateWorkspacesOptionsScript);
@@ -112,30 +112,24 @@
               }
             )
             .withFailureHandler(
-              function(error){
-                $('#updating-requirements-status').html("Update failed");
-                alert(error);
-              }
+                $('#updating-requirements-status').html("Update failed")
             )
             .updateAllRequirements();
       }
       
-      function updateAllValiesScript() {
-        $('#updating-valies-status').html("Updating...");
+      function updateAllValisScript() {
+        $('#updating-valis-status').html("Updating...");
         google.script.run
             .withUserObject(this)
             .withSuccessHandler(
               function(){
-               $('#updating-valies-status').html("");
+               $('#updating-valis-status').html("");
               }
             )
             .withFailureHandler(
-              function(error){
-                $('#updating-valies-status').html("Update failed");
-                alert(error);
-              }
+                $('#updating-valis-status').html("Update failed")
             )
-            .updateValies();
+            .updateValis();
       }
       function connectValispaceScript(){
           google.script.run
@@ -146,8 +140,7 @@
                   $('#connectionStatus').html("Connected");
                   updateWorkspacesOptionsScript();
                 } else {
-                  alert("connection failed");
-                  $('#connectionStatus').html("Not connected");
+                  $('#connectionStatus').html("Not connected")
                 }
               }
             )
@@ -161,8 +154,10 @@
       }
       
       function disconnectValispaceScript(){
-      
+
       }
+      
+
       
       function OptionsScript(){
       google.script.run.withUserObject(this).openOptionDialog();

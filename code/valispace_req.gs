@@ -327,8 +327,13 @@ function updateAllRequirements(element, req, compReqs, components, verifications
   if(!element){
     element = DocumentApp.getActiveDocument().getBody();
      // Download all requirements
+    try{
     var responseReq = getAuthenticatedValispaceUrl('requirements');
-    req = JSON.parse(responseReq.getContentText());
+      req = JSON.parse(responseReq.getContentText());
+    } catch (error) {
+      alert("Errooooor")
+    } 
+    
     // Download all components_requirements
     var responseComponentReq = getAuthenticatedValispaceUrl("requirements/component-requirements");
     compReqs = JSON.parse(responseComponentReq.getContentText());

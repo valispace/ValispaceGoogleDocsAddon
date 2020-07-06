@@ -21,8 +21,14 @@ function connectValispace(){
   
 }
 
+function showErrorTest(message){
+
+}
+
 
 function valispaceAskToken(deployment_name, username, passwd){
+  var dialog = DocumentApp.getUi()
+  
   deployment = "https://"+deployment_name+".valispace.com"
   Logger.log("Connected to: "+deployment)
   PropertiesService.getScriptProperties().setProperty('deployment', deployment);
@@ -48,7 +54,8 @@ function valispaceAskToken(deployment_name, username, passwd){
   } else {
     PropertiesService.getUserProperties().setProperty('connectionStatus', 'false');
     PropertiesService.getUserProperties().setProperty('connectionAttemptDone', 'true');
-    throw Error('No access token received: ' + response.getContentText());
+    dialog.alert('Wrong Username or Password', 'You inserted a wrong username or password, please try again', dialog.ButtonSet.OK)
+    //throw Error('No access token received: ' + response.getContentText());
   }  
   
 }

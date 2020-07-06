@@ -1,7 +1,7 @@
 function showSidebar() {
   var template = HtmlService.createTemplateFromFile('code/sidebarTemplate');
   var page = template.evaluate();
-  page.setTitle('Valispace');
+  page.setTitle('Valispace on Google Docs');
   
   DocumentApp.getUi().showSidebar(page);
   

@@ -155,13 +155,13 @@ function insertValiWithParams(link, valiJSON , field, displayUnit, decimalPlaces
 }
 
 
-function getValiValue(idVali, allValies){
+function getValiValue(idVali, allValis){
   var returnVali;
-  if (!allValies){
+  if (!allValis){
     var responseVali = getAuthenticatedValispaceUrl('valis/' + idVali);
     returnVali = JSON.parse(responseVali.getContentText());
   } else {
-    returnVali = allValies.filter(function(d){return d.id === parseInt(this);}, idVali)[0];
+    returnVali = allValis.filter(function(d){return d.id === parseInt(this);}, idVali)[0];
   }
   
   return returnVali;
@@ -171,11 +171,11 @@ function getValiValue(idVali, allValies){
 
 
 // Update All Vali links present in the text
-function updateValies(element, allValies) {
+function updateValis(element, allValis) {
   var deployment = PropertiesService.getScriptProperties().getProperty('deployment');
   if(!element){
     element = DocumentApp.getActiveDocument().getBody();
-    allValies = JSON.parse(getAuthenticatedValispaceUrl('valis').getContentText());
+    allValis = JSON.parse(getAuthenticatedValispaceUrl('valis').getContentText());
   }
   
   
@@ -248,7 +248,7 @@ function updateValies(element, allValies) {
             
             
             
-            var vali = getValiValue(valiId, allValies);
+            var vali = getValiValue(valiId, allValis);
             Logger.log(vali);
             var newTextToInsert = "";
             if(field==='margin_minus'){
@@ -311,6 +311,6 @@ function updateValies(element, allValies) {
       numChildren = 0;
     }
     for (var i=0; i<numChildren; i++) {
-      updateValies(element.getChild(i), allValies);
+      updateValis(element.getChild(i), allValis);
     }
 }
