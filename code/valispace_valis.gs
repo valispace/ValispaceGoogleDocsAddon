@@ -32,7 +32,8 @@ function createTree(components, valis, matrices, parentID){
   var newHtml = "";
   var currentComponent = components.filter(function(d){return d.id === parentID;})[0];
   
-  var deployment = PropertiesService.getScriptProperties().getProperty('deployment');
+  var deployment = PropertiesService.getUserProperties().getProperty('deployment');
+  Logger.log(deployment)
   
   // Insert current component as UL
   newHtml += '<li><span class="caret"><i class="valiIcon fas fa-cube"></i>' + currentComponent.name + '</span>';
@@ -172,7 +173,7 @@ function getValiValue(idVali, allValis){
 
 // Update All Vali links present in the text
 function updateValis(element, allValis) {
-  var deployment = PropertiesService.getScriptProperties().getProperty('deployment');
+  var deployment = PropertiesService.getUserProperties().getProperty('deployment');
   if(!element){
     element = DocumentApp.getActiveDocument().getBody();
     allValis = JSON.parse(getAuthenticatedValispaceUrl('valis').getContentText());

@@ -37,6 +37,7 @@
       <input type="submit" value="Connect" class="login-button" onclick="connect()" >
       <input type="button" value="Close" class="login-button" onclick="closeIt()" >
     </div>  
+    <div id="output"></div>
   </form>
 
   </div>
@@ -49,11 +50,14 @@
         var username = 
         google.script.run
           .withSuccessHandler(closeIt)
-          .withFailureHandler(function(error){
-            alert(error);
-          })
+          .withFailureHandler(errorMessage)
           .valispaceAskToken($('#deployment').val(), $('#username').val(), $('#pass').val());
       };
+      
+      function errorMessage(error) {
+        var div = document.getElementById('output');
+        div.innerHTML = "Wrong Deployment Name.";
+      }
       
       function closeIt(){
         google.script.host.close()

@@ -31,7 +31,8 @@ function valispaceAskToken(deployment_name, username, passwd){
   
   deployment = "https://"+deployment_name+".valispace.com"
   Logger.log("Connected to: "+deployment)
-  PropertiesService.getScriptProperties().setProperty('deployment', deployment);
+  PropertiesService.getUserProperties().setProperty('deployment', deployment);  
+
   var tokenUrl = deployment + '/o/token/'
   var payload = {
     grant_type: 'password',
@@ -139,7 +140,7 @@ function get_workspaces(){
 
 // UrlFetchApp with the authentication options
 function getAuthenticatedValispaceUrl(subUrl, opt_options){
-  var deployment = PropertiesService.getScriptProperties().getProperty('deployment');
+  var deployment = PropertiesService.getUserProperties().getProperty('deployment');
   var completeUrl = deployment + '/rest/' + subUrl;
   var fetchOptions = opt_options || {};
   if (!fetchOptions.headers) {

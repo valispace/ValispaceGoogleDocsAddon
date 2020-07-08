@@ -28,7 +28,7 @@ function getRequirementTree(id){
 
 
 function createSpecificationTree(specificationRequirementGroups, specRequirements, currentSpecification){
-  var deployment = PropertiesService.getScriptProperties().getProperty('deployment');
+  var deployment = PropertiesService.getUserProperties().getProperty('deployment');
   // Create the specifications tree
   var specHtml = "<li><span class='caret'><i class=' valiIcon fas fa-clipboard-check'></i>" + currentSpecification.name + "</span><ul class='nested'>";
   
@@ -211,7 +211,7 @@ function insertRequirement(link){
 
 // Interpret the requirements and return a paragraph
 function interpretReqText(textReq, cell){
-  var deployment = PropertiesService.getScriptProperties().getProperty('deployment');
+  var deployment = PropertiesService.getUserProperties().getProperty('deployment');
   var interpreted = textReq;
   const valiRegex = /<vali[^>]*?\[id\]="([0-9]+?)"[^>]*?>[\s\S]*?<\/vali>/gm
   const findIDregex = /\[id\]="([0-9]+?)"/
@@ -323,7 +323,7 @@ function getReqValue(reqId){
 
 // Recursive requirements update function
 function updateAllRequirements(element, req, compReqs, components, verifications, verifMethods){
-  var deployment = PropertiesService.getScriptProperties().getProperty('deployment');
+  var deployment = PropertiesService.getUserProperties().getProperty('deployment');
   if(!element){
     element = DocumentApp.getActiveDocument().getBody();
      // Download all requirements
