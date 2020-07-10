@@ -89,8 +89,7 @@ function insertVali(link){
   template.vali = getValiValue(valiId);
   template.link = link;
   var page = template.evaluate();
-  page.setTitle('Import Vali');
-  page.setHeight(400);
+  page.setHeight(550);
   
   var dialog = DocumentApp.getUi().showModalDialog(page, 'Import Vali');
 

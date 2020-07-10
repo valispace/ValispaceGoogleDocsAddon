@@ -14,11 +14,8 @@
 	  for(i = 0 ; i < valis.length; i++){
 		valis[i].addEventListener("click", function(){ 
 		  google.script.run
-		  .withFailureHandler(function(error){
-			 alert(error);
-		   }
-		   )
-		   .insertVali(this.id);
+		  .withFailureHandler(errorMessage)
+		  .insertVali(this.id);
 	   });
 	  }
 	  
@@ -26,15 +23,14 @@
 	  for(i = 0 ; i < requirements.length; i++){
 		requirements[i].addEventListener("click", function(){ 
 		  google.script.run
-		   .withFailureHandler(function(error){
-			 alert(this.id);
-			 alert(error);
-		   }
-		   )
+		   .withFailureHandler(errorMessage)
 		   .insertRequirement(this.id);
 	   });
 	  }
 	  
+      function errorMessage(error) {
+        Logger.log(error);
+      }
 	  
 	}
   </script>
@@ -55,7 +51,7 @@
 	  )
 	  .withFailureHandler(
 	  function(error){
-		  $('#projectTree').html("Failed to load project tree :" + error);
+		  $('#projectTree').html("Failed to load project tree. Please try again, if the problem persist contact support@valispace.com");
 		})
 	  .getProjectTree(id);
 	}
@@ -72,7 +68,7 @@
 		)
 		.withFailureHandler(
 		  function(error){
-			$('#requirementTree').html("Failed to load requirement tree :" + error);
+			$('#requirementTree').html("Failed to load requirement tree. Please try again, if the problem persist contact support@valispace.com");
 		  }
 		)
 		.getRequirementTree(id);
@@ -95,7 +91,7 @@
 			   )
 			 .withFailureHandler(
 			   function(error){
-				 $('#requirementTree').html("Failed to load requirements :" + error);
+				 $('#requirementTree').html("Failed to load requirements. Please try again, if the problem persist contact support@valispace.com");
 			   }
 			 )
 			 .getRequirementTree(id);
@@ -103,7 +99,7 @@
 		)
 		.withFailureHandler(
 		  function(error){
-			$('#projectTree').html("Failed to load components :" + error);
+			$('#projectTree').html("Failed to load components. Please try again, if the problem persist contact support@valispace.com");
 		  })
 		.getProjectTree(id);
 	}

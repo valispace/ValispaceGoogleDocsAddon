@@ -166,8 +166,9 @@ function insertRequirement(link){
   
   var req = getReqValue(reqId);
   
-  
   var insertedText = req.identifier;
+  Logger.log(insertedText)
+  Logger.log(req)
   
   
   var body = DocumentApp.getActiveDocument().getBody();
@@ -192,7 +193,6 @@ function insertRequirement(link){
   
   
   
-  
   // insert formatted text in the cell 
   interpretReqText(req.text, reqTable.getCell(1, 1));
   
@@ -209,7 +209,7 @@ function insertRequirement(link){
 }
 
 
-// Interpret the requirements and return a paragraph
+// Interpret the requirements, return a paragraph and insert in a table cell.
 function interpretReqText(textReq, cell){
   var deployment = PropertiesService.getUserProperties().getProperty('deployment');
   var interpreted = textReq;
@@ -331,7 +331,7 @@ function updateAllRequirements(element, req, compReqs, components, verifications
     var responseReq = getAuthenticatedValispaceUrl('requirements');
       req = JSON.parse(responseReq.getContentText());
     } catch (error) {
-      alert("Errooooor")
+      alert("Error")
     } 
     
     // Download all components_requirements
@@ -378,9 +378,6 @@ function updateAllRequirements(element, req, compReqs, components, verifications
         } else {
           rationaleCell.setText("");
         }
-        
-        
-  
         
         // Update the checks
         var childrenComponentRequirementIds = currentReq[0].component_requirements;
