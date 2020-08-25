@@ -1,7 +1,7 @@
 
 function getProjectTree(id){
   var myId = id;
-  Logger.log(myId);
+  //Logger.log(myId);
   
   // Return Valis from Specific project
   var responseComponents = getAuthenticatedValispaceUrl('components/?project=' + myId);
@@ -33,15 +33,15 @@ function createTree(components, valis, matrices, parentID){
   var currentComponent = components.filter(function(d){return d.id === parentID;})[0];
   
   var deployment = PropertiesService.getUserProperties().getProperty('deployment');
-  Logger.log(deployment)
+  //Logger.log(deployment)
   
   // Insert current component as UL
   newHtml += '<li><span class="caret"><i class="valiIcon fas fa-cube"></i>' + currentComponent.name + '</span>';
   newHtml += '<ul class="nested">'
   var i;
-  Logger.log("Creating component");
-  Logger.log(parentID);
-  Logger.log(matrices);
+  //Logger.log("Creating component");
+  //Logger.log(parentID);
+  //Logger.log(matrices);
   for(i = 0 ; i < currentComponent.children.length ; i++){
     newHtml += createTree(components, valis, matrices, currentComponent.children[i]);
   }
@@ -84,6 +84,8 @@ function createTree(components, valis, matrices, parentID){
 // ****************************************************************************************
 
 function insertVali(link){
+  var cursor = DocumentApp.getActiveDocument().getCursor();
+  if (cursor){
   var valiId = link.split("/vali/")[1].split('/')[0];
   var template = HtmlService.createTemplateFromFile('code/valiDialog');
   template.vali = getValiValue(valiId);
@@ -92,7 +94,10 @@ function insertVali(link){
   page.setHeight(550);
   
   var dialog = DocumentApp.getUi().showModalDialog(page, 'Import Vali');
-
+  }else {
+    DocumentApp.getUi().alert("Could not find current position. \r\n Please click on the text where you want to add the requirement and make sure you don't have a text selected.");
+    return;
+  }
 }
 
 
@@ -102,12 +107,13 @@ function customizeVali(link){
 
 function insertValiWithParams(link, valiJSON , field, displayUnit, decimalPlaces){
   var cursor = DocumentApp.getActiveDocument().getCursor();
-  Logger.log("JSON vali");
-  Logger.log(displayUnit);
+  if (cursor){
+  //Logger.log("JSON vali");
+  //Logger.log(displayUnit);
   var vali = JSON.parse(valiJSON);
   
-  Logger.log(vali);
-  Logger.log(vali[field]);
+  //Logger.log(vali);
+  //Logger.log(vali[field]);
   var insertedText ="";
   if(field === 'margin_minus'){
      insertedText += "-";
@@ -133,12 +139,9 @@ function insertValiWithParams(link, valiJSON , field, displayUnit, decimalPlaces
     attributes[DocumentApp.Attribute.UNDERLINE] = false;
     attributes[DocumentApp.Attribute.FOREGROUND_COLOR] = "#000000";
   }
-
   
   var newText2 = cursor.insertText(insertedText);
-  
-  Logger.log(attributes);
-  
+
   var insertedLink = link;
   insertedLink += "?valiField=" + field + " displayUnit=" + (displayUnit ? "true" : "false"); 
   insertedLink += " nbDecimals=" + decimalPlaces;
@@ -149,9 +152,17 @@ function insertValiWithParams(link, valiJSON , field, displayUnit, decimalPlaces
   newText2.setLinkUrl(insertedLink);
   newText2.setAttributes(attributes); 
   
-  //if highlight true{
-  //newText2.setBackgroundColor('#ff0000');
-  //}
+  highlight = PropertiesService.getDocumentProperties().getProperty('highlightVali');
+  //Logger.log('Highlight is: '+highlight);
+  if(highlight==="true"){
+    //Logger.log('Highlight should be true and it is: '+highlight);
+    newText2.setBackgroundColor('#fff9bb');
+    newText2.setItalic(true)
+  }
+  } else {
+    DocumentApp.getUi().alert("Could not find current position. \r\n Please click on the text where you want to add the requirement and make sure you don't have a text selected.");
+    return;
+  }
 }
 
 
@@ -168,149 +179,6 @@ function getValiValue(idVali, allValis){
   
 }
 
-
-
-// Update All Vali links present in the text
-function updateValis(element, allValis) {
-  var deployment = PropertiesService.getUserProperties().getProperty('deployment');
-  if(!element){
-    element = DocumentApp.getActiveDocument().getBody();
-    allValis = JSON.parse(getAuthenticatedValispaceUrl('valis').getContentText());
-  }
-  
-  
-  if (element.getType() === DocumentApp.ElementType.TEXT) {
-    var textObj = element.editAsText();
-    var inUrl = false;
-    var urlJustFinished = false;
-    var txtLength = element.getText().length;
-    var ch = 0;
-    while (ch < txtLength) {
-      var url = textObj.getLinkUrl(ch);
-      if (url != null) {
-        if (!inUrl) {
-          inUrl = true;
-          var curUrl = {};
-          var start = ch;
-          curUrl.element = element;
-          curUrl.url = String( url ); // grab a copy
-          curUrl.startOffset = ch;   
-          curUrl.attributes = element.getAttributes(ch);  
-          
-        }
-        else {
-          curUrl.endOffsetInclusive = ch;
-        }
-        
-        // If text element finished, URL Finished
-        if (ch === txtLength - 1){
-          urlJustFinished = true;
-          inUrl = false;
-        }
-        
-      }
-      // Finished URL
-      else {
-        if (inUrl) {
-          urlJustFinished = true;
-          inUrl = false;
-        }
-      }
-      if (urlJustFinished){
-        // The Vali ID is at the last position of the link
-        
-        // Test if this is a valid URL.
-        if(curUrl.url.indexOf(deployment+'/components/') === 0){
-          try{
-            Logger.log("On fait le parse:");
-            var splitted = curUrl.url.split("/vali/")[1].split('?');
-            Logger.log(splitted);
-            var valiId = splitted[0];
-            Logger.log(valiId);
-            
-            var params = splitted[1].split(" ");
-            Logger.log(params);
-            var field = params[0].split("=")[1];
-            Logger.log(field);
-            var displayUnit = params[1].split("=")[1];
-            Logger.log(displayUnit);
-            var nbDecimals;
-            try{
-              nbDecimals = parseInt(params[2].split("=")[1]);
-            } catch (e) { // If decimal is not defined.
-              nbDecimals = 2;
-              curUrl.url += " nbDecimals=2"
-            }
-            Logger.log("nbDecimals");
-            Logger.log(nbDecimals)
-            Logger.log(curUrl.attributes);
-            
-            
-            
-            
-            var vali = getValiValue(valiId, allValis);
-            Logger.log(vali);
-            var newTextToInsert = "";
-            if(field==='margin_minus'){
-              newTextToInsert += "-";
-            }
-            
-            newTextToInsert += vali[field].toFixed(nbDecimals);
-            if (displayUnit === "true"){
-              if((field==='value') || (field==='wc_plus') || (field==='wc_minus')){
-                newTextToInsert += ' ' + vali.unit;
-              } else {
-                newTextToInsert += ' %';
-              }
-            }
-            Logger.log(newTextToInsert);
-            
-            
-            textObj.deleteText(curUrl.startOffset, curUrl.endOffsetInclusive);    
-            textObj.insertText(curUrl.startOffset, newTextToInsert);
-            
-            var endtxt = curUrl.startOffset + newTextToInsert.length - 1;
-            
-            
-            
-            textObj.setLinkUrl(curUrl.startOffset, endtxt, curUrl.url);
-            delete curUrl.attributes.LINK_URL;
-            
-            try{
-              if (curUrl.attributes.BACKGROUND_COLOR === null) {
-                delete curUrl.attributes.BACKGROUND_COLOR;
-              }
-            } catch (e) {}
-            
-            textObj.setAttributes(curUrl.startOffset, endtxt, curUrl.attributes);
-            
-            //if highlight true{
-            //newText2.setBackgroundColor('#ff0000');
-            //}
-            
-            // Updating text length and Position
-            txtLength = txtLength + newTextToInsert.length - 1 - (curUrl.endOffsetInclusive - curUrl.startOffset);
-            ch = ch + newTextToInsert.length - 1 - (curUrl.endOffsetInclusive - curUrl.startOffset);
-          }
-          catch (e){
-            DocumentApp.getUi().alert(" Problem with vali\n Link: " + curUrl.url + "\nText: " + curUrl.element.getText());
-          }
-        }
-        urlJustFinished = false;
-      }
-      ch += 1;
-    }
-  }
-
-    
-    // Get number of child elements, for elements that can have child elements. 
-    try {
-      var numChildren = element.getNumChildren();
-    }
-    catch (e) {
-      numChildren = 0;
-    }
-    for (var i=0; i<numChildren; i++) {
-      updateValis(element.getChild(i), allValis);
-    }
+function valisHighlightChange(highlightVali){
 }
+

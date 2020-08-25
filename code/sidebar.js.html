@@ -154,11 +154,16 @@
       }
       
       function errorMessage(error) {
-        Logger.log(error);
+        console.log(error);
       }
       
       function OptionsScript(){
       google.script.run.withUserObject(this).openOptionDialog();
+      google.script.run
+            .withUserObject(this)
+            .withSuccessHandler()
+            .withFailureHandler(errorMessage)
+            .openOptionDialog();
       }
       
      

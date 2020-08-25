@@ -29,8 +29,8 @@ function showErrorTest(message){
 function valispaceAskToken(deployment_name, username, passwd){
   var dialog = DocumentApp.getUi()
   
-  deployment = "https://"+deployment_name+".valispace.com"
-  Logger.log("Connected to: "+deployment)
+  deployment = deployment_name
+  //Logger.log("Connected to: "+deployment)
   PropertiesService.getUserProperties().setProperty('deployment', deployment);  
 
   var tokenUrl = deployment + '/o/token/'
@@ -50,7 +50,7 @@ function valispaceAskToken(deployment_name, username, passwd){
     PropertiesService.getUserProperties().setProperty('connectionAttemptDone', 'true');
     PropertiesService.getUserProperties().setProperty('valispaceLogin', username); 
     PropertiesService.getUserProperties().setProperty('valispacePwd', passwd);
-    Logger.log("Connected");
+    //Logger.log("Connected");
 
   } else {
     PropertiesService.getUserProperties().setProperty('connectionStatus', 'false');
@@ -64,7 +64,7 @@ function valispaceAskToken(deployment_name, username, passwd){
 
 
 function checkValispaceConnexion(){
-  Logger.log("Testing valispace connexion");
+  //Logger.log("Testing valispace connexion");
   
   try{
     var response;
@@ -79,17 +79,17 @@ function checkValispaceConnexion(){
       
     if( responseCode === 200){
       // Connected
-      Logger.log("User Connected");
+      //Logger.log("User Connected");
       return true;
     } else if (responseCode === 401) {
       // access_token is no longer valid, request a new one
-      Logger.log("No return code");
+      //Logger.log("No return code");
       var username = PropertiesService.getUserProperties().getProperty('valispaceLogin');
       var pwd = PropertiesService.getUserProperties().getProperty('valispacePwd');
-      Logger.log("username");
-      Logger.log(username); 
-      Logger.log("pwd"); 
-      Logger.log(pwd);
+      //Logger.log("username");
+      //Logger.log(username); 
+      //Logger.log("pwd"); 
+      //Logger.log(pwd);
       if ((username.length > 0) && (pwd.length > 0)){
          valispaceAskToken(username, pwd);
          response = getAuthenticatedValispaceUrl('project');
@@ -114,7 +114,7 @@ function promptPassword() {
 
 
 function get_projects(workspaceID){
-  Logger.log("Getting projects");
+  //Logger.log("Getting projects");
   //var allProjects = JSON.parse(getAuthenticatedValispaceUrl('project').getContentText());
   var allProjects = JSON.parse(getAuthenticatedValispaceUrl('project/?workspace='+workspaceID).getContentText());
   projectList = "[{\"name\":\"" + allProjects[0].name + "\",\"id\":" + allProjects[0].id +"}"
@@ -127,7 +127,7 @@ function get_projects(workspaceID){
 }
 
 function get_workspaces(){
-  Logger.log("Getting Workspaces");
+  //Logger.log("Getting Workspaces");
   var allWorkspaces = JSON.parse(getAuthenticatedValispaceUrl('workspace').getContentText());
   workspaceList = "[{\"name\":\"" + allWorkspaces[0].name + "\",\"id\":" + allWorkspaces[0].id +"}"
   for(i=1; i < allWorkspaces.length; i++){
@@ -147,7 +147,7 @@ function getAuthenticatedValispaceUrl(subUrl, opt_options){
     fetchOptions.headers = {};
   }
   fetchOptions.headers.Authorization = 'Bearer ' + PropertiesService.getUserProperties().getProperty('access_token');
-  Logger.log("Getting URL");
-  Logger.log(completeUrl);
+  //Logger.log("Getting URL");
+  //Logger.log(completeUrl);
     return  UrlFetchApp.fetch(completeUrl, fetchOptions);
   }

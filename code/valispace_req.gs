@@ -1,17 +1,22 @@
 
 function getRequirementTree(id){
   const myId = id ;
+  //Logger.log(myId)
   
   const responseLabels = getAuthenticatedValispaceUrl('requirements/specifications/labels/');
   const responseRequirementGroups = getAuthenticatedValispaceUrl('requirements/groups/');
   const responseSpecifications = getAuthenticatedValispaceUrl('requirements/specifications/');
   const responseRequirements = getAuthenticatedValispaceUrl('requirements/');
   
+
+  
   var labels = JSON.parse(responseLabels.getContentText());
   var requirementGroups = JSON.parse(responseRequirementGroups.getContentText());
   var specification = JSON.parse(responseSpecifications.getContentText());
   var requirements = JSON.parse(responseRequirements.getContentText());
   
+//  Logger.log("requirements")
+//  Logger.log(requirements)
   
   function checkProjectId(element) {
     return element.project === parseInt(this);
@@ -21,6 +26,9 @@ function getRequirementTree(id){
   // requirement Groups cannot be filtered by projects, we keep it all
   var projectSpecifications = specification.filter(checkProjectId,  myId);
   var projectRequirements = requirements.filter(checkProjectId,  myId);
+//  Logger.log("projectRequirements")
+//  Logger.log(projectRequirements)
+  
  
   return createRequirementTree(projectLabels, requirementGroups, projectSpecifications, projectRequirements, null, 0);
 
@@ -30,8 +38,11 @@ function getRequirementTree(id){
 function createSpecificationTree(specificationRequirementGroups, specRequirements, currentSpecification){
   var deployment = PropertiesService.getUserProperties().getProperty('deployment');
   // Create the specifications tree
-  var specHtml = "<li><span class='caret'><i class=' valiIcon fas fa-clipboard-check'></i>" + currentSpecification.name + "</span><ul class='nested'>";
   
+  var linkSpec = deployment + "/specifications/" + currentSpecification.id;
+  var specHtml = '<li><span class="caret"><i class="valiIcon fas fa-clipboard-check"></i>'
+  specHtml+= '<i class="Specification">' + currentSpecification.name + '   </i></span>';
+  specHtml+= '<i class="fa fa-plus addSpecification" id="'+linkSpec+'"></i><ul class="nested">'
   
   function check_spec_requirement_id(element){
     return element.id === parseInt(this);
@@ -103,11 +114,13 @@ function createRequirementTree(projectLabels, requirementGroups, projectSpecific
   }
   
   function checkIsSpecificationRequirementGroup(element){
-    return this.requirement_groups.indexOf(element.id) > -1;
+    return element.group == this.id
+//    return this.requirement_groups.indexOf(element.id) > -1;
   }
   
   function checkIsSpecificationRequirement(element){
-    return this.requirements.indexOf(element.id) > -1; 
+    return element.specification == this.id
+//    return this.requirements.indexOf(element.id) > -1; 
   }
   
   //////////////////////////////////////////////////
@@ -117,6 +130,8 @@ function createRequirementTree(projectLabels, requirementGroups, projectSpecific
   // We load the values of the current level
   var currentLabels = projectLabels.filter(checkLabelParent, parentLabelThis);
   var currentSpecifications = projectSpecifications.filter(checkSpecificationLabel, parentLabelThis);
+  //Logger.log("projectRequirements")
+  //Logger.log(projectRequirements)
 
   var newHtml = "";
   
@@ -138,6 +153,8 @@ function createRequirementTree(projectLabels, requirementGroups, projectSpecific
   
   // Specifications
   for(i = 0 ; i < currentSpecifications.length ; i++){
+    
+    //Logger.log(currentSpecifications[i])
     var specificationRequirementGroups = requirementGroups.filter(checkIsSpecificationRequirementGroup, currentSpecifications[i]);
     var specificationRequirements = projectRequirements.filter(checkIsSpecificationRequirement, currentSpecifications[i]);
     newHtml += createSpecificationTree(specificationRequirementGroups, specificationRequirements,  currentSpecifications[i]);
@@ -154,21 +171,20 @@ function createRequirementTree(projectLabels, requirementGroups, projectSpecific
   
 }
 
+function insertSpecification(link){
+ 
+//  DocumentApp.getUi().alert("Clicked on a Specification. Work in Progress.")
+  
+  var specId = link.split("/specifications/")[1].split("/")[0];
 
-// Insert a Requirement into the Document
-function insertRequirement(link){
-  //Logger.log(link);
+  const responseRequirements = getAuthenticatedValispaceUrl('requirements/');
+  var reqAll = JSON.parse(responseRequirements.getContentText());
   
+  function check_spec_requirement_id(element){
+    return element.specification === parseInt(this);
+  }
   
-  // The id requirements is contained just after / requirements / in the url
-  var reqId = link.split("/requirements/")[1].split("/")[0];
-
-  
-  var req = getReqValue(reqId);
-  
-  var insertedText = req.identifier;
-  Logger.log(insertedText)
-  Logger.log(req)
+  var Requirements = reqAll.filter(check_spec_requirement_id, specId)
   
   
   var body = DocumentApp.getActiveDocument().getBody();
@@ -181,34 +197,207 @@ function insertRequirement(link){
     var index = body.getChildIndex(element);
   }
   else {
-    DocumentApp.getUi().alert("Could not find current position");
+    DocumentApp.getUi().alert("Could not find current position. Please click on the text where you want to add the requirement.");
     return;
   }
   
-  var templatedoc = DocumentApp.openById('1bDQClCWVcvzPARYl5ohGvBgZlQ519NGGCStqizzK-bU');
+  var ReqTableID = PropertiesService.getDocumentProperties().getProperty('ReqTableID');
+  try{
+    var templatedoc = DocumentApp.openById(ReqTableID);
+  } catch (error) {
+    DocumentApp.getUi().alert("Could not find the document. Confirm it was not deleted and that anyone have read access with the link.");
+    //Logger.log("Document not accessible", ReqTableID)
+  } 
   
-  var reqTable = body.insertTable(index+1,templatedoc.getChild(1).copy());
-  var reqIdText = reqTable.getCell(1, 0).setText("[" + req.identifier + "]");
-  reqIdText.setLinkUrl(link);
+  var reqTableItem = templatedoc.getChild(1).copy();
   
+  fields = ["id",
+            "created",
+            "updated",
+            "project",
+            "valicontainer",
+            "specification",
+            "identifier",
+            "title",
+            "text",
+            "component_requirements",
+            "parents",
+            "children",
+            "valis",
+            "used_valis",
+            "comment",
+            "tags",
+            "position"];
   
-  
-  // insert formatted text in the cell 
-  interpretReqText(req.text, reqTable.getCell(1, 1));
-  
-  if(req.comment !== null){
-    interpretReqText(req.comment, reqTable.getCell(1, 2));
-    reqTable.getCell(1, 2).editAsText().setItalic(true);
+  for (var reqnum = 0 ; reqnum < Requirements.length; reqnum++){
+
+    
+    var RowToCopy = reqTableItem.getRow(1).copy();
+    
+    
+    req = Requirements[reqnum];
+    
+    for (var i=0; i<fields.length; i++){
+      var field = RowToCopy.findText("#"+fields[i]+"#")
+      if (field != null){ 
+        reqFieldAttributes = field.getElement().asText().getAttributes()
+        delete reqFieldAttributes.LINK_URL;
+        field.getElement().asText().setLinkUrl(link + "?field="+"#" + fields[i] + "#")
+        field.getElement().asText().setAttributes(reqFieldAttributes)
+        if (req[fields[i]] != null) {
+          if (fields[i] == "text" || fields[i] == "comment"){
+            RowToCopy.replaceText("#"+fields[i]+"#", interpretReqTextSimple(req[fields[i]]));
+          } else{
+            RowToCopy.replaceText("#"+fields[i]+"#", req[fields[i]]);
+          };
+        }else{
+          RowToCopy.replaceText("#"+fields[i]+"#", "");
+        };         
+      } ;
+    }; 
+    var AppendedRow = reqTableItem.appendTableRow(RowToCopy);
   }
   
   
-  //reqTable.getCell(1, 3).setText(req.method);
-      
-//  var newText2 = cursor.insertText(insertedText);
-//  newText2.setLinkUrl(link);
+  var reqTable = body.insertTable(index+1,reqTableItem);
+  reqTable.removeRow(1)
+  
+  
+
+
+  
 }
 
 
+function testing(){
+  link = "https://demo.valispace.com/specifications/6640"
+  var body = DocumentApp.openById("1osnQugQPMQs7ScXjhMXne2HXjaBmVvGf4uk9uXcJYIM").getBody();
+  //Logger.log(body)
+  var ReqTableID = PropertiesService.getDocumentProperties().getProperty('ReqTableID');
+  try{
+    var templatedoc = DocumentApp.openById(ReqTableID);
+  } catch (error) {
+    DocumentApp.getUi().alert("Could not find the document. Confirm it was not deleted and that anyone have read access with the link.");
+    //Logger.log("Document not accessible", ReqTableID)
+  } 
+  
+  var reqTable = body.insertTable(0,templatedoc.getChild(1).copy());
+  
+}
+
+// Insert a Requirement into the Document.
+// Function that is working with the new Requirement Template, which substitutes the "#property#"
+function insertRequirement(link){ 
+  //Logger.log(link)
+  // The id requirements is contained just after / requirements / in the url
+  var reqId = link.split("/requirements/")[1].split("/")[0];
+
+  var req = getReqValue(reqId);
+  
+  var insertedText = req.identifier;
+ 
+  
+  var body = DocumentApp.getActiveDocument().getBody();
+  var cursor = DocumentApp.getActiveDocument().getCursor();
+  if (cursor) {
+    var element = cursor.getElement();
+    while (element.getParent().getType() != DocumentApp.ElementType.BODY_SECTION) {
+      element = element.getParent();
+    }
+    var index = body.getChildIndex(element);
+  }
+  else {
+    DocumentApp.getUi().alert("Could not find current position. Please click on the text where you want to add the requirement.");
+    return;
+  }
+  
+  var ReqTableID = PropertiesService.getDocumentProperties().getProperty('ReqTableID');
+  try{
+    var templatedoc = DocumentApp.openById(ReqTableID);
+  } catch (error) {
+    DocumentApp.getUi().alert("Could not find the document. Confirm it was not deleted and that anyone have read access with the link.");
+    //Logger.log("Document not accessible", ReqTableID)
+  } 
+  
+  var reqTable = body.insertTable(index+1,templatedoc.getChild(1).copy());
+  
+  // Add a for loop to check for the #elements# and then another loop to make the replacements for only what is available.
+  
+//  var reqId = reqTable.findText( "#id#")
+//  reqIdAttributes = reqId.getElement().asText().getAttributes()
+//  delete reqIdAttributes.LINK_URL;
+//  reqId.getElement().asText().setLinkUrl(link + "?field=id")
+//  reqId.getElement().asText().setAttributes(reqIdAttributes)
+//  reqTable.replaceText('#id#', req.identifier)
+//    
+//  var reqText = reqTable.findText('#text#')
+//  reqTextAttributes = reqText.getElement().asText().getAttributes()
+//  delete reqTextAttributes.LINK_URL;
+//  reqText.getElement().asText().setLinkUrl(link + "?field=text")
+//  reqText.getElement().asText().setAttributes(reqTextAttributes)
+//  reqTable.replaceText('#text#', interpretReqTextSimple(req.text))
+//  
+//  var reqTags = reqTable.findText('#tags#')
+//  //reqTags.getElement().asText().setLinkUrl(link)
+//  reqTable.replaceText('#tags#', req.tags)
+//  
+//  var reqParents = reqTable.findText('#parents#')
+//  //reqParents.getElement().asText().setLinkUrl(link)
+//  reqTable.replaceText('#parents#', req.parents)
+//  
+//  var reqComment = reqTable.findText('#comment#')
+//  //reqComment.getElement().asText().setLinkUrl(link)
+//  reqTable.replaceText('#comment#', interpretReqTextSimple(req.comment))
+//  
+//  var reqCreated = reqTable.findText('#created#')
+//  //reqCreated.getElement().asText().setLinkUrl(link)
+//  reqTable.replaceText('#created#', req.created)
+//  
+//  //var reqIdText = reqTable.getCell(1, 0).setText("[" + req.identifier + "]");
+//  //reqId.setLinkUrl(link);
+//  //reqTable.setLinkUrl(link);
+  
+  fields = ["id",
+            "created",
+            "updated",
+            "project",
+            "valicontainer",
+            "specification",
+            "identifier",
+            "title",
+            "text",
+            "component_requirements",
+            "parents",
+            "children",
+            "valis",
+            "used_valis",
+            "comment",
+            "tags",
+            "position"];
+  for (var i=0; i<fields.length; i++){
+    var field = reqTable.findText("#"+fields[i]+"#")
+    if (field != null){ 
+      reqFieldAttributes = field.getElement().asText().getAttributes()
+      delete reqFieldAttributes.LINK_URL;
+      field.getElement().asText().setLinkUrl(link + "?field="+"#" + fields[i] + "#")
+      field.getElement().asText().setAttributes(reqFieldAttributes)
+      if (req[fields[i]] != null) {
+        if (fields[i] == "text" || fields[i] == "comment"){
+          reqTable.replaceText("#"+fields[i]+"#", interpretReqTextSimple(req[fields[i]]));
+        } else{
+          reqTable.replaceText("#"+fields[i]+"#", req[fields[i]]);
+        };
+      }else{
+        reqTable.replaceText("#"+fields[i]+"#", "");
+      };         
+    } ;
+  };
+  
+  
+  
+}  
+
+  
 // Interpret the requirements, return a paragraph and insert in a table cell.
 function interpretReqText(textReq, cell){
   var deployment = PropertiesService.getUserProperties().getProperty('deployment');
@@ -224,7 +413,6 @@ function interpretReqText(textReq, cell){
   // we remove the tags <p>/
   const pReplacementRegex = /<\/?p[^>]*?>/g
   interpreted = interpreted.replace(pReplacementRegex, "")
-  
   
   // we remove the tags <span>
   const spanReplacementRegex = /<\/?span[^>]*?>/g
@@ -277,7 +465,69 @@ function interpretReqText(textReq, cell){
 }
 
 
-
+function interpretReqTextSimple(textReq){
+  var deployment = PropertiesService.getUserProperties().getProperty('deployment');
+  var interpreted = textReq;
+  const valiRegex = /<vali[^>]*?\[id\]="([0-9]+?)"[^>]*?>[\s\S]*?<\/vali>/gm
+  const findIDregex = /\[id\]="([0-9]+?)"/
+  const findFieldRegex = /field="([^"]+?)"/
+  var valis = textReq.match(valiRegex);
+  var count = 0;
+  
+  interpreted = interpreted.replace(valiRegex,"$$$$VALI$$$$");
+  
+  // we remove the tags <p>/
+  const pReplacementRegex = /<\/?p[^>]*?>/g
+  interpreted = interpreted.replace(pReplacementRegex, "")
+  
+  
+  // we remove the tags <span>
+  const spanReplacementRegex = /<\/?span[^>]*?>/g
+  interpreted = interpreted.replace(spanReplacementRegex, "")
+  
+  // We replace the <br> tags with line breaks
+  const brReplacementRegex = /<\/?br[^>]*?>/g
+  interpreted = interpreted.replace(brReplacementRegex, "\n")
+  
+  // Replace the lists
+  const ulOpenReplacementRegex = /<\/?ul[^>]*?>/g
+  interpreted = interpreted.replace(ulOpenReplacementRegex, "");
+  const liOpenReplacementRegex = /<li[^>]*?>/g
+  interpreted = interpreted.replace(liOpenReplacementRegex, "\n\t - ");
+  const liCloseReplacementRegex = /<\/li>/g
+  interpreted = interpreted.replace(liCloseReplacementRegex, "");
+  
+  var splitted = interpreted.split('$$VALI$$');
+  
+  var i;
+  var text = "";
+  
+  for(i = 0 ; i < splitted.length ; i++){
+    text = text + splitted[i];
+    if (i !== splitted.length - 1){
+      var idVali = parseInt(valis[i].match(findIDregex)[1]);
+      var vali = getValiValue(idVali);
+      var valiTxt = "";
+      if (vali.unit.length > 0){
+        valiTxt = vali.value + " " + vali.unit;
+      } else {
+        valiTxt = vali.value;
+      }
+      
+      var link;
+      if(vali.parent_model === 'requirement'){
+        link =   deployment+'/specifications/requirements/' + vali.parent_object_id + '/valis';
+      } else {
+        link =  deployment+'/components/'+ vali.parent_object_id + '/properties/vali/' + vali.id;
+      }
+      text = text + valiTxt;
+      text = text + " ";
+      //text.setLinkUrl(0, valiTxt.length - 1, link);
+    }
+  } 
+  
+  return text
+}
 
 
 
@@ -308,7 +558,7 @@ function getReqValue(reqId){
       }
 //    
       req.method +=  componentName + ": " + verifMethodText  ;// name + ": " + verifMethodText;
-    Logger.log(req);
+    //Logger.log(req);
     
   }
   //var responseVerifMethod = getAuthenticatedValispaceUrl('requirements/verifications/' + reqId);
@@ -317,103 +567,3 @@ function getReqValue(reqId){
   
   return req  
 };
-
-
-
-
-// Recursive requirements update function
-function updateAllRequirements(element, req, compReqs, components, verifications, verifMethods){
-  var deployment = PropertiesService.getUserProperties().getProperty('deployment');
-  if(!element){
-    element = DocumentApp.getActiveDocument().getBody();
-     // Download all requirements
-    try{
-    var responseReq = getAuthenticatedValispaceUrl('requirements');
-      req = JSON.parse(responseReq.getContentText());
-    } catch (error) {
-      alert("Error")
-    } 
-    
-    // Download all components_requirements
-    var responseComponentReq = getAuthenticatedValispaceUrl("requirements/component-requirements");
-    compReqs = JSON.parse(responseComponentReq.getContentText());
-    // Download all components
-    var componentResponse = getAuthenticatedValispaceUrl("components");
-    components = JSON.parse(componentResponse.getContentText());
-    // Download all veritications
-    var responseVerif = getAuthenticatedValispaceUrl("requirements/verifications");
-    verifications = JSON.parse(responseVerif.getContentText());
-    // Download all verification methods
-    var responseVerifMethod = getAuthenticatedValispaceUrl("requirements/verification-methods");
-    verifMethods = JSON.parse(responseVerifMethod.getContentText());
-  } 
-  
-  
-  
-  
-  
-  if (element.getType() === DocumentApp.ElementType.TABLE) {
-     var link = element.getCell(0, 0).getChild(0).getLinkUrl();
-    if (link){
-      if (link.indexOf(deployment+"/specifications/requirements/") === 0){
-        //Get the requirement id
-        var reqId = parseInt(link.split("/requirements/")[1].split("/")[0]);
-        
-        // Retrieve the requirement and insert text
-        var currentReq = req.filter(function(d){return d.id === parseInt(this); }, reqId);
-        
-        //DocumentApp.getUi().alert(currentReq[0]);
-        Logger.log(currentReq[0]);
-        
-        var textReq = currentReq[0].text;
-        var reqCell = element.getCell(1, 0);
-        interpretReqText(textReq, reqCell);
-        
-        
-        var rationaleText = currentReq[0].comment;
-        var rationaleCell = element.getCell(2,0);
-        if(rationaleText !== null){
-          interpretReqText(rationaleText, rationaleCell);
-          rationaleCell.editAsText().setItalic(true);
-        } else {
-          rationaleCell.setText("");
-        }
-        
-        // Update the checks
-        var childrenComponentRequirementIds = currentReq[0].component_requirements;
-        var textValidation = ""
-        
-        var i;
-        for(i = 0 ; i < childrenComponentRequirementIds.length ; i++){
-          var childCompoReq = compReqs.filter(function(d){return d.id === parseInt(this);}, childrenComponentRequirementIds[i]);
-          var compo = components.filter(function(d){return d.id === parseInt(this);}, childCompoReq[0].component);
-          var verif = verifications.filter(function(d){return d.id === parseInt(this);}, childrenComponentRequirementIds[i]);
-          var verifMethodText="";
-          if (verif[0].method === null){
-            verifMethodText = "NA";
-          } else {
-            verifMethodText = verifMethods.filter(function(d){return d.id === parseInt(this);}, verif[0].method)[0].name;
-          }
-          textValidation += compo[0].name + ': ' + verifMethodText ;
-                                      
-        }
-        
-        
-        
-        element.getCell(1,1).setText(textValidation);
-      }
-      
-    }
-  }
-    // Get number of child elements, for elements that can have child elements. 
-  try {
-    var numChildren = element.getNumChildren();
-  }
-  catch (e) {
-    numChildren = 0;
-  }
-  for (var i=0; i<numChildren; i++) {
-    updateAllRequirements(element.getChild(i), req, compReqs, components, verifications, verifMethods);
-  }
-  
-}

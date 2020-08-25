@@ -19,6 +19,15 @@
 	   });
 	  }
 	  
+      var specifications = document.getElementsByClassName("addSpecification");
+ 	  for(i = 0 ; i < specifications.length; i++){
+		specifications[i].addEventListener("click", function(){ 
+		  google.script.run
+		   .withFailureHandler(errorMessage)
+		   .insertSpecification(this.id);
+	   });
+	  }     
+      
 	  var requirements = document.getElementsByClassName("requirement");
 	  for(i = 0 ; i < requirements.length; i++){
 		requirements[i].addEventListener("click", function(){ 
@@ -29,7 +38,7 @@
 	  }
 	  
       function errorMessage(error) {
-        Logger.log(error);
+        //Logger.log(error);
       }
 	  
 	}
