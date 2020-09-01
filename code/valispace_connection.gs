@@ -48,8 +48,6 @@ function valispaceAskToken(deployment_name, username, passwd){
     PropertiesService.getUserProperties().setProperty('access_token',accessToken);
     PropertiesService.getUserProperties().setProperty('connectionStatus', 'true');
     PropertiesService.getUserProperties().setProperty('connectionAttemptDone', 'true');
-    PropertiesService.getUserProperties().setProperty('valispaceLogin', username); 
-    PropertiesService.getUserProperties().setProperty('valispacePwd', passwd);
     //Logger.log("Connected");
 
   } else {

@@ -240,9 +240,14 @@ function insertSpecification(link){
     for (var i=0; i<fields.length; i++){
       var field = RowToCopy.findText("#"+fields[i]+"#")
       if (field != null){ 
+        var deployment = PropertiesService.getUserProperties().getProperty('deployment');
+        req_link = deployment+"/specifications/requirements/"+req["id"]
+        Logger.log(req_link)
+        
         reqFieldAttributes = field.getElement().asText().getAttributes()
         delete reqFieldAttributes.LINK_URL;
-        field.getElement().asText().setLinkUrl(link + "?field="+"#" + fields[i] + "#")
+        
+        field.getElement().asText().setLinkUrl(req_link + "?field="+"#" + fields[i] + "#")
         field.getElement().asText().setAttributes(reqFieldAttributes)
         if (req[fields[i]] != null) {
           if (fields[i] == "text" || fields[i] == "comment"){
@@ -269,26 +274,10 @@ function insertSpecification(link){
 }
 
 
-function testing(){
-  link = "https://demo.valispace.com/specifications/6640"
-  var body = DocumentApp.openById("1osnQugQPMQs7ScXjhMXne2HXjaBmVvGf4uk9uXcJYIM").getBody();
-  //Logger.log(body)
-  var ReqTableID = PropertiesService.getDocumentProperties().getProperty('ReqTableID');
-  try{
-    var templatedoc = DocumentApp.openById(ReqTableID);
-  } catch (error) {
-    DocumentApp.getUi().alert("Could not find the document. Confirm it was not deleted and that anyone have read access with the link.");
-    //Logger.log("Document not accessible", ReqTableID)
-  } 
-  
-  var reqTable = body.insertTable(0,templatedoc.getChild(1).copy());
-  
-}
-
 // Insert a Requirement into the Document.
 // Function that is working with the new Requirement Template, which substitutes the "#property#"
 function insertRequirement(link){ 
-  //Logger.log(link)
+  Logger.log(link)
   // The id requirements is contained just after / requirements / in the url
   var reqId = link.split("/requirements/")[1].split("/")[0];
 
