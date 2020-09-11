@@ -44,7 +44,7 @@
     
     function changeReqTable(){
     var ReqTableID = $('#ReqTableID').val();
-    google.script.run.withSuccessHandler(statusTableUpdated).changeReqTableTemplate(ReqTableID);
+    google.script.run.withSuccessHandler().changeReqTableTemplate(ReqTableID);
     };
     
     function createNewTemp(){

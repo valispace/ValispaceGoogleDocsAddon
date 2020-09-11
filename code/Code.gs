@@ -12,7 +12,6 @@ function showSidebar() {
   if (PropertiesService.getDocumentProperties().getProperty('highlightVali') === null) {
     PropertiesService.getDocumentProperties().setProperty('highlightVali', false);
   };
-
     
 
 }

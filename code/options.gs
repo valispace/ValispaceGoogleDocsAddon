@@ -32,7 +32,7 @@ function createNewTemplate(){
 function changeReqTableTemplate(ReqTableID){
   try{
     PropertiesService.getDocumentProperties().setProperty('ReqTableID', ReqTableID);
-    var templatedoc = DocumentApp.openById(ReqTableID);
+//    var templatedoc = DocumentApp.openById(ReqTableID);
   } catch (error) {
     DocumentApp.getUi().alert("Could not find the document. Confirm it was not deleted and that anyone have read access with the link.");
     //Logger.log("Document not accessible", ReqTableID)
