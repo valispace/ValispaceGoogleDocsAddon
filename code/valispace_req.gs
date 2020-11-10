@@ -1,5 +1,18 @@
 var Users;
 var Groups;
+var Files;
+
+var individualReq 
+var firstRowHeader
+
+
+function testFunctionOne(id){
+  Logger.log(id)
+  Logger.log("One");
+};
+function TestFunctionTwo(){
+  Logger.log("Two");
+};
 
 function getUsers(){
   const responseUsers = getAuthenticatedValispaceUrl('user/')
@@ -8,6 +21,10 @@ function getUsers(){
 function getGroups(){
   const responseGroups = getAuthenticatedValispaceUrl('group/')
   Groups = JSON.parse(responseGroups.getContentText());
+}
+function getFiles(){
+  const responseFiles = getAuthenticatedValispaceUrl('files/?project=')
+  Files = JSON.parse(responseFiles.getContentText());
 }
 
 
@@ -60,6 +77,7 @@ function createSpecificationTree(specificationRequirementGroups, specRequirement
   function check_spec_requirement_id(element){
     return element.id === parseInt(this);
   }
+  
   
   function cleanupSpecRequirements(element){
     return element.id !== parseInt(this);
@@ -197,12 +215,13 @@ function insertSpecification(link){
   
   var specId = link.split("/specifications/")[1].split("/")[0];
   
+  
   const responseRequirements = getAuthenticatedValispaceUrl('requirements/');
   var reqAll = JSON.parse(responseRequirements.getContentText());
   
   function check_spec_requirement_id(element){
     return element.specification === parseInt(this);
-  }
+  }    
   
   var Requirements = reqAll.filter(check_spec_requirement_id, specId)
   
@@ -254,14 +273,13 @@ function insertSpecification(link){
   var reqTableItem = templatedoc.getChild(1).copy();
   
   var table = body.appendTable();
-
+  
   
   if (individualReq==="false"){
     if (firstRowHeader==="true"){ 
       table.appendTableRow(reqTableItem.getRow(0).copy())
     }
   }
-
   
   for (var reqnum = 0 ; reqnum < Requirements.length; reqnum++){
     req = Requirements[reqnum];
@@ -275,52 +293,11 @@ function insertSpecification(link){
     for (var j=startrow; j<reqTableItem.getNumRows(); j++){
       var RowToCopy = reqTableItem.getRow(j).copy()
       
-      for (var i=0; i<fields.length; i++){
-        var field = RowToCopy.findText("#"+fields[i]+"#")
-        
-        if (field != null){ 
-          var deployment = PropertiesService.getUserProperties().getProperty('deployment');
-          req_link = deployment+"/specifications/requirements/"+req["id"]
-          //          Logger.log(req_link)
-          //          Logger.log(req[fields[i]])
-          
-          reqFieldAttributes = field.getElement().asText().getAttributes()
-          delete reqFieldAttributes.LINK_URL;
-          
-          field.getElement().asText().setLinkUrl(req_link + "?field="+"#" + fields[i] + "#")
-          field.getElement().asText().setAttributes(reqFieldAttributes)
-          
-          if (req[fields[i]] != null) {
-            if (fields[i] == "text" || fields[i] == "comment"){
-              RowToCopy.replaceText("#"+fields[i]+"#", interpretReqTextSimple(req[fields[i]]));
-            } else if (fields[i] == "owner") {
-              var owner = Users.filter(function(user){return (user.id==req[fields[i]]["id"]);})[0]
-              owner_fullname = owner.first_name + " " + owner.last_name
-              RowToCopy.replaceText("#"+fields[i]+"#", owner_fullname);
-            } else {
-              RowToCopy.replaceText("#"+fields[i]+"#", req[fields[i]]);
-            };
-          } else if (fields[i]=="owner_wgroup" && req["owner"] != null) {
-            // This is a special querry, to look for which group the user is at only work for single group on a user
-            Logger.log("inside onwner Group")
-            var owner = Users.filter( function(user){return (user.id==req["owner"]["id"]);})[0]
-            Logger.log(owner)
-            var group = Groups.filter( function(group){return (group.id==owner.groups[0]);})[0]
-            if (group == "undefined"){
-              group = "No Group"
-            }
-            Logger.log(group)
-            RowToCopy.replaceText("#"+fields[i]+"#", group.name + " - " + owner.first_name + " " + owner.last_name);          
-          
-        } else {
-          RowToCopy.replaceText("#"+fields[i]+"#", "");
-        };         
-      };
-    }; 
-    
-    if (individualReq==="true"){
-      table.appendTableRow(RowToCopy);
-    } else {
+      replaceFields(RowToCopy);
+      
+      if (individualReq==="true"){
+        table.appendTableRow(RowToCopy);
+      } else {
         table.appendTableRow(RowToCopy)
       };
     };
@@ -335,14 +312,227 @@ function insertSpecification(link){
   
   if (individualReq==="false"){
     var reqTable = body.insertTable(index+1,table);
+  };  
+}
+
+function insertSpecification_withSection(link){
+  getUsers() 
+  getGroups()
+  getFiles()
+  
+  var individualReq = PropertiesService.getDocumentProperties().getProperty('individualReq');
+  var firstRowHeader = PropertiesService.getDocumentProperties().getProperty('firstRowHeader');
+  
+  //  DocumentApp.getUi().alert("Clicked on a Specification. Work in Progress.")
+  
+  var specId = link.split("/specifications/")[1].split("/")[0];
+  
+  const responseRequirementGroups = getAuthenticatedValispaceUrl('requirements/groups/');
+  var groupsAll = JSON.parse(responseRequirementGroups.getContentText());
+  
+  const responseSpecification = getAuthenticatedValispaceUrl('requirements/specifications/'+String(specId));
+  var Specification = JSON.parse(responseSpecification.getContentText());
+  specificationGroups = Specification.requirement_groups;
+  
+  const responseRequirements = getAuthenticatedValispaceUrl('requirements/');
+  var reqAll = JSON.parse(responseRequirements.getContentText());
+  
+  function check_spec_requirement_id(element){
+    return element.specification === parseInt(this);
+  } ;   
+  function check_spec_requirement_group(element){
+    return element.group === parseInt(this);
+  };
+  function check_spec_requirement_noGroup(element){
+    return element.group === null || element.group === undefined 
+  };
+  function check_spec_Group_id(element){
+    return element.id === parseInt(this);
+  }
+  
+  
+  var Requirements = reqAll.filter(check_spec_requirement_id, specId)
+  
+  
+  
+  var body = DocumentApp.getActiveDocument().getBody();
+  var cursor = DocumentApp.getActiveDocument().getCursor();
+  if (cursor) {
+    var element = cursor.getElement();
+    while (element.getParent().getType() != DocumentApp.ElementType.BODY_SECTION) {
+      element = element.getParent();
+    }
+    var index = body.getChildIndex(element);
+  }
+  else {
+    DocumentApp.getUi().alert("Could not find current position. Please click on the text where you want to add the requirement.");
+    return;
+  }
+  
+  var ReqTableID = PropertiesService.getDocumentProperties().getProperty('ReqTableID');
+  try{
+    var templatedoc = DocumentApp.openById(ReqTableID);
+  } catch (error) {
+    DocumentApp.getUi().alert("Could not find the document. Confirm it was not deleted and that anyone have read access with the link.");
+    //Logger.log("Document not accessible", ReqTableID)
+  } 
+  
+  fields = ["id",
+            "created",
+            "updated",
+            "project",
+            "valicontainer",
+            "specification",
+            "identifier",
+            "title",
+            "text",
+            "component_requirements",
+            "parents",
+            "children",
+            "valis",
+            "used_valis",
+            "comment",
+            "tags",
+            "position",
+            "owner",
+            "owner_wgroup",
+            "files"];
+  
+  
+  
+  var reqTableItem = templatedoc.getChild(1).copy();
+  
+  var table = body.appendTable();
+  
+  
+  if (individualReq==="false"){
+    if (firstRowHeader==="true"){ 
+      AppendedRow = table.appendTableRow(reqTableItem.getRow(0).copy())
+    };
+  };
+  
+  
+  for (var i in specificationGroups){
+    var Group = groupsAll.filter(check_spec_Group_id, specificationGroups[i])[0]
+    var Requirements_onGroup = Requirements.filter(check_spec_requirement_group, specificationGroups[i]);
+    
+    index_ = body.getChildIndex(table)
+    
+    //logger.log(Requirements_onGroup.length)
+    if (Requirements_onGroup.length != 0){
+      var text = body.insertParagraph(index_-1, "\r"+Group.name).setHeading(DocumentApp.ParagraphHeading.HEADING2)
+      addRequirementRow(Requirements_onGroup, reqTableItem, table)
+    }
+  };
+ 
+  
+  var Requirements_NoGroup = Requirements.filter(check_spec_requirement_noGroup, specificationGroups[i]);
+  
+  if (Requirements_NoGroup.length != 0){
+    index_ = body.getChildIndex(table)
+    var text = body.insertParagraph(index_-1, "\r Requirements with no Section").setHeading(DocumentApp.ParagraphHeading.HEADING2)
+    addRequirementRow(Requirements_NoGroup, reqTableItem, table)
+  }
+  
+  
+  if (individualReq==="false"){
+    var reqTable = body.insertTable(index_,table);
+  };
+  
+  
+  function addRequirementRow(Requirements, reqTableItem, table){
+    for (var reqnum = 0 ; reqnum < Requirements.length; reqnum++){
+      req = Requirements[reqnum];
+      //logger.log(req.identifier)
+      if (firstRowHeader==="true"){    
+        var startrow = 1;
+      } else {
+        var startrow = 0;
+      }
+      
+      for (var j=startrow; j<reqTableItem.getNumRows(); j++){
+        var RowToCopy = reqTableItem.getRow(j).copy()
+        
+        replaceFields(RowToCopy);
+        
+        if (individualReq==="true"){
+          table.appendTableRow(RowToCopy);
+        } else {
+          table.appendTableRow(RowToCopy)
+        };
+      };
+      
+      if (individualReq==="true") {
+        var reqTable = body.insertTable(index_+reqnum,table.copy())
+        table.clear();
+        table = body.appendTable();
+      };
+      
+    }; 
   }  
+}
+
+
+function replaceFields(RowToCopy){
+  for (var i=0; i<fields.length; i++){
+    var field = RowToCopy.findText("#"+fields[i]+"#")
+    
+    if (field != null){ 
+      var deployment = PropertiesService.getUserProperties().getProperty('deployment');
+      req_link = deployment+"/specifications/requirements/"+req["id"]
+      //          Logger.log(req_link)
+      //          Logger.log(req[fields[i]])
+      
+      reqFieldAttributes = field.getElement().asText().getAttributes()
+      delete reqFieldAttributes.LINK_URL;
+      
+      field.getElement().asText().setLinkUrl(req_link + "?field="+"#" + fields[i] + "#")
+      field.getElement().asText().setAttributes(reqFieldAttributes)
+      
+      if (req[fields[i]] != null) {
+        if (fields[i] == "text" || fields[i] == "comment"){
+          RowToCopy.replaceText("#"+fields[i]+"#", interpretReqTextSimple(req[fields[i]]));
+        } else if (fields[i] == "owner") {
+          var owner = Users.filter(function(user){return (user.id==req[fields[i]]["id"]);})[0]
+          owner_fullname = owner.first_name + " " + owner.last_name
+          RowToCopy.replaceText("#"+fields[i]+"#", owner_fullname);
+        } else {
+          RowToCopy.replaceText("#"+fields[i]+"#", req[fields[i]]);
+        };
+      } else if (fields[i]=="owner_wgroup" && req["owner"] != null) {
+        // This is a special querry, to look for which group the user is at only work for single group on a user
+        var owner = Users.filter( function(user){return (user.id==req["owner"]["id"]);})[0]
+        var group = Groups.filter( function(group){return (group.id==owner.groups[0]);})[0]
+        if (group == "undefined"){
+          group = "No Group"
+        }
+        RowToCopy.replaceText("#"+fields[i]+"#", group.name + " - " + owner.first_name + " " + owner.last_name);          
+        
+//      } else if (fields[i]=="files") {
+//        Logger.log(req.id)
+//        
+//        var files_onReq = Files.filter(function(files){return (files.object_id==req.id);})
+//        files_names = ""
+//        
+//        if (files_onReq != NaN){
+//            file_id = parseInt(files_onReq.reference_file)
+//            Logger.log(file_id)
+//            var file = getAuthenticatedValispaceUrl('files/'+String(file_id));
+//            files_names = files_names + file.name + ", "          
+//        }
+//        RowToCopy.replaceText("#"+fields[i]+"#", files_names)
+      } else {
+        RowToCopy.replaceText("#"+fields[i]+"#", "");
+      };         
+    };
+  }; 
 }
 
 
 // Insert a Requirement into the Document.
 // Function that is working with the new Requirement Template, which substitutes the "#property#"
 function insertRequirement(link){ 
-  Logger.log(link)
+//  Logger.log(link)
   // The id requirements is contained just after / requirements / in the url
   var reqId = link.split("/requirements/")[1].split("/")[0];
   

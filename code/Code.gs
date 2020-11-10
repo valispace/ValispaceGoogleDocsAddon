@@ -18,7 +18,6 @@ function showSidebar() {
   if (PropertiesService.getDocumentProperties().getProperty('firstRowHeader') === null) {
     PropertiesService.getDocumentProperties().setProperty('firstRowHeader', false);
   };
-  
     
 
 }
