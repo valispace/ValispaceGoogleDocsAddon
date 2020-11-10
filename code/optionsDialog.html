@@ -26,6 +26,13 @@
     <input type="submit" value="Create New Template" class="action button" onclick="createNewTemp()">
     </div>
     <br>
+    
+    <div>
+    <input  type="checkbox" id="individualReq" value="individualReq" <?!=individualReqOption?> >Treat Requirements Individually (Add by spec)<br>
+    </div>
+    <div>
+    <input  type="checkbox" id="firstRowHeader" value="firstRowHeader" <?!=firstRowHeaderOption?> >First Row as Header <br>
+    </div>
      
     
     <div id="LastButtons">
@@ -39,7 +46,9 @@
     <script>
     function changeOptions(){
     var highlightVali =  $("#highlightValis").is(':checked');
-    google.script.run.withSuccessHandler(closeIt).changeOptions(highlightVali);
+    var individualReq =  $("#individualReq").is(':checked');
+    var firstRowHeader =  $("#firstRowHeader").is(':checked');
+    google.script.run.withSuccessHandler(closeIt).changeOptions(highlightVali, individualReq, firstRowHeader);
     };
     
     function changeReqTable(){

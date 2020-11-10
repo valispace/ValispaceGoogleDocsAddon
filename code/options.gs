@@ -2,6 +2,8 @@ function openOptionDialog() {
   var template = HtmlService.createTemplateFromFile('code/optionsDialog');
 
   template.highlightOption = "";
+  template.individualReqOption = "";
+  template.firstRowHeaderOption = "";
 
   
   if (PropertiesService.getDocumentProperties().getProperty('highlightVali') == "true"){
@@ -9,6 +11,18 @@ function openOptionDialog() {
   } 
   else if (PropertiesService.getDocumentProperties().getProperty('highlightVali') == "false"){
     template.highlightOption = "";
+  }
+  if (PropertiesService.getDocumentProperties().getProperty('individualReq') == "true"){
+    template.individualReqOption = "checked";
+  } 
+  else if (PropertiesService.getDocumentProperties().getProperty('individualReq') == "false"){
+    template.individualReqOption = "";
+  }
+  if (PropertiesService.getDocumentProperties().getProperty('firstRowHeader') == "true"){
+    template.firstRowHeaderOption = "checked";
+  } 
+  else if (PropertiesService.getDocumentProperties().getProperty('firstRowHeader') == "false"){
+    template.firstRowHeaderOption = "";
   }
   
   var page = template.evaluate();
@@ -44,11 +58,20 @@ function resetReqTableTemplate(){
   PropertiesService.getDocumentProperties().setProperty('ReqTableID', ReqTableID_original);
 }
 
-function changeOptions(highlightVali){
-  previousSetting = PropertiesService.getDocumentProperties().getProperty('highlightVali'); 
+function changeOptions(highlightVali, individualReq, firstRowHeader){
+  previousSetting_highlight = PropertiesService.getDocumentProperties().getProperty('highlightVali'); 
+  previousSetting_individualReq = PropertiesService.getDocumentProperties().getProperty('individualReq'); 
+  previousSetting_firstRowHeader = PropertiesService.getDocumentProperties().getProperty('firstRowHeader'); 
+  
   //Logger.log('Previous Settings '+previousSetting)
-  if (previousSetting != highlightVali){
+  if (previousSetting_highlight != highlightVali){
     PropertiesService.getDocumentProperties().setProperty('highlightVali', highlightVali);
+  };
+  if (previousSetting_individualReq != individualReq){
+    PropertiesService.getDocumentProperties().setProperty('individualReq', individualReq);
+  };
+  if (previousSetting_firstRowHeader != firstRowHeader){
+    PropertiesService.getDocumentProperties().setProperty('firstRowHeader', firstRowHeader);
   };
   //Logger.log('new Settings '+PropertiesService.getDocumentProperties().getProperty('highlightVali'))
   

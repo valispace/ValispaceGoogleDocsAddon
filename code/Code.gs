@@ -12,6 +12,13 @@ function showSidebar() {
   if (PropertiesService.getDocumentProperties().getProperty('highlightVali') === null) {
     PropertiesService.getDocumentProperties().setProperty('highlightVali', false);
   };
+  if (PropertiesService.getDocumentProperties().getProperty('individualReq') === null) {
+    PropertiesService.getDocumentProperties().setProperty('individualReq', false);
+  };
+  if (PropertiesService.getDocumentProperties().getProperty('firstRowHeader') === null) {
+    PropertiesService.getDocumentProperties().setProperty('firstRowHeader', false);
+  };
+  
     
 
 }

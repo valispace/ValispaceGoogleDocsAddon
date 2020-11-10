@@ -1,3 +1,15 @@
+var Users;
+var Groups;
+
+function getUsers(){
+  const responseUsers = getAuthenticatedValispaceUrl('user/')
+  Users = JSON.parse(responseUsers.getContentText());
+}
+function getGroups(){
+  const responseGroups = getAuthenticatedValispaceUrl('group/')
+  Groups = JSON.parse(responseGroups.getContentText());
+}
+
 
 function getRequirementTree(id){
   const myId = id ;
@@ -8,15 +20,16 @@ function getRequirementTree(id){
   const responseSpecifications = getAuthenticatedValispaceUrl('requirements/specifications/');
   const responseRequirements = getAuthenticatedValispaceUrl('requirements/');
   
-
+  
+  
   
   var labels = JSON.parse(responseLabels.getContentText());
   var requirementGroups = JSON.parse(responseRequirementGroups.getContentText());
   var specification = JSON.parse(responseSpecifications.getContentText());
   var requirements = JSON.parse(responseRequirements.getContentText());
   
-//  Logger.log("requirements")
-//  Logger.log(requirements)
+  //  Logger.log("requirements")
+  //  Logger.log(requirements)
   
   function checkProjectId(element) {
     return element.project === parseInt(this);
@@ -26,12 +39,12 @@ function getRequirementTree(id){
   // requirement Groups cannot be filtered by projects, we keep it all
   var projectSpecifications = specification.filter(checkProjectId,  myId);
   var projectRequirements = requirements.filter(checkProjectId,  myId);
-//  Logger.log("projectRequirements")
-//  Logger.log(projectRequirements)
+  //  Logger.log("projectRequirements")
+  //  Logger.log(projectRequirements)
   
- 
+  
   return createRequirementTree(projectLabels, requirementGroups, projectSpecifications, projectRequirements, null, 0);
-
+  
 }
 
 
@@ -68,13 +81,13 @@ function createSpecificationTree(specificationRequirementGroups, specRequirement
   
   for( j = 0 ; j < specRequirements.length ; j++){
     var linkReq = deployment + "/specifications/requirements/" + specRequirements[j].id + "/components";
-      specHtml+='<li class="requirement" id="' + linkReq + '"><i class="valiIcon fas fa-check"></i>' + specRequirements[j].identifier + '</li>';
+    specHtml+='<li class="requirement" id="' + linkReq + '"><i class="valiIcon fas fa-check"></i>' + specRequirements[j].identifier + '</li>';
   }
   
   specHtml += '</ul></li>'
   return specHtml;
-
-
+  
+  
 }
 
 function createRequirementTree(projectLabels, requirementGroups, projectSpecifications, projectRequirements, parentLabel, profondeur){
@@ -115,12 +128,12 @@ function createRequirementTree(projectLabels, requirementGroups, projectSpecific
   
   function checkIsSpecificationRequirementGroup(element){
     return element.group == this.id
-//    return this.requirement_groups.indexOf(element.id) > -1;
+    //    return this.requirement_groups.indexOf(element.id) > -1;
   }
   
   function checkIsSpecificationRequirement(element){
     return element.specification == this.id
-//    return this.requirements.indexOf(element.id) > -1; 
+    //    return this.requirements.indexOf(element.id) > -1; 
   }
   
   //////////////////////////////////////////////////
@@ -132,7 +145,7 @@ function createRequirementTree(projectLabels, requirementGroups, projectSpecific
   var currentSpecifications = projectSpecifications.filter(checkSpecificationLabel, parentLabelThis);
   //Logger.log("projectRequirements")
   //Logger.log(projectRequirements)
-
+  
   var newHtml = "";
   
   if (parentLabelThis === -666){ // If we are at the root of the project
@@ -166,17 +179,24 @@ function createRequirementTree(projectLabels, requirementGroups, projectSpecific
   } else {
     newHtml += "</ul></li>";
   }
- 
+  
   return newHtml; 
   
 }
 
+
 function insertSpecification(link){
- 
-//  DocumentApp.getUi().alert("Clicked on a Specification. Work in Progress.")
+  
+  getUsers() 
+  getGroups()
+  
+  var individualReq = PropertiesService.getDocumentProperties().getProperty('individualReq');
+  var firstRowHeader = PropertiesService.getDocumentProperties().getProperty('firstRowHeader');
+  
+  //  DocumentApp.getUi().alert("Clicked on a Specification. Work in Progress.")
   
   var specId = link.split("/specifications/")[1].split("/")[0];
-
+  
   const responseRequirements = getAuthenticatedValispaceUrl('requirements/');
   var reqAll = JSON.parse(responseRequirements.getContentText());
   
@@ -209,8 +229,6 @@ function insertSpecification(link){
     //Logger.log("Document not accessible", ReqTableID)
   } 
   
-  var reqTableItem = templatedoc.getChild(1).copy();
-  
   fields = ["id",
             "created",
             "updated",
@@ -227,50 +245,97 @@ function insertSpecification(link){
             "used_valis",
             "comment",
             "tags",
-            "position"];
+            "position",
+            "owner",
+            "owner_wgroup"];
+  
+  
+  
+  var reqTableItem = templatedoc.getChild(1).copy();
+  
+  var table = body.appendTable();
+
+  
+  if (individualReq==="false"){
+    if (firstRowHeader==="true"){ 
+      table.appendTableRow(reqTableItem.getRow(0).copy())
+    }
+  }
+
   
   for (var reqnum = 0 ; reqnum < Requirements.length; reqnum++){
-
-    
-    var RowToCopy = reqTableItem.getRow(1).copy();
-    
-    
     req = Requirements[reqnum];
     
-    for (var i=0; i<fields.length; i++){
-      var field = RowToCopy.findText("#"+fields[i]+"#")
-      if (field != null){ 
-        var deployment = PropertiesService.getUserProperties().getProperty('deployment');
-        req_link = deployment+"/specifications/requirements/"+req["id"]
-        Logger.log(req_link)
+    if (firstRowHeader==="true"){    
+      var startrow = 1;
+    } else {
+      var startrow = 0;
+    }
+    
+    for (var j=startrow; j<reqTableItem.getNumRows(); j++){
+      var RowToCopy = reqTableItem.getRow(j).copy()
+      
+      for (var i=0; i<fields.length; i++){
+        var field = RowToCopy.findText("#"+fields[i]+"#")
         
-        reqFieldAttributes = field.getElement().asText().getAttributes()
-        delete reqFieldAttributes.LINK_URL;
-        
-        field.getElement().asText().setLinkUrl(req_link + "?field="+"#" + fields[i] + "#")
-        field.getElement().asText().setAttributes(reqFieldAttributes)
-        if (req[fields[i]] != null) {
-          if (fields[i] == "text" || fields[i] == "comment"){
-            RowToCopy.replaceText("#"+fields[i]+"#", interpretReqTextSimple(req[fields[i]]));
-          } else{
-            RowToCopy.replaceText("#"+fields[i]+"#", req[fields[i]]);
-          };
-        }else{
+        if (field != null){ 
+          var deployment = PropertiesService.getUserProperties().getProperty('deployment');
+          req_link = deployment+"/specifications/requirements/"+req["id"]
+          //          Logger.log(req_link)
+          //          Logger.log(req[fields[i]])
+          
+          reqFieldAttributes = field.getElement().asText().getAttributes()
+          delete reqFieldAttributes.LINK_URL;
+          
+          field.getElement().asText().setLinkUrl(req_link + "?field="+"#" + fields[i] + "#")
+          field.getElement().asText().setAttributes(reqFieldAttributes)
+          
+          if (req[fields[i]] != null) {
+            if (fields[i] == "text" || fields[i] == "comment"){
+              RowToCopy.replaceText("#"+fields[i]+"#", interpretReqTextSimple(req[fields[i]]));
+            } else if (fields[i] == "owner") {
+              var owner = Users.filter(function(user){return (user.id==req[fields[i]]["id"]);})[0]
+              owner_fullname = owner.first_name + " " + owner.last_name
+              RowToCopy.replaceText("#"+fields[i]+"#", owner_fullname);
+            } else {
+              RowToCopy.replaceText("#"+fields[i]+"#", req[fields[i]]);
+            };
+          } else if (fields[i]=="owner_wgroup" && req["owner"] != null) {
+            // This is a special querry, to look for which group the user is at only work for single group on a user
+            Logger.log("inside onwner Group")
+            var owner = Users.filter( function(user){return (user.id==req["owner"]["id"]);})[0]
+            Logger.log(owner)
+            var group = Groups.filter( function(group){return (group.id==owner.groups[0]);})[0]
+            if (group == "undefined"){
+              group = "No Group"
+            }
+            Logger.log(group)
+            RowToCopy.replaceText("#"+fields[i]+"#", group.name + " - " + owner.first_name + " " + owner.last_name);          
+          
+        } else {
           RowToCopy.replaceText("#"+fields[i]+"#", "");
         };         
-      } ;
+      };
     }; 
-    var AppendedRow = reqTableItem.appendTableRow(RowToCopy);
-  }
+    
+    if (individualReq==="true"){
+      table.appendTableRow(RowToCopy);
+    } else {
+        table.appendTableRow(RowToCopy)
+      };
+    };
+    
+    if (individualReq==="true") {
+      var reqTable = body.insertTable(index+1+reqnum,table.copy())
+      table.clear();
+    };
+    
+  };
   
   
-  var reqTable = body.insertTable(index+1,reqTableItem);
-  reqTable.removeRow(1)
-  
-  
-
-
-  
+  if (individualReq==="false"){
+    var reqTable = body.insertTable(index+1,table);
+  }  
 }
 
 
@@ -280,11 +345,11 @@ function insertRequirement(link){
   Logger.log(link)
   // The id requirements is contained just after / requirements / in the url
   var reqId = link.split("/requirements/")[1].split("/")[0];
-
+  
   var req = getReqValue(reqId);
   
   var insertedText = req.identifier;
- 
+  
   
   var body = DocumentApp.getActiveDocument().getBody();
   var cursor = DocumentApp.getActiveDocument().getCursor();
@@ -312,39 +377,39 @@ function insertRequirement(link){
   
   // Add a for loop to check for the #elements# and then another loop to make the replacements for only what is available.
   
-//  var reqId = reqTable.findText( "#id#")
-//  reqIdAttributes = reqId.getElement().asText().getAttributes()
-//  delete reqIdAttributes.LINK_URL;
-//  reqId.getElement().asText().setLinkUrl(link + "?field=id")
-//  reqId.getElement().asText().setAttributes(reqIdAttributes)
-//  reqTable.replaceText('#id#', req.identifier)
-//    
-//  var reqText = reqTable.findText('#text#')
-//  reqTextAttributes = reqText.getElement().asText().getAttributes()
-//  delete reqTextAttributes.LINK_URL;
-//  reqText.getElement().asText().setLinkUrl(link + "?field=text")
-//  reqText.getElement().asText().setAttributes(reqTextAttributes)
-//  reqTable.replaceText('#text#', interpretReqTextSimple(req.text))
-//  
-//  var reqTags = reqTable.findText('#tags#')
-//  //reqTags.getElement().asText().setLinkUrl(link)
-//  reqTable.replaceText('#tags#', req.tags)
-//  
-//  var reqParents = reqTable.findText('#parents#')
-//  //reqParents.getElement().asText().setLinkUrl(link)
-//  reqTable.replaceText('#parents#', req.parents)
-//  
-//  var reqComment = reqTable.findText('#comment#')
-//  //reqComment.getElement().asText().setLinkUrl(link)
-//  reqTable.replaceText('#comment#', interpretReqTextSimple(req.comment))
-//  
-//  var reqCreated = reqTable.findText('#created#')
-//  //reqCreated.getElement().asText().setLinkUrl(link)
-//  reqTable.replaceText('#created#', req.created)
-//  
-//  //var reqIdText = reqTable.getCell(1, 0).setText("[" + req.identifier + "]");
-//  //reqId.setLinkUrl(link);
-//  //reqTable.setLinkUrl(link);
+  //  var reqId = reqTable.findText( "#id#")
+  //  reqIdAttributes = reqId.getElement().asText().getAttributes()
+  //  delete reqIdAttributes.LINK_URL;
+  //  reqId.getElement().asText().setLinkUrl(link + "?field=id")
+  //  reqId.getElement().asText().setAttributes(reqIdAttributes)
+  //  reqTable.replaceText('#id#', req.identifier)
+  //    
+  //  var reqText = reqTable.findText('#text#')
+  //  reqTextAttributes = reqText.getElement().asText().getAttributes()
+  //  delete reqTextAttributes.LINK_URL;
+  //  reqText.getElement().asText().setLinkUrl(link + "?field=text")
+  //  reqText.getElement().asText().setAttributes(reqTextAttributes)
+  //  reqTable.replaceText('#text#', interpretReqTextSimple(req.text))
+  //  
+  //  var reqTags = reqTable.findText('#tags#')
+  //  //reqTags.getElement().asText().setLinkUrl(link)
+  //  reqTable.replaceText('#tags#', req.tags)
+  //  
+  //  var reqParents = reqTable.findText('#parents#')
+  //  //reqParents.getElement().asText().setLinkUrl(link)
+  //  reqTable.replaceText('#parents#', req.parents)
+  //  
+  //  var reqComment = reqTable.findText('#comment#')
+  //  //reqComment.getElement().asText().setLinkUrl(link)
+  //  reqTable.replaceText('#comment#', interpretReqTextSimple(req.comment))
+  //  
+  //  var reqCreated = reqTable.findText('#created#')
+  //  //reqCreated.getElement().asText().setLinkUrl(link)
+  //  reqTable.replaceText('#created#', req.created)
+  //  
+  //  //var reqIdText = reqTable.getCell(1, 0).setText("[" + req.identifier + "]");
+  //  //reqId.setLinkUrl(link);
+  //  //reqTable.setLinkUrl(link);
   
   fields = ["id",
             "created",
@@ -386,7 +451,7 @@ function insertRequirement(link){
   
 }  
 
-  
+
 // Interpret the requirements, return a paragraph and insert in a table cell.
 function interpretReqText(textReq, cell){
   var deployment = PropertiesService.getUserProperties().getProperty('deployment');
@@ -426,7 +491,7 @@ function interpretReqText(textReq, cell){
   var para = cell.getChild(0);
   cell.setText("");
   
-
+  
   
   for(i = 0 ; i < splitted.length ; i++){
     para.appendText(splitted[i]);
@@ -532,21 +597,21 @@ function getReqValue(reqId){
   req['method'] = "";
   
   for(i = 0 ; i < req.component_requirements.length ; i++){
-      var responseComponentReq = getAuthenticatedValispaceUrl("requirements/component-requirements/" + req.component_requirements[i]);
-      var compReq = JSON.parse(responseComponentReq.getContentText());
-      var componentResponse = getAuthenticatedValispaceUrl("components/" + compReq.component);
-      var componentName = JSON.parse(componentResponse.getContentText()).name;
-      var responseVerif = getAuthenticatedValispaceUrl("requirements/verifications/" + compReq.verifications);
-      var verificationMethod = JSON.parse(responseVerif.getContentText()).method;
-      var verifMethodText;
-      if (verificationMethod === null){
-        verifMethodText = "NA";
-      } else { 
-        var responseMethodName = getAuthenticatedValispaceUrl("requirements/verification-methods/" + verificationMethod);
-        verifMethodText = JSON.parse(responseMethodName.getContentText()).name;
-      }
-//    
-      req.method +=  componentName + ": " + verifMethodText  ;// name + ": " + verifMethodText;
+    var responseComponentReq = getAuthenticatedValispaceUrl("requirements/component-requirements/" + req.component_requirements[i]);
+    var compReq = JSON.parse(responseComponentReq.getContentText());
+    var componentResponse = getAuthenticatedValispaceUrl("components/" + compReq.component);
+    var componentName = JSON.parse(componentResponse.getContentText()).name;
+    var responseVerif = getAuthenticatedValispaceUrl("requirements/verifications/" + compReq.verifications);
+    var verificationMethod = JSON.parse(responseVerif.getContentText()).method;
+    var verifMethodText;
+    if (verificationMethod === null){
+      verifMethodText = "NA";
+    } else { 
+      var responseMethodName = getAuthenticatedValispaceUrl("requirements/verification-methods/" + verificationMethod);
+      verifMethodText = JSON.parse(responseMethodName.getContentText()).name;
+    }
+    //    
+    req.method +=  componentName + ": " + verifMethodText  ;// name + ": " + verifMethodText;
     //Logger.log(req);
     
   }
