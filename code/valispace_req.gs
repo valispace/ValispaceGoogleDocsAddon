@@ -1,18 +1,11 @@
 var Users;
 var Groups;
 var Files;
+var Files_dict = {};
 
 var individualReq 
 var firstRowHeader
 
-
-function testFunctionOne(id){
-  Logger.log(id)
-  Logger.log("One");
-};
-function TestFunctionTwo(){
-  Logger.log("Two");
-};
 
 function getUsers(){
   const responseUsers = getAuthenticatedValispaceUrl('user/')
@@ -22,11 +15,25 @@ function getGroups(){
   const responseGroups = getAuthenticatedValispaceUrl('group/')
   Groups = JSON.parse(responseGroups.getContentText());
 }
-function getFiles(){
-  const responseFiles = getAuthenticatedValispaceUrl('files/?project=')
-  Files = JSON.parse(responseFiles.getContentText());
-}
 
+function GenerateFilesDict(){
+    id = 85;
+    responseFiles = getAuthenticatedValispaceUrl('files/?project='+String(id))
+    Files = JSON.parse(responseFiles.getContentText());
+
+    
+    for (var file_index in Files){
+      if (Files[file_index].name == "") {
+        reference_file_id = Files[file_index].reference_file
+        reference_file = Files.filter( function(file){return (file.id==reference_file_id);})[0]
+        Files_dict[String(Files[file_index].id)] = reference_file.name; 
+      } else {
+      Files_dict[String(Files[file_index].id)] = Files[file_index].name;  
+      }
+
+    }
+
+}
 
 function getRequirementTree(id){
   const myId = id ;
@@ -316,9 +323,12 @@ function insertSpecification(link){
 }
 
 function insertSpecification_withSection(link){
+//    console.log("Starting Insert Specification");
   getUsers() 
   getGroups()
-  getFiles()
+
+  GenerateFilesDict()
+//  Logger.log(Files_dict)
   
   var individualReq = PropertiesService.getDocumentProperties().getProperty('individualReq');
   var firstRowHeader = PropertiesService.getDocumentProperties().getProperty('firstRowHeader');
@@ -353,6 +363,9 @@ function insertSpecification_withSection(link){
   
   var Requirements = reqAll.filter(check_spec_requirement_id, specId)
   
+//  For Some Reason the filter returns the Id order inverted
+//  Requirements.reverse();
+  
   
   
   var body = DocumentApp.getActiveDocument().getBody();
@@ -374,7 +387,7 @@ function insertSpecification_withSection(link){
     var templatedoc = DocumentApp.openById(ReqTableID);
   } catch (error) {
     DocumentApp.getUi().alert("Could not find the document. Confirm it was not deleted and that anyone have read access with the link.");
-    //Logger.log("Document not accessible", ReqTableID)
+//Logger.log("Document not accessible", ReqTableID)
   } 
   
   fields = ["id",
@@ -396,7 +409,8 @@ function insertSpecification_withSection(link){
             "position",
             "owner",
             "owner_wgroup",
-            "files"];
+            "files",
+            "images"];
   
   
   
@@ -414,14 +428,18 @@ function insertSpecification_withSection(link){
   
   for (var i in specificationGroups){
     var Group = groupsAll.filter(check_spec_Group_id, specificationGroups[i])[0]
+//    console.log("Starting Filterinr Requirements by Specification SEcion");
     var Requirements_onGroup = Requirements.filter(check_spec_requirement_group, specificationGroups[i]);
+//    console.log("Finished Filterinr Requirements by Specification SEcion");
     
     index_ = body.getChildIndex(table)
     
     //logger.log(Requirements_onGroup.length)
     if (Requirements_onGroup.length != 0){
       var text = body.insertParagraph(index_-1, "\r"+Group.name).setHeading(DocumentApp.ParagraphHeading.HEADING2)
+//    console.log("Starting Insert Requirements Group");
       addRequirementRow(Requirements_onGroup, reqTableItem, table)
+//    console.log("Starting Insert Requirements Group");
     }
   };
  
@@ -442,8 +460,9 @@ function insertSpecification_withSection(link){
   
   function addRequirementRow(Requirements, reqTableItem, table){
     for (var reqnum = 0 ; reqnum < Requirements.length; reqnum++){
+//      console.log("Starting Insert Requirement");
+//      Logger.log(Requirements[reqnum].id)
       req = Requirements[reqnum];
-      //logger.log(req.identifier)
       if (firstRowHeader==="true"){    
         var startrow = 1;
       } else {
@@ -455,11 +474,7 @@ function insertSpecification_withSection(link){
         
         replaceFields(RowToCopy);
         
-        if (individualReq==="true"){
           table.appendTableRow(RowToCopy);
-        } else {
-          table.appendTableRow(RowToCopy)
-        };
       };
       
       if (individualReq==="true") {
@@ -467,9 +482,10 @@ function insertSpecification_withSection(link){
         table.clear();
         table = body.appendTable();
       };
-      
+//      console.log("Finished Insert Requirement");
     }; 
-  }  
+  }
+//console.log("Finished Insert Specification");
 }
 
 
@@ -483,11 +499,11 @@ function replaceFields(RowToCopy){
       //          Logger.log(req_link)
       //          Logger.log(req[fields[i]])
       
-      reqFieldAttributes = field.getElement().asText().getAttributes()
-      delete reqFieldAttributes.LINK_URL;
+//      reqFieldAttributes = field.getElement().asText().getAttributes()
+//      delete reqFieldAttributes.LINK_URL;
       
-      field.getElement().asText().setLinkUrl(req_link + "?field="+"#" + fields[i] + "#")
-      field.getElement().asText().setAttributes(reqFieldAttributes)
+//      field.getElement().asText().setLinkUrl(req_link + "?field="+"#" + fields[i] + "#")
+//      field.getElement().asText().setAttributes(reqFieldAttributes)
       
       if (req[fields[i]] != null) {
         if (fields[i] == "text" || fields[i] == "comment"){
@@ -508,19 +524,23 @@ function replaceFields(RowToCopy){
         }
         RowToCopy.replaceText("#"+fields[i]+"#", group.name + " - " + owner.first_name + " " + owner.last_name);          
         
-//      } else if (fields[i]=="files") {
-//        Logger.log(req.id)
-//        
-//        var files_onReq = Files.filter(function(files){return (files.object_id==req.id);})
-//        files_names = ""
-//        
-//        if (files_onReq != NaN){
-//            file_id = parseInt(files_onReq.reference_file)
-//            Logger.log(file_id)
-//            var file = getAuthenticatedValispaceUrl('files/'+String(file_id));
-//            files_names = files_names + file.name + ", "          
+      } else if (fields[i]=="files") {
+        var files_onReq = Files.filter(function(files){return (files.object_id==req.id && files.mimetype!="image/png");})
+        files_names = ""
+        
+        for (var file_index in files_onReq){    
+          Logger.log(files_onReq[file_index].mimetype)
+          file_id = parseInt(files_onReq[file_index].id)
+          files_names = files_names + Files_dict[file_id] + ", "    
+        }
+        RowToCopy.replaceText("#"+fields[i]+"#", files_names)
+//      } else if (fields[i]=="images") {
+//        var images_onReq = Files.filter(function(files){return (files.object_id==req.id && files.mimetype=="image/png");})
+//        for (var file_index in images_onReq){    
+//          file_id = parseInt(images_onReq[file_index].id)
+//          var resp = UrlFetchApp.fetch(images_onReq[file_index].download_url);
+//          body.appendImage(resp.getBlob())
 //        }
-//        RowToCopy.replaceText("#"+fields[i]+"#", files_names)
       } else {
         RowToCopy.replaceText("#"+fields[i]+"#", "");
       };         
@@ -532,7 +552,6 @@ function replaceFields(RowToCopy){
 // Insert a Requirement into the Document.
 // Function that is working with the new Requirement Template, which substitutes the "#property#"
 function insertRequirement(link){ 
-//  Logger.log(link)
   // The id requirements is contained just after / requirements / in the url
   var reqId = link.split("/requirements/")[1].split("/")[0];
   
@@ -802,7 +821,6 @@ function getReqValue(reqId){
     }
     //    
     req.method +=  componentName + ": " + verifMethodText  ;// name + ": " + verifMethodText;
-    //Logger.log(req);
     
   }
   //var responseVerifMethod = getAuthenticatedValispaceUrl('requirements/verifications/' + reqId);
