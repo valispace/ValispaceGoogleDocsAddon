@@ -2,6 +2,7 @@ var Users;
 var Groups;
 var Files;
 var Files_dict = {};
+var max_reqs = 100;
 
 var individualReq 
 var firstRowHeader
@@ -17,7 +18,7 @@ function getGroups(){
 }
 
 function GenerateFilesDict(){
-    id = 85;
+    id = 87;
     responseFiles = getAuthenticatedValispaceUrl('files/?project='+String(id))
     Files = JSON.parse(responseFiles.getContentText());
 
@@ -38,7 +39,7 @@ function GenerateFilesDict(){
 function getRequirementTree(id){
   const myId = id ;
   //Logger.log(myId)
-  
+  //VALISPACE TESTING 
   const responseLabels = getAuthenticatedValispaceUrl('requirements/specifications/labels/');
   const responseRequirementGroups = getAuthenticatedValispaceUrl('requirements/groups/');
   const responseSpecifications = getAuthenticatedValispaceUrl('requirements/specifications/');
@@ -322,8 +323,49 @@ function insertSpecification(link){
   };  
 }
 
+function RequirementTemplate_Copy() {
+  var startTime
+  var endTime
+  var timeDiff
+  
+  //---------------------------------------------------------------------------------------------------------------------------------------------------
+  var ReqTableID = PropertiesService.getDocumentProperties().getProperty('ReqTableID');
+  try{
+    var templatedoc = DocumentApp.openById(ReqTableID);
+  } catch (error) {
+    DocumentApp.getUi().alert("Could not find the document. Confirm it was not deleted and that anyone have read access with the link.");
+    //Logger.log("Document not accessible", ReqTableID)
+  } 
+  var reqTableItem = templatedoc.getBody().getChild(1).copy();
+  //---------------------------------------------------------------------------------------------------------------------------------------------------
+  return reqTableItem
+}
+
+function replaceText(element, value){
+ return element.replaceText("#identifier#", String(value));
+}
+
+function ResetSectionAndReq(){
+  
+    PropertiesService.getUserProperties().setProperty('section_num', 0);
+    PropertiesService.getUserProperties().setProperty('req_num', 0);
+} 
+
+function GetSectionAndReq(){
+  console.log(parseInt(PropertiesService.getUserProperties().getProperty('section_num')));
+  console.log(parseInt(PropertiesService.getUserProperties().getProperty('req_num')));
+}
+
 function insertSpecification_withSection(link){
   console.log("Starting Insert Specification");
+  
+  if(PropertiesService.getUserProperties().getProperty('section_num')==null){
+    PropertiesService.getUserProperties().setProperty('section_num', 0);
+  }
+  if(PropertiesService.getUserProperties().getProperty('req_num')==null){
+    PropertiesService.getUserProperties().setProperty('req_num', 0);
+  }
+  
   //INITIAL SETUP
   //---------------------------------------------------------------------------------------------------------------------------------------------------
   getUsers()
@@ -337,7 +379,6 @@ function insertSpecification_withSection(link){
   var individualReq = PropertiesService.getDocumentProperties().getProperty('individualReq');
   var firstRowHeader = PropertiesService.getDocumentProperties().getProperty('firstRowHeader');
   
-  //  DocumentApp.getUi().alert("Clicked on a Specification. Work in Progress.")
   
   startTime = new Date();
   //REQUESTING DATA TO VALISPACE
@@ -351,6 +392,8 @@ function insertSpecification_withSection(link){
   const responseSpecification = getAuthenticatedValispaceUrl('requirements/specifications/'+String(specId));
   var Specification = JSON.parse(responseSpecification.getContentText());
   specificationGroups = Specification.requirement_groups;
+  // ADD THE NO GROUP TO THE END
+  specificationGroups.push(-1)
   
   const responseRequirements = getAuthenticatedValispaceUrl('requirements/');
   var reqAll = JSON.parse(responseRequirements.getContentText());
@@ -365,8 +408,13 @@ function insertSpecification_withSection(link){
     return element.specification === parseInt(this);
   } ;   
   function check_spec_requirement_group(element){
-    return element.group === parseInt(this);
+    var num = parseInt(this)
+    if (num > 0){
+      return element.group === null || element.group === undefined;
+    }
+    return element.group === num;
   };
+  
   function check_spec_requirement_noGroup(element){
     return element.group === null || element.group === undefined 
   };
@@ -446,7 +494,7 @@ function insertSpecification_withSection(link){
   var table = body.appendTable();
   
   
-  //Sets the first row as header if selected
+  // Sets the first row as header if selected
   //---------------------------------------------------------------------------------------------------------------------------------------------------
   if (individualReq==="false"){
     if (firstRowHeader==="true"){ 
@@ -459,9 +507,16 @@ function insertSpecification_withSection(link){
   startTime = new Date();
   console.log("GET THE REQUIREMENTS");
   var Requirements = reqAll.filter(check_spec_requirement_id, specId)
+  // Ordering by Identifier
+  var startTime_filtering = new Date();
   Requirements.sort(function (req1, req2) {
-    return req2.id - req1.id;
+    return req1.identifier - req2.identifier;
   })
+  var endTime_filtering = new Date();
+  var timeDiff = endTime_filtering - startTime_filtering       
+  console.log("Sorting Requirements Time: " + String(timeDiff) + "ms")
+        
+  
   //  For Some Reason the filter returns the Id order inverted
   //Requirements.reverse(); // TODO: Check memory size of a reversion of a list. It can be memory intensive
   endTime = new Date();
@@ -473,47 +528,53 @@ function insertSpecification_withSection(link){
   
   var document = DocumentApp.getActiveDocument();
   var body = document.getBody();
-  var table = body.appendTable();
+  var table = body.insertTable(index_);
   
   specificationGroups.reverse();
   
-  for (var i in specificationGroups){
-
-    
+  console.log("Specification Groups: " + specificationGroups)
+  starting_section = parseInt(PropertiesService.getUserProperties().getProperty('section_num'));
+  console.log(starting_section)
+  for (var i = starting_section ; i < specificationGroups.length; i++){
+    console.log("Inside for loop")
+    console.log(specificationGroups[i])
     // FILTER GROUP AND GET REQUIREMENTS ON THE GROUP
     var Group = groupsAll.filter(check_spec_Group_id, specificationGroups[i])[0]
 //    console.log("Starting Filterinr Requirements by Specification SEcion");
     var Requirements_onGroup = Requirements.filter(check_spec_requirement_group, specificationGroups[i]);
 //    console.log("Finished Filterinr Requirements by Specification SEcion");
     
+    console.log(Requirements_onGroup)
+    starting_req = parseInt(PropertiesService.getUserProperties().getProperty('req_num'));
+    
+    var num_req_added = addRequirementRow(Requirements_onGroup, reqTableItem, table, from=starting_req, to=starting_req+max_reqs);
+    if (num_req_added >= max_reqs){
+      PropertiesService.getUserProperties().setProperty('req_num', num_req_added);
+      break;
+    }
     
     
-    //logger.log(Requirements_onGroup.length)
-    
-    addRequirementRow(Requirements_onGroup, reqTableItem, table)
     
     var document = DocumentApp.getActiveDocument();
     var body = document.getBody();
-    var table = body.appendTable();
-    // Insert a paragraph with the title if there are requirements on the group
-    if (Requirements_onGroup.length != 0){
-      //      index_ = body.getChildIndex(table)
-      var text = body.insertParagraph(index_, "\r"+Group.name).setHeading(DocumentApp.ParagraphHeading.HEADING2)
-      
-      //    console.log("Starting Insert Requirements Group");
+    var table = body.insertTable(index_)
     
-//    console.log("Starting Insert Requirements Group");
+    
+    // Insert a paragraph with the title if there are requirements on the group
+    if (Requirements_onGroup.length != 0 && Group != undefined){
+      var text = body.insertParagraph(index_, "\r"+Group.name).setHeading(DocumentApp.ParagraphHeading.HEADING2)
+    } else if (Requirements_onGroup.length != 0) {
+      var text = body.insertParagraph(index_, "\r Requirements with no Section").setHeading(DocumentApp.ParagraphHeading.HEADING2)
     }
+    
+    PropertiesService.getUserProperties().setProperty('section_num', i+1); // We set it to the next section to insert.
+    PropertiesService.getUserProperties().setProperty('req_num', 0);
   };
- 
   
-  var Requirements_NoGroup = Requirements.filter(check_spec_requirement_noGroup, specificationGroups[i]);
-  
-  if (Requirements_NoGroup.length != 0){
-    addRequirementRow(Requirements_NoGroup, reqTableItem, table)
-    index_ = body.getChildIndex(table)
-    var text = body.insertParagraph(index_, "\r Requirements with no Section").setHeading(DocumentApp.ParagraphHeading.HEADING2)
+  if (parseInt(PropertiesService.getUserProperties().getProperty('req_num')) > specificationGroups.length){
+    PropertiesService.getUserProperties().setProperty('section_num', 0);
   }
+  
   
   // IF WE NEED TO INSERT THEM ALL IN ONE TABLE
   if (individualReq==="false"){
@@ -521,13 +582,15 @@ function insertSpecification_withSection(link){
   };
   
   
-  function addRequirementRow(Requirements, reqTableItem, table){
-
+  function addRequirementRow(Requirements, reqTableItem, table, from, to){
+    if(null == from){from = 0};
+    if(null == to){to=Requirements.length};
     var document = DocumentApp.getActiveDocument();
     var body = document.getBody();
-    for (var reqnum = 0 ; reqnum < Requirements.length; reqnum++){
+    var reqnum;
+    for (reqnum = from ; reqnum < to; reqnum++){
       //      TODO: Just make a copy of the template table
-      var table = body.appendTable(reqTableItem.copy());
+      var table = body.insertTable(index_, reqTableItem.copy());
 //      console.log(String(Requirements[reqnum].id))
       req = Requirements[reqnum];
       // If all in one table don't copy the header
@@ -540,29 +603,34 @@ function insertSpecification_withSection(link){
         replaceFields(table);
       
       if (individualReq==="true") {
+        //appendToDoc(body, table.copy())
         var reqTable = body.insertTable(index_,table.copy())
         table.clear();
-        table = body.appendTable();
+//        table = body.appendTable();
         
       };
       
       
-      if (reqnum % 10 == 0){
-        //TODO: We need to save the document if it has made changes every 5 tables for example
-        startTime = new Date();
-        console.log("Save document")
-        document.saveAndClose();
-        endTime = new Date();
-        timeDiff = endTime - startTime;
-        console.log(timeDiff + " ms");
+      
+      //if (reqnum >= to){
+       // break;
+        //TODO: We need to save the document if it has made changes every 30 tables for example
+        //startTime_SC = new Date();
+        //return from+reqnum;
+        //document.saveAndClose();
+       // endTime_SC = new Date();
+       // timeDiff_SC = endTime_SC - startTime_SC;
+       // console.log("saveAndClose(): " + timeDiff_SC + " ms"); 
 
         
-        var document = DocumentApp.getActiveDocument();
-        var body = document.getBody();
-     }
+       // var document = DocumentApp.getActiveDocument();
+        //var body = document.getBody();
+     //}
+     
     }; 
-
-  }
+    return from+reqnum;
+  };
+  
 }
 
 
@@ -579,7 +647,7 @@ function replaceFields(RowToCopy){
       reqFieldAttributes = field.getElement().asText().getAttributes()
       delete reqFieldAttributes.LINK_URL;
       
-      field.getElement().asText().setLinkUrl(req_link + "?field="+"#" + fields[i] + "#")
+//      field.getElement().asText().setLinkUrl(req_link + "?field="+"#" + fields[i] + "#")
       field.getElement().asText().setAttributes(reqFieldAttributes)
       
       if (req[fields[i]] != null) {
