@@ -94,7 +94,7 @@
     var projectId = $("#options-projects").val();
     var projectName = $("#options-projects option:selected").text();
     //updateAllTrees(projectId, projectName);
-    google.script.run.update_requirements_tree(projectId);
+    google.script.run.build_requirements_tree(projectId);
   }
 
   function insertNewValiScript() {

@@ -31,16 +31,17 @@ function get_projects(workspaceID) {
   return Projects
 }
 
-function update_requirements_tree(projectId){
+function build_requirements_tree(projectId){
   Logger.log('Set Project id'+projectId)
   PropertiesService.getUserProperties().setProperty('projectID', projectId)
-  RequirementsTree.update()
+  RequirementsTree.build()
+
 }
 
 function insert_req_value(fieldName, searchFieldValue, fieldValue){
   Logger.log(`Hello World: ${fieldName}, ${searchFieldValue}, ${fieldValue}`)
-  RequirementsTree.update()
-  
+  RequirementsTree.build()
+
   Logger.log(Object.keys(RequirementsTree.nodes_list))
   Logger.log(searchFieldValue)
   Logger.log(PropertiesService.getUserProperties().getProperty('projectID'))
