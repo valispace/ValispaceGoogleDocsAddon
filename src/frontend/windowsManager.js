@@ -35,7 +35,10 @@ function build_requirements_tree(projectId){
   Logger.log('Set Project id'+projectId)
   PropertiesService.getUserProperties().setProperty('projectID', projectId)
   RequirementsTree.build()
+}
 
+function update_all_values(projectId){
+  RequirementsTree.update_all()
 }
 
 function insert_req_value(fieldName, searchFieldValue, fieldValue){

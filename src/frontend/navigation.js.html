@@ -3,10 +3,10 @@
 	$(function () {
 
 		$('#search-specific-requirement').click(searchSpecificRequirement);
-
+		$('#update-all').click(() => google.script.run.update_all_values());
 	});
 
-	
+
 	function searchSpecificRequirement(){
     google.script.run.openSearchRequirementDialog()
   }
