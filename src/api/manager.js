@@ -19,11 +19,11 @@
  */
 function valispaceAskToken(deployment_url, username, passwd){
   //  var dialog = DocumentApp.getUi()
-  
+
   deployment = deployment_url
-  
-  PropertiesService.getUserProperties().setProperty('deployment_url', deployment);  
-  
+
+  PropertiesService.getUserProperties().setProperty('deployment_url', deployment);
+
   var tokenUrl = deployment + '/o/token/'
   var payload = {
     grant_type: 'password',
@@ -40,19 +40,15 @@ function valispaceAskToken(deployment_url, username, passwd){
     PropertiesService.getUserProperties().setProperty('connectionStatus', 'true');
     PropertiesService.getUserProperties().setProperty('connectionAttemptDone', 'true');
     //Logger.log("Connected");
-    
+
   } else {
     PropertiesService.getUserProperties().setProperty('connectionStatus', 'false');
     PropertiesService.getUserProperties().setProperty('connectionAttemptDone', 'true');
     dialog.alert('Wrong Username or Password', 'You inserted a wrong username or password, please try again', dialog.ButtonSet.OK)
-  }  
+  }
   return responseData
 }
 
-function checkValispaceConnexion2(){
-  PropertiesService.getUserProperties().setProperty('deployment_url', 'https://staging.valispace.com')
-  Logger.log(checkValispaceConnexion())
-}
 
 
 /**
@@ -71,7 +67,7 @@ function checkValispaceConnexion(){
       response = e;
       responseCode = "unkown";
     }
-    
+
     if( responseCode === 200){
       // Connected
       return true;
@@ -79,7 +75,7 @@ function checkValispaceConnexion(){
       // access_token is no longer valid, request a new one
       var username = PropertiesService.getUserProperties().getProperty('valispaceLogin');
       var pwd = PropertiesService.getUserProperties().getProperty('valispacePwd');
-      
+
       // If Uername and Password properties are not empty, try to reconnect
       if ((username.length > 0) && (pwd.length > 0)){
         valispaceAskToken(username, pwd);
@@ -101,7 +97,7 @@ function checkValispaceConnexion(){
  * @param  {[type]} opt_options - 
  * @return {string}      Returns the Server response to the given request.
  */
-// 
+//
 function getAuthenticatedValispaceUrl(subUrl, opt_options){
   var deployment = PropertiesService.getUserProperties().getProperty('deployment_url');
   var completeUrl = deployment + '/rest/' + subUrl;
@@ -112,3 +108,4 @@ function getAuthenticatedValispaceUrl(subUrl, opt_options){
   fetchOptions.headers.Authorization = 'Bearer ' + PropertiesService.getUserProperties().getProperty('access_token');
   return  UrlFetchApp.fetch(completeUrl, fetchOptions);
 }
+
