@@ -29,8 +29,8 @@ var RequirementsTree = {
   root_nodes: [],
   nodes_list: {},
   inserter: Inserter,
-  update: function(reload=false){
-    if(reload){
+  build: function(reload_caches=false){
+    if(reload_caches){
       LabelsCache.reload()
       SpecificationsCache.reload()
       GroupsCache.reload()
@@ -38,6 +38,7 @@ var RequirementsTree = {
       FilesCache.reload()
     }
     var project_id = PropertiesService.getUserProperties().getProperty('projectID')
+    //TODO: We have to create this in a for loop that loads and builds tree for every type we have
     //Add labels to the tree
     var Labels = LabelsCache.get(project_id)
     Labels.forEach(Label => this.nodes_list["labels_" + Label.id]= new Element(Label, types.requirements.specifications.labels))
@@ -96,15 +97,30 @@ var RequirementsTree = {
     return this.nodes_list[element_name].get_properties()
   },
   insert_value: function(element_name, property){
-    this.inserter.insert(this.nodes_list[element_name].insert_value(property))
+    var url_meta = this.nodes_list[element_name].data.url
+
+    const insertion_data = new InsertionData(this.nodes_list[element_name].insert_value(property), url_meta, element_name, property)
+    this.inserter.insert(insertion_data)
   },
   search: function(prop_search, search_term){
     if(!this.loaded) return false
     for (const [key, value] of Object.entries(this.nodes_list)) {
+      //TODO: Update the search logic
       if(value.data[prop_search.toLowerCase()] && value.data[prop_search.toLowerCase()].toLowerCase().includes(search_term.toLowerCase())) return key
+    }
+  },
+  update_all: function(){//Gdocs element
+    //Builds the tree, updating values from API
+    this.build(true)
+    //It goes through the list of entries in inserted_elements
+    for (const [id, instances] of Object.entries(this.inserter.inserted_elements)) {
+      //TODO: Figure out a better way to define names. This is not general and is split between files.
+      //Smth like a translator in the inserter
+      id = id.split('__')
+      var new_data = this.nodes_list[id[0]].insert_value(id[1])
+      for (i in instances){
+        this.inserter.update(id, new_data)
+      }
     }
   }
 }
-
-
-
