@@ -1,16 +1,16 @@
 var types = {
-  workspaces:{},
-  projects:{},
-  requirements:{
-    specifications:{
-      labels:{},
+  workspaces:{name:'workspaces'},
+  projects:{name:'projects'},
+  requirements:{name:'requirements',
+    specifications:{name:'specifications',
+      labels:{name:'labels'},
     },
-    groups:{},
+    groups:{name:'groups'},
   },
-  users:{},
-  user_groups:{},
-  tags:{},
-  files:{}
+  users:{name:'users'},
+  user_groups:{name:'user_groups'},
+  tags:{name:'tags'},
+  files:{name:'files'}
 }
 
 // ****************************************************************************************
@@ -33,6 +33,7 @@ types.user_groups.get = function (){
 types.workspaces.get = function (){
   return JSON.parse(getAuthenticatedValispaceUrl('workspace'));
 }
+
 
 // ****************************************************************************************
 // Valispace REST - Projects
@@ -86,7 +87,7 @@ types.requirements.groups.get = function (project_id){
  * @return {[type]}      [description]
  */
 types.requirements.get = function (project_id){
-  return JSON.parse(getAuthenticatedValispaceUrl('requirements/complete/?project='+project_id+';clean_text=text,comment'));
+  return JSON.parse(getAuthenticatedValispaceUrl('requirements/complete/?project='+project_id+'&clean_text=text,comment'));
 }
 
 // ****************************************************************************************
