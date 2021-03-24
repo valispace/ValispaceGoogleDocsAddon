@@ -34,7 +34,9 @@ function get_projects(workspaceID) {
 function build_requirements_tree(projectId){
   Logger.log('Set Project id'+projectId)
   PropertiesService.getUserProperties().setProperty('projectID', projectId)
+  Inserter.load_inserted()
   RequirementsTree.build()
+  Logger.log(Inserter.inserted_elements)
 }
 
 function update_all_values(projectId){
@@ -46,10 +48,6 @@ function insert_req_value(fieldName, searchFieldValue, fieldValue){
   RequirementsTree.build()
 
   Logger.log(Object.keys(RequirementsTree.nodes_list))
-  Logger.log(searchFieldValue)
-  Logger.log(PropertiesService.getUserProperties().getProperty('projectID'))
   var req_id = RequirementsTree.search(fieldName,searchFieldValue)
-  Logger.log(req_id)
-  Logger.log(fieldValue.toLowerCase())
   RequirementsTree.insert_value(req_id, fieldValue.toLowerCase())
 }

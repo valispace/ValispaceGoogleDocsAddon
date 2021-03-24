@@ -7,6 +7,7 @@ function InsertionData(data, url, name, property){
 
 var Inserter = {
   inserted_elements:{},
+  loaded:false,
   load_inserted: function(){
     const all_links = getAllLinks()
     for(x in all_links){
@@ -16,6 +17,7 @@ var Inserter = {
         this.inserted_elements[id].push(all_links[x].text)
       }
     }
+    this.loaded = true
     return true
   },
   insert: function(object,  table=false){
@@ -31,11 +33,18 @@ var Inserter = {
       el = index.insertText(object.data)
     }
     el.setLinkUrl(object.url + `?from=valispace&name=${id}`)
+    console.log(el)
     this.inserted_elements[id].push(el)
+    console.log(this.inserted_elements)
+    this.inserted_elements[id][this.inserted_elements[id].length-1].setForegroundColor("#000000").setUnderline(false)
   },
-  update: function(id, new_data){
-    for(i in this.inserted_elements[id]){
-      this.inserted_elements[id][i].replaceText("^.*$", new_data)
+  update: function(){
+    const all_links = getAllLinks()
+    for(x in all_links){
+      if (all_links[x].url.includes('?from=valispace&name=')){
+        id = all_links[x].url.split("?from=valispace&name=")[1]
+        all_links[x].text.replaceText("^.*$", new_data)
+      }
     }
   },
   //TODO: This function(get) returns two different things, better if not
@@ -141,7 +150,7 @@ function getAllLinks(mergeAdjacent=false) {
               lastLink.endOffsetInclusive = endOffsetInclusive;
               return;
             }
-
+            
             lastLink = {
               "section": section,
               "isFirstPageSection": isFirstPageSection,

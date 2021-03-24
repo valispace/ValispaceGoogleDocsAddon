@@ -28,16 +28,15 @@ var RequirementsTree = {
   loaded:false,
   root_nodes: [],
   nodes_list: {},
-  inserter: Inserter,
   build: function(reload_caches=false){
-    if(reload_caches){
-      LabelsCache.reload()
-      SpecificationsCache.reload()
-      GroupsCache.reload()
-      RequirementsCache.reload()
-      FilesCache.reload()
-    }
     var project_id = PropertiesService.getUserProperties().getProperty('projectID')
+    if(reload_caches){
+      LabelsCache.reload(project_id)
+      SpecificationsCache.reload(project_id)
+      GroupsCache.reload(project_id)
+      RequirementsCache.reload(project_id)
+      FilesCache.reload(project_id)
+    }
     //TODO: We have to create this in a for loop that loads and builds tree for every type we have
     //Add labels to the tree
     var Labels = LabelsCache.get(project_id)
@@ -91,7 +90,7 @@ var RequirementsTree = {
     table_to_insert = [
       templates.header.insert(),
     ].concat(this.nodes_list[element_name].insert().flat())
-    this.inserter.insert(table_to_insert.flat().filter(x => x!=null), table=true)
+    Inserter.insert(table_to_insert.flat().filter(x => x!=null), table=true)
   },
   get_properties(element_name){
     return this.nodes_list[element_name].get_properties()
@@ -100,7 +99,7 @@ var RequirementsTree = {
     var url_meta = this.nodes_list[element_name].data.url
 
     const insertion_data = new InsertionData(this.nodes_list[element_name].insert_value(property), url_meta, element_name, property)
-    this.inserter.insert(insertion_data)
+    Inserter.insert(insertion_data)
   },
   search: function(prop_search, search_term){
     if(!this.loaded) return false
@@ -113,13 +112,19 @@ var RequirementsTree = {
     //Builds the tree, updating values from API
     this.build(true)
     //It goes through the list of entries in inserted_elements
-    for (const [id, instances] of Object.entries(this.inserter.inserted_elements)) {
-      //TODO: Figure out a better way to define names. This is not general and is split between files.
-      //Smth like a translator in the inserter
-      id = id.split('__')
-      var new_data = this.nodes_list[id[0]].insert_value(id[1])
-      for (i in instances){
-        this.inserter.update(id, new_data)
+    console.log(Inserter.inserted_elements)
+    console.log(Inserter.inserted_elements)
+    const all_links = getAllLinks()
+    for(x in all_links){
+      if (all_links[x].url.includes('?from=valispace&name=')){
+        id = all_links[x].url.split("?from=valispace&name=")[1]
+        //TODO: Figure out a better way to define names. This is not general and is split between files.
+        //Smth like a translator in the inserter
+        id = id.split('__')
+        console.log(`${id[0]} ${new_data}`)
+        var new_data = this.nodes_list[id[0]].insert_value(id[1])
+
+        all_links[x].text.replaceText("^.*$", new_data)
       }
     }
   }

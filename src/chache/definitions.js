@@ -4,8 +4,8 @@ function Cache(type){
   this.loaded = false
   this.loaded_ids = []
   this.loaded_items = []
-  this.reload = function(){
-    this.get(reload=true)
+  this.reload = function(args){
+    this.get(args, reload=true)
   }
   this.get = function(args, reload = false, filter = item => true) {
     if (this.loaded === false | reload === true){
@@ -18,6 +18,7 @@ function Cache(type){
     console.log('Calling API')
     var items = this.type.get(args)
     for (var x in items){
+      //items[x].url = urlTranslator(items[x], this.type)
       this.loaded_items.push(items[x])
       this.loaded_ids.push(items[x].id)
     }
