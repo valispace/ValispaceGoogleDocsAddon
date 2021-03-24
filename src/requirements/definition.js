@@ -114,18 +114,81 @@ var RequirementsTree = {
     //It goes through the list of entries in inserted_elements
     console.log(Inserter.inserted_elements)
     console.log(Inserter.inserted_elements)
-    const all_links = getAllLinks()
-    for(x in all_links){
-      if (all_links[x].url.includes('?from=valispace&name=')){
-        id = all_links[x].url.split("?from=valispace&name=")[1]
-        //TODO: Figure out a better way to define names. This is not general and is split between files.
-        //Smth like a translator in the inserter
-        id = id.split('__')
-        console.log(`${id[0]} ${new_data}`)
-        var new_data = this.nodes_list[id[0]].insert_value(id[1])
 
-        all_links[x].text.replaceText("^.*$", new_data)
+    var links = [];
+    var mergeAdjacent=false;
+    var doc = DocumentApp.getActiveDocument();
+
+
+    iterateSections(doc, function(section, sectionIndex, isFirstPageSection) {
+      if (!("getParagraphs" in section)) {
+        // as we're using some undocumented API, adding this to avoid cryptic
+        // messages upon possible API changes.
+        throw new Error("An API change has caused this script to stop " +
+                        "working.\n" +
+                        "Section #" + sectionIndex + " of type " +
+                        section.getType() + " has no .getParagraphs() method. " +
+          "Stopping script.");
       }
-    }
+
+      section.getParagraphs().forEach(function(par) {
+        // skip empty paragraphs
+        if (par.getNumChildren() == 0) {
+          return;
+        }
+
+        // go over all text elements in paragraph / list-item
+        for (var el=par.getChild(0); el!=null; el=el.getNextSibling()) {
+          if (el.getType() != DocumentApp.ElementType.TEXT) {
+            continue;
+          }
+
+          // go over all styling segments in text element
+          var attributeIndices = el.getTextAttributeIndices();
+          var lastLink = null;
+          attributeIndices.forEach(function(startOffset, i, attributeIndices) {
+            var url = el.getLinkUrl(startOffset);
+
+            if (url != null) {
+              // we hit a link
+              var endOffsetInclusive = (i+1 < attributeIndices.length?
+                                        attributeIndices[i+1]-1 : null);
+
+              // check if this and the last found link are continuous
+              if (mergeAdjacent && lastLink != null && lastLink.url == url &&
+                    lastLink.endOffsetInclusive == startOffset - 1) {
+                // this and the previous style segment are continuous
+                lastLink.endOffsetInclusive = endOffsetInclusive;
+                return;
+              }
+              if (url.includes('?from=valispace&name=')){
+                id = url.split("?from=valispace&name=")[1]
+                //TODO: Figure out a better way to define names. This is not general and is split between files.
+                //Smth like a translator in the inserter
+                id = id.split('__')
+                if(RequirementsTree.nodes_list[id[0]]){
+                  var new_data = RequirementsTree.nodes_list[id[0]].insert_value(id[1])
+                  console.log(`Updated: ${id[0]} ${new_data}`)
+                  if(el.getText() !== new_data) {el.replaceText("^.*$", new_data)}
+                }
+                else{console.log(`Not updated: ${id[0]} ${new_data}`)}
+              }
+
+              lastLink = {
+                "section": section,
+                "isFirstPageSection": isFirstPageSection,
+                "paragraph": par,
+                "textEl": el,
+                "startOffset": startOffset,
+                "endOffsetInclusive": endOffsetInclusive,
+                "url": url
+              };
+
+              links.push(lastLink);
+            }
+          });
+        }
+      });
+    });
   }
 }
