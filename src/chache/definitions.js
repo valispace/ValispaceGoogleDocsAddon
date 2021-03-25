@@ -56,6 +56,9 @@ function Element(data, type, children=[]){
   this.get_properties = function (){
     return Object.keys(this.data)
   }
+  this.insert_image = function(){
+    return this.data['image_file'] || this.data['image_link']
+  }
   this.insert_value = function (propertie_name){
     return this.data[propertie_name]
   }

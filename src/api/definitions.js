@@ -87,7 +87,7 @@ types.requirements.groups.get = function (project_id){
  * @return {[type]}      [description]
  */
 types.requirements.get = function (project_id){
-  return JSON.parse(getAuthenticatedValispaceUrl('requirements/complete/?project='+project_id+'&clean_text=text,comment'));
+  return JSON.parse(getAuthenticatedValispaceUrl('requirements/full_list/?project='+project_id+'&clean_text=text,comment'));
 }
 
 // ****************************************************************************************

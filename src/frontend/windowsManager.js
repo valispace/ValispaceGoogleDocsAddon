@@ -45,6 +45,7 @@ function update_all_values(projectId){
 
 function insert_req_value(fieldName, searchFieldValue, fieldValue){
   Logger.log(`Hello World: ${fieldName}, ${searchFieldValue}, ${fieldValue}`)
+  //TODO: This doesn't stay in memory needs reload, trouble
   RequirementsTree.build()
 
   Logger.log(Object.keys(RequirementsTree.nodes_list))

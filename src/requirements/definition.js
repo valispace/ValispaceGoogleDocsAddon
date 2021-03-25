@@ -95,11 +95,23 @@ var RequirementsTree = {
   get_properties(element_name){
     return this.nodes_list[element_name].get_properties()
   },
-  insert_value: function(element_name, property){
-    var url_meta = this.nodes_list[element_name].data.url
+  insert_value: function (element_name, property) {
+    var url_meta = this.nodes_list[element_name].data.url;
+    var data = this.nodes_list[element_name].insert_value(property)
+    var insertion_type = 'text'
+    if(property == 'image'){
+      var img_url = this.nodes_list[element_name].insert_image(property)
+      data = UrlFetchApp.fetch(img_url).getBlob()
+      insertion_type = 'image'
+    }
+    const insertion_data = new InsertionData(
+      data,
+      url_meta,
+      element_name,
+      property
+    );
 
-    const insertion_data = new InsertionData(this.nodes_list[element_name].insert_value(property), url_meta, element_name, property)
-    Inserter.insert(insertion_data)
+    Inserter.insert(insertion_data, insertion_type);
   },
   search: function(prop_search, search_term){
     if(!this.loaded) return false
@@ -111,10 +123,11 @@ var RequirementsTree = {
   update_all: function(){//Gdocs element
     //Builds the tree, updating values from API
     this.build(true)
-    //It goes through the list of entries in inserted_elements
-    console.log(Inserter.inserted_elements)
-    console.log(Inserter.inserted_elements)
-
+    //It goes through every url in the doc and update if it belongs to valispace
+    this.update_text()
+    this.update_images()
+  },
+  update_text: function(){
     var links = [];
     var mergeAdjacent=false;
     var doc = DocumentApp.getActiveDocument();
@@ -139,54 +152,93 @@ var RequirementsTree = {
 
         // go over all text elements in paragraph / list-item
         for (var el=par.getChild(0); el!=null; el=el.getNextSibling()) {
-          if (el.getType() != DocumentApp.ElementType.TEXT) {
-            continue;
-          }
+          if (el.getType() == DocumentApp.ElementType.TEXT) {
 
-          // go over all styling segments in text element
-          var attributeIndices = el.getTextAttributeIndices();
-          var lastLink = null;
-          attributeIndices.forEach(function(startOffset, i, attributeIndices) {
-            var url = el.getLinkUrl(startOffset);
 
-            if (url != null) {
-              // we hit a link
-              var endOffsetInclusive = (i+1 < attributeIndices.length?
-                                        attributeIndices[i+1]-1 : null);
+            // go over all styling segments in text element
+            var attributeIndices = el.getTextAttributeIndices();
+            var lastLink = null;
+            attributeIndices.forEach(function(startOffset, i, attributeIndices) {
+              var url = el.getLinkUrl(startOffset);
 
-              // check if this and the last found link are continuous
-              if (mergeAdjacent && lastLink != null && lastLink.url == url &&
-                    lastLink.endOffsetInclusive == startOffset - 1) {
-                // this and the previous style segment are continuous
-                lastLink.endOffsetInclusive = endOffsetInclusive;
-                return;
-              }
-              if (url.includes('?from=valispace&name=')){
-                id = url.split("?from=valispace&name=")[1]
-                //TODO: Figure out a better way to define names. This is not general and is split between files.
-                //Smth like a translator in the inserter
-                id = id.split('__')
-                if(RequirementsTree.nodes_list[id[0]]){
-                  var new_data = RequirementsTree.nodes_list[id[0]].insert_value(id[1])
-                  console.log(`Updated: ${id[0]} ${new_data}`)
-                  if(el.getText() !== new_data) {el.replaceText("^.*$", new_data)}
+              if (url != null) {
+                // we hit a link
+                var endOffsetInclusive = (i+1 < attributeIndices.length?
+                  attributeIndices[i+1]-1 : null);
+
+                // check if this and the last found link are continuous
+                if (mergeAdjacent && lastLink != null && lastLink.url == url &&
+                lastLink.endOffsetInclusive == startOffset - 1) {
+                  // this and the previous style segment are continuous
+                  lastLink.endOffsetInclusive = endOffsetInclusive;
+                  return;
                 }
-                else{console.log(`Not updated: ${id[0]} ${new_data}`)}
+                if (url.includes('?from=valispace&name=')){
+                  id = url.split("?from=valispace&name=")[1]
+                  //TODO: Figure out a better way to define names. This is not general and is split between files.
+                  //Smth like a translator in the inserter
+                  id = id.split('__')
+                  if(RequirementsTree.nodes_list[id[0]]){
+                    var new_data = RequirementsTree.nodes_list[id[0]].insert_value(id[1])
+                    console.log(`Updated: ${id[0]} ${new_data}`)
+                    if(el.getText() !== new_data) {el.replaceText("^.*$", new_data)}
+                  }
+                  else{console.log(`Not updated: ${id[0]} ${new_data}`)}
+                }
+
+                lastLink = {
+                  "section": section,
+                  "isFirstPageSection": isFirstPageSection,
+                  "paragraph": par,
+                  "textEl": el,
+                  "startOffset": startOffset,
+                  "endOffsetInclusive": endOffsetInclusive,
+                  "url": url
+                };
+
+                links.push(lastLink);
               }
+            });
+          }
+        }
+      });
+    });
+  },
+  update_images: function(){
+    var doc = DocumentApp.getActiveDocument();
 
-              lastLink = {
-                "section": section,
-                "isFirstPageSection": isFirstPageSection,
-                "paragraph": par,
-                "textEl": el,
-                "startOffset": startOffset,
-                "endOffsetInclusive": endOffsetInclusive,
-                "url": url
-              };
 
-              links.push(lastLink);
+    iterateSections(doc, function(section, sectionIndex, isFirstPageSection) {
+      if (!("getParagraphs" in section)) {
+        // as we're using some undocumented API, adding this to avoid cryptic
+        // messages upon possible API changes.
+        throw new Error("An API change has caused this script to stop " +
+                        "working.\n" +
+                        "Section #" + sectionIndex + " of type " +
+                        section.getType() + " has no .getParagraphs() method. " +
+          "Stopping script.");
+      }
+
+      section.getImages().forEach(function(image) {
+        // go over all image elements
+        var url = image.getLinkUrl();
+
+        if (url != null) {
+          if (url.includes('?from=valispace&name=')){
+            id = url.split("?from=valispace&name=")[1]
+            //TODO: Figure out a better way to define names. This is not general and is split between files.
+            //Smth like a translator in the inserter
+            id = id.split('__')
+            if(RequirementsTree.nodes_list[id[0]]){
+              var new_data = RequirementsTree.nodes_list[id[0]].insert_image(id[1])
+              console.log(`Updated: ${id[0]} ${new_data}`)
+              var new_img = UrlFetchApp.fetch(new_data).getBlob();
+              var parent = image.getParent();
+              parent.insertInlineImage(parent.getChildIndex(image)+1, new_img).setLinkUrl(url);
+              image.removeFromParent();
             }
-          });
+            else{console.log(`Not updated: ${id[0]} ${new_data}`)}
+          }
         }
       });
     });

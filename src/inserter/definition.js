@@ -20,23 +20,26 @@ var Inserter = {
     this.loaded = true
     return true
   },
-  insert: function(object,  table=false){
+  insert: function(object, type='text'){
     id = `${object.name}__${object.property}`
     if (!(id in this.inserted_elements)) {this.inserted_elements[id] = []}
 
-    var index = this.get_position(table)
-    var el;
-    if (table){
+    var index = this.get_position(type=="table"|| type=="image")
+    var el
+    if (type=='table'){
       el = index.appendTable(object.data)
+    }
+    if(type=='image'){
+      el = index.appendInlineImage(object.data)
     }
     else{
       el = index.insertText(object.data)
+      el.setForegroundColor("#000000").setUnderline(false)
     }
     el.setLinkUrl(object.url + `?from=valispace&name=${id}`)
     console.log(el)
     this.inserted_elements[id].push(el)
     console.log(this.inserted_elements)
-    this.inserted_elements[id][this.inserted_elements[id].length-1].setForegroundColor("#000000").setUnderline(false)
   },
   update: function(){
     const all_links = getAllLinks()
@@ -48,15 +51,15 @@ var Inserter = {
     }
   },
   //TODO: This function(get) returns two different things, better if not
-  get_position: function(table=false){
+  get_position: function(parent=false){
     var cursor = this.get_active_document().getCursor();
     if (cursor) {
-      if(table){
+      if(parent){
         var element = cursor.getElement();
-        while (element.getParent().getType() != DocumentApp.ElementType.BODY_SECTION) {
-          element = element.getParent();
-        }
-        return this.get_body.getChildIndex(element);
+        // while (element.getParent().getType() != DocumentApp.ElementType.BODY_SECTION) {
+        //   element = element.getParent();
+        // }
+        return element;
       }
       return cursor
     }
@@ -150,7 +153,7 @@ function getAllLinks(mergeAdjacent=false) {
               lastLink.endOffsetInclusive = endOffsetInclusive;
               return;
             }
-            
+
             lastLink = {
               "section": section,
               "isFirstPageSection": isFirstPageSection,
@@ -210,4 +213,18 @@ function iterateSections(doc, func) {
 
     func(section, i, isFirstPageSection);
   }
+}
+
+function decodeQueryParameters(queryString) {
+  var query = {};
+  var pairs = (queryString[0] === '?' ? queryString.substr(1) : queryString).split('&');
+  for (var i = 0; i < pairs.length; i++) {
+      var pair = pairs[i].split('=');
+      query[decodeURIComponent(pair[0])] = decodeURIComponent(pair[1] || '');
+  }
+  return query;
+}
+
+function encodeQueryParameters(url, query) {
+  return url + URLSearchParams(query).toString();
 }
