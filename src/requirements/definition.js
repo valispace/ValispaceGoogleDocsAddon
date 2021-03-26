@@ -78,10 +78,10 @@ var RequirementsTree = {
     Files.forEach(Files => this.nodes_list["files_" + Files.id]= new Element(Files, types.files))
     Files.forEach(File => {
       if(File.name === "") {
-        if(!this.nodes_list["requirements_"+File.object_id].data.files) this.nodes_list["requirements_"+File.object_id].data.files = []
+        if(!this.nodes_list["requirements_"+File.object_id].data.files) {this.nodes_list["requirements_"+File.object_id].data.files = []}
         this.nodes_list["requirements_"+File.object_id].data.files.push(this.nodes_list['files_'+File.reference_file])
       }else if(File.object_ids){
-        if(!this.nodes_list["requirements_"+File.object_id].data.files) this.nodes_list["requirements_"+File.object_id].data.files = []
+        if(!this.nodes_list["requirements_"+File.object_id].data.files) {this.nodes_list["requirements_"+File.object_id].data.files = []}
         this.nodes_list["requirements_"+File.object_id].data.files.push(this.nodes_list['files_'+File.id])
     }})
     this.loaded =true
@@ -97,21 +97,28 @@ var RequirementsTree = {
   },
   insert_value: function (element_name, property) {
     var url_meta = this.nodes_list[element_name].data.url;
-    var data = this.nodes_list[element_name].insert_value(property)
+    var data_array = [this.nodes_list[element_name].insert_value(property)]
     var insertion_type = 'text'
+    if(property.includes('parent')){
+
+    }
     if(property == 'image'){
-      var img_url = this.nodes_list[element_name].insert_image(property)
-      data = UrlFetchApp.fetch(img_url).getBlob()
+      var img_urls = this.nodes_list[element_name].insert_image(property)
+      for(x in img_urls){
+        data_array[x] = UrlFetchApp.fetch(img_urls[x]).getBlob()
+      }
       insertion_type = 'image'
     }
-    const insertion_data = new InsertionData(
-      data,
-      url_meta,
-      element_name,
-      property
-    );
-
-    Inserter.insert(insertion_data, insertion_type);
+    console.log(data_array.length)
+    for(data of data_array){
+      var insertion_data = new InsertionData(
+        data,
+        url_meta,
+        element_name,
+        property
+      );
+      Inserter.insert(insertion_data, insertion_type);
+    }
   },
   search: function(prop_search, search_term){
     if(!this.loaded) return false

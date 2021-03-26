@@ -57,7 +57,19 @@ function Element(data, type, children=[]){
     return Object.keys(this.data)
   }
   this.insert_image = function(){
-    return this.data['image_file'] || this.data['image_link']
+    var images = [];
+    console.log(this.data)
+    if(this.data.files){
+      for(file of this.data.files){
+        if(file.mimetype.includes('image')){
+          images.push(file.download_url)
+        }
+      }
+    }
+    if(this.data['image_file'] || this.data['image_link']){
+      images.push(this.data['image_file'] || this.data['image_link'])
+    }
+    return images
   }
   this.insert_value = function (propertie_name){
     return this.data[propertie_name]
