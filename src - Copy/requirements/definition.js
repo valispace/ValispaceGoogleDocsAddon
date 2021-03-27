@@ -127,7 +127,6 @@ var RequirementsTree = {
       if(value.data[prop_search.toLowerCase()] && value.data[prop_search.toLowerCase()].toLowerCase().includes(search_term.toLowerCase())) return key
     }
   },
-
   update_all: function(){//Gdocs element
     //Builds the tree, updating values from API
     this.build(true)

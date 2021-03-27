@@ -4,44 +4,12 @@
 
 		$('#search-specific-requirement').click(searchSpecificRequirement);
 		$('#update-all').click(() => google.script.run.update_all_values());
-		$('#testButton').click(testButton); // TODO to be removed
 	});
 
 
-	function searchSpecificRequirement() {
-		google.script.run.openSearchRequirementDialog()
-	}
-
-
-	/* When the user clicks on the button,
-toggle between hiding and showing the dropdown content */
-	function expandRequirementTree() {
-		document.getElementById("myDropdown").classList.toggle("show");
-	}
-
-	// Rename and Repurpose
-	// IN this function the real Requirement Tree will be called and html generated
-	function replaceRequirementsTreeHtml() {
-		google.script.run.withSuccessHandler(function (htmlToWrite) {
-			document.getElementById('requirementTreeInsertButton').innerHTML = htmlToWrite;
-        }).buildRequirementTreeHtml();
-	}
-
-	function filterFunction() {
-		var input, filter, ul, li, a, i;
-		input = document.getElementById("myInput");
-		filter = input.value.toUpperCase();
-		div = document.getElementById("myDropdown");
-		a = div.getElementsByTagName("a");
-		for (i = 0; i < a.length; i++) {
-			txtValue = a[i].textContent || a[i].innerText;
-			if (txtValue.toUpperCase().indexOf(filter) > -1) {
-				a[i].style.display = "";
-			} else {
-				a[i].style.display = "none";
-			}
-		}
-	}
+	function searchSpecificRequirement(){
+    google.script.run.openSearchRequirementDialog()
+  }
 
 	function addTreeListener() {
 		var toggler = document.getElementsByClassName("caret");

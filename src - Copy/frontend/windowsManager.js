@@ -19,15 +19,7 @@ function openSearchRequirementDialog(){
     var page = template.evaluate();
     var dialog = DocumentApp.getUi().showModalDialog(page, 'Search Requirement');
 
-} 
-
-function openTestPage() {
-      var template = HtmlService.createTemplateFromFile('frontend/TestPage');
-      var page = template.evaluate();
-      var dialog = DocumentApp.getUi().showModalDialog(page, 'Test Page');
-} // TODO to be removed
-
-
+}
 
 // TODO - How can I make the google.script.run to call a object function? It would replace functions below.
 function get_workspaces() {

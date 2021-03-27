@@ -63,7 +63,7 @@ function checkValispaceConnexion(){
     var responseCode;
     try{
       response = getAuthenticatedValispaceUrl('project');
-      responseCode = response.getResponseCode() ;
+      responseCode = reponse.getResponseCode() ;
     } catch(e){
       response = e;
       responseCode = "unkown";
@@ -81,7 +81,7 @@ function checkValispaceConnexion(){
       if ((username.length > 0) && (pwd.length > 0)){
         valispaceAskToken(username, pwd);
         response = getAuthenticatedValispaceUrl('project');
-        responseCode = response.getResponseCode();
+        responseCode = reponse.getResponseCode();
         return  responseCode === 200
       }
       return false;
