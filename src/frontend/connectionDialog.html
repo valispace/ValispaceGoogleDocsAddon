@@ -2,19 +2,19 @@
 <html>
   <head>
     <base target="_top">
-    <?!=HtmlService.createHtmlOutputFromFile('code/connectionDialog.css').getContent()?>
+    <?!=HtmlService.createHtmlOutputFromFile('frontend/connectionDialog.css').getContent()?>
   </head>
   <body>
   <div class="login-container">
     
-    <div>
+    <!-- <div>
     <img class="logo" src="https://www.valispace.com/wp-content/uploads/2018/06/valispace_logo_grey.png" width="50%" height="50%">
-    </div>
+    </div> -->
 
     <form>
-    <div class="input-label">
-      <label for="deployment">Deployment Url<br></label>
-    </div> 
+      <div class="input-label">
+        <label for="deployment">Deployment Url<br></label>
+      </div> 
     <div class="input-field">
       <input type="text" id="deployment" name="deployment" value="https://demo.valispace.com">
     </div>
@@ -47,7 +47,6 @@
     </script>
     <script>
       function connect(){
-        var username = 
         google.script.run
           .withSuccessHandler(closeIt)
           .withFailureHandler(errorMessage)
