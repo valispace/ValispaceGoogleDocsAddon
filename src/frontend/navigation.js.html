@@ -37,14 +37,13 @@ toggle between hiding and showing the dropdown content */
 		var input, filter, ul, li, a, i;
 		input = document.getElementById("myInput");
 		filter = input.value.toUpperCase();
-		div = document.getElementById("myDropdown");
-		a = div.getElementsByTagName("a");
-		for (i = 0; i < a.length; i++) {
-			txtValue = a[i].textContent || a[i].innerText;
+		div = document.getElementsByClassName('requirement');
+		for (i = 0; i < div.length; i++) {
+			txtValue = div[i].textContent || div[i].innerText;
 			if (txtValue.toUpperCase().indexOf(filter) > -1) {
-				a[i].style.display = "";
+				div[i].style.display = "";
 			} else {
-				a[i].style.display = "none";
+				div[i].style.display = "none";
 			}
 		}
 	}
@@ -69,14 +68,29 @@ toggle between hiding and showing the dropdown content */
 		// 	});
 		// }
 
-		// var specifications = document.getElementsByClassName("addSpecification");
-		// for (i = 0; i < specifications.length; i++) {
-		// 	specifications[i].addEventListener("click", function () {
-		// 		google.script.run
-		// 			.withFailureHandler(errorMessage)
-		// 			.insertSpecification_withSection(this.id);
-		// 	});
-		// }
+		var labels = document.getElementsByClassName("label");
+		for (i = 0; i < labels.length; i++) {
+			labels[i].addEventListener("click", function () {
+				labelId = this.id;
+				google.script.run.withFailureHandler(errorMessage).direct_insert(labelId, 'name');
+			});
+		}
+
+		var specifications = document.getElementsByClassName("specification");
+		for (i = 0; i < specifications.length; i++) {
+			specifications[i].addEventListener("click", function () {
+				specId = this.id;
+				google.script.run.withFailureHandler(errorMessage).direct_insert(specId, 'name');
+			});
+		}
+
+		var groups = document.getElementsByClassName("group");
+		for (i = 0; i < groups.length; i++) {
+			groups[i].addEventListener("click", function () {
+				groupId = this.id;
+				google.script.run.withFailureHandler(errorMessage).direct_insert(groupId, 'name');
+			});
+		}
 
 		var requirements = document.getElementsByClassName("requirement");
 		for (i = 0; i < requirements.length; i++) {
