@@ -19,12 +19,18 @@ toggle between hiding and showing the dropdown content */
 		document.getElementById("myDropdown").classList.toggle("show");
 	}
 
+	function expandObjectProperties(objectId) {
+		document.getElementById(objectId).classList.toggle("show");
+		// addPropertyListener()
+	}
+
 	// Rename and Repurpose
 	// IN this function the real Requirement Tree will be called and html generated
 	function replaceRequirementsTreeHtml() {
 		google.script.run.withSuccessHandler(function (htmlToWrite) {
 			document.getElementById('requirementTreeInsertButton').innerHTML = htmlToWrite;
-        }).buildRequirementTreeHtml();
+			addTreeListener()
+		}).buildRequirementTreeHtml();
 	}
 
 	function filterFunction() {
@@ -44,46 +50,60 @@ toggle between hiding and showing the dropdown content */
 	}
 
 	function addTreeListener() {
-		var toggler = document.getElementsByClassName("caret");
-		var i;
-		for (i = 0; i < toggler.length; i++) {
-			toggler[i].addEventListener("click", function () {
-				this.parentElement.querySelector(".nested").classList.toggle("active");
-				this.classList.toggle("caret-down");
+		// var toggler = document.getElementsByClassName("caret");
+		// var i;
+		// for (i = 0; i < toggler.length; i++) {
+		// 	toggler[i].addEventListener("click", function () {
+		// 		this.parentElement.querySelector(".nested").classList.toggle("active");
+		// 		this.classList.toggle("caret-down");
 
-			});
-		}
+		// 	});
+		// }
 
-		var valis = document.getElementsByClassName("vali");
-		for (i = 0; i < valis.length; i++) {
-			valis[i].addEventListener("click", function () {
-				google.script.run
-					.withFailureHandler(errorMessage)
-					.insertVali(this.id);
-			});
-		}
+		// var valis = document.getElementsByClassName("vali");
+		// for (i = 0; i < valis.length; i++) {
+		// 	valis[i].addEventListener("click", function () {
+		// 		google.script.run
+		// 			.withFailureHandler(errorMessage)
+		// 			.insertVali(this.id);
+		// 	});
+		// }
 
-		var specifications = document.getElementsByClassName("addSpecification");
-		for (i = 0; i < specifications.length; i++) {
-			specifications[i].addEventListener("click", function () {
-				google.script.run
-					.withFailureHandler(errorMessage)
-					.insertSpecification_withSection(this.id);
-			});
-		}
+		// var specifications = document.getElementsByClassName("addSpecification");
+		// for (i = 0; i < specifications.length; i++) {
+		// 	specifications[i].addEventListener("click", function () {
+		// 		google.script.run
+		// 			.withFailureHandler(errorMessage)
+		// 			.insertSpecification_withSection(this.id);
+		// 	});
+		// }
 
 		var requirements = document.getElementsByClassName("requirement");
 		for (i = 0; i < requirements.length; i++) {
 			requirements[i].addEventListener("click", function () {
-				google.script.run
-					.withFailureHandler(errorMessage)
-					.insertRequirement(this.id);
+				expandObjectProperties(this.id + '_properties')
+				// google.script.run.withFailureHandler(errorMessage).direct_insert(this.id, 'text');
+				// TODO: Insert Property is fixed to text
+			});
+		}
+
+		var properties = document.getElementsByClassName("property");
+		for (i = 0; i < properties.length; i++) {
+			properties[i].addEventListener("click", function () {
+				htmlElementId = this.id.split('_property_');
+				reqId = htmlElementId[0];
+				propertyName = htmlElementId[1];
+				google.script.run.withFailureHandler(errorMessage).direct_insert(reqId, propertyName);
 			});
 		}
 
 		function errorMessage(error) {
 			//Logger.log(error);
 		}
+
+	}
+
+	function addPropertyListener() {
 
 	}
 

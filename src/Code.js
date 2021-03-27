@@ -45,6 +45,9 @@ function onInstall(e){
 }
 
 function onOpen(e) {
+
+  // TODO: Maybe we can start downloading data here to speed up
+  
   DocumentApp.getUi().createAddonMenu()
       .addItem('Show sidebar', 'showSidebar')
       .addToUi();
