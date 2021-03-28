@@ -1,31 +1,12 @@
 <style>
 	/* Remove default bullets */
-	ul,
-	#topUl {
-		list-style-type: none;
-		padding-left: 10px;
-		font-size: 0.8em;
-
-
-	}
-
 
 	#navigationList {
-
 		z-index: 100;
 		background-color: #52626d;
 		opacity: 1;
 	}
 
-	/* Remove margins and padding from the parent ul */
-	.topUl {
-		margin: 0;
-		padding: 0;
-		padding-top: 3px;
-		padding-bottom: 3px;
-		padding-left: 10px;
-		font-size: 0.8em;
-	}
 
 	/* Style the caret/arrow */
 	.caret {
@@ -62,7 +43,11 @@
 		padding-top: 3px;
 		padding-bottom: 3px;
 	}
-
+ 
+	#myDropdown {
+		padding-left: 5px;
+		padding-right: 5px;
+	}
 
 	.vali {
 		cursor: pointer;
@@ -102,7 +87,7 @@
 		cursor: pointer;
 		padding-top: 1px;
 		padding-bottom: 1px;
-		font-size: 0.9em;
+		font-size: 1em;
 	}
 
 	.addSpecification {
@@ -117,6 +102,8 @@
 
 	.treeContainer {
 		width: 100%;
+		padding-left: 10px;
+		padding-right: 10px;
 	}
 
 	.treeTitle {
@@ -124,5 +111,13 @@
 		padding-bottom: 15px;
 		text-align: center;
 		font-weight: 600;
+	}
+
+	.truncate {
+		display: inline-block;
+		width: 80%;
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
 	}
 </style>

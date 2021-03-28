@@ -1,10 +1,8 @@
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
 <script>
 	$(function () {
-
 		$('#search-specific-requirement').click(searchSpecificRequirement);
 		$('#update-all').click(() => google.script.run.update_all_values());
-		$('#testButton').click(testButton); // TODO to be removed
 	});
 
 
@@ -37,7 +35,7 @@ toggle between hiding and showing the dropdown content */
 		var input, filter, ul, li, a, i;
 		input = document.getElementById("myInput");
 		filter = input.value.toUpperCase();
-		div = document.getElementsByClassName('requirement');
+		div = document.getElementsByClassName('reqSearcheableObj');
 		for (i = 0; i < div.length; i++) {
 			txtValue = div[i].textContent || div[i].innerText;
 			if (txtValue.toUpperCase().indexOf(filter) > -1) {
@@ -48,6 +46,9 @@ toggle between hiding and showing the dropdown content */
 		}
 	}
 
+	// TODO: The listeners should be for the div, not for the LI
+	// Once I separate the div and the Icont, they need to ahve different listeners, sicne they will have different actions
+	
 	function addTreeListener() {
 		// var toggler = document.getElementsByClassName("caret");
 		// var i;

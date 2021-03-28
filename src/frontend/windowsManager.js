@@ -39,6 +39,23 @@ function get_projects(workspaceID) {
   return Projects
 }
 
+// TODO: Remove those if I cannot load previous workspace and project automatically
+function get_previous_workspace() {
+  return PropertiesService.getUserProperties().getProperty('selectedWorkspace')
+}
+function get_previous_project() {
+  return PropertiesService.getUserProperties().getProperty('selectedProject')
+}
+
+function set_workspace(workspaceID) {
+  PropertiesService.getUserProperties().setProperty('selectedWorkspace', workspaceID);
+}
+
+function set_project(projectID) {
+  PropertiesService.getUserProperties().setProperty('selectedProject', projectID);
+}
+
+
 function build_requirements_tree(projectId) {
   Logger.log('Set Project id' + projectId)
   PropertiesService.getUserProperties().setProperty('projectID', projectId)
@@ -66,7 +83,7 @@ function insert_req_value(fieldName, searchFieldValue, fieldValue) {
 
 // TODO: Rename to Insert
 function direct_insert(reqId, fieldValue) {
-  Logger.log(`Object to be Inserted - ID:  ${reqId} and Property: ${fieldValue} ` )
+  Logger.log(`Object to be Inserted - ID:  ${reqId} and Property: ${fieldValue} `)
   //TODO: This doesn't stay in memory needs reload, trouble
   RequirementsTree.build()
   RequirementsTree.insert_value(reqId, fieldValue.toLowerCase())

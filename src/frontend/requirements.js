@@ -9,9 +9,9 @@ var folderIcon = '<i class="tree fas fa-folder"></i>'
 function buildRequirementTreeHtml() {
   // RequirementsTree = getRequirementsTree()  
   RequirementsTree.build(true);
-  html = '<ul>'
+  html = '<ul class="reqTreeMain">'
   html = html.concat(recursiveFunction(RequirementsTree.root_nodes))
-  html.concat('<ul>')
+  html.concat('</ul>')
   return html
 }
 
@@ -53,7 +53,7 @@ function recursiveFunction(object, html = '') {
 function labelHtml(item){
   var subhtml = ''
   label_id = 'labels_' + String(item.data.id); 
-  subhtml = subhtml.concat('<li class="label" id="',label_id,'">', 'Folder: ', String(item.data.name), folderIcon, '</li>');
+  subhtml = subhtml.concat('<li class="reqSearcheableObj label" id="',label_id,'"><div class="truncate">', 'Folder: ', String(item.data.name),'</div>', folderIcon, '</li>');
 
   return subhtml
 }
@@ -61,7 +61,7 @@ function labelHtml(item){
 function specificationHtml(item){
   var subhtml = ''
   spec_id = 'specs_' + String(item.data.id); 
-  subhtml = subhtml.concat('<li class="specification" id="',spec_id,'">', 'Specification: ', String(item.data.name), specificationIcon, '</li>');
+  subhtml = subhtml.concat('<li class="reqSearcheableObj specification" id="',spec_id,'"><div class="truncate">', 'Specification: ', String(item.data.name),'</div>', specificationIcon, '</li>');
 
   return subhtml
 }
@@ -69,7 +69,7 @@ function specificationHtml(item){
 function groupHtml(item){
   var subhtml = ''
   group_id = 'groups_' + String(item.data.id); 
-  subhtml = subhtml.concat('<li class="group" id="',group_id,'">', 'Section: ', String(item.data.name), sectionIcon, '</li>');
+  subhtml = subhtml.concat('<li class="reqSearcheableObj group" id="',group_id,'"><div class="truncate">', 'Section: ', String(item.data.name),'</div>', sectionIcon, '</li>');
 
   return subhtml
 }
@@ -82,7 +82,7 @@ function requirementHtml(item){
     reqTitle = ' - '.concat(String(item.data.title))
   }
   requirement_id = 'requirements_' + String(item.data.id);
-  subhtml = subhtml.concat('<li class="requirement" id="',requirement_id,'">', String(item.data.identifier), reqTitle, reqIcon);
+  subhtml = subhtml.concat('<li class="reqSearcheableObj requirement" id="',requirement_id,'"><div class="truncate">', String(item.data.identifier), reqTitle,'</div>', reqIcon);
   subhtml = subhtml.concat('<ul id="',requirement_id,'_properties" class="dropdown-content">');
   // TODO: Automatically get allowable properties;
   subhtml = subhtml.concat('<li class="property" id="requirements_',String(item.data.id),'_property_identifier">Identifier</a>');
