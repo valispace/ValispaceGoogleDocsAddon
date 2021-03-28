@@ -105,10 +105,20 @@ toggle between hiding and showing the dropdown content */
 			objects[i].addEventListener("click", function () {
 				console.log('Clicked on to expand: ' + 'children_' + this.parentElement.id)
 				expandObjectProperties('children_' + this.parentElement.id)
+
+
 				// google.script.run.withFailureHandler(errorMessage).direct_insert(this.id, 'text');
 			});
 		}
-
+		// merge this with above function, with if conditional (?)
+		var requirements = document.getElementsByClassName("requirement");
+		for (i = 0; i < requirements.length; i++) {
+			requirements[i].addEventListener("click", function () {
+				expandObjectProperties(this.id + '_properties')
+				// google.script.run.withFailureHandler(errorMessage).direct_insert(this.id, 'text');
+				// TODO: Insert Property is fixed to text
+			});
+		}
 		// Listener to Plus Button - Add Element
 		var objects = document.getElementsByClassName("add-element");
 		for (i = 0; i < objects.length; i++) {
@@ -144,15 +154,7 @@ toggle between hiding and showing the dropdown content */
 		// 	});
 		// }
 
-
-		var requirements = document.getElementsByClassName("requirement");
-		for (i = 0; i < requirements.length; i++) {
-			requirements[i].addEventListener("click", function () {
-				expandObjectProperties(this.id + '_properties')
-				// google.script.run.withFailureHandler(errorMessage).direct_insert(this.id, 'text');
-				// TODO: Insert Property is fixed to text
-			});
-		}
+		
 
 		var properties = document.getElementsByClassName("property");
 		for (i = 0; i < properties.length; i++) {
@@ -161,6 +163,8 @@ toggle between hiding and showing the dropdown content */
 				reqId = htmlElementId[0];
 				propertyName = htmlElementId[1];
 				google.script.run.withFailureHandler(errorMessage).direct_insert(reqId, propertyName);
+				// Reexpand after Insertion ( Workaround )
+				expandObjectProperties(this.parentElement.id)
 			});
 		}
 
