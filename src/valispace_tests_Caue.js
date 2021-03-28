@@ -11,7 +11,6 @@
 //   //  Insert HTML text
 //   for (element in object){
 //     item = object[element]
-
 //       // TODO add Id and classes to each type
 //       // TODO Should this be Generic?
 //       // If label (Folder)
@@ -35,8 +34,6 @@
 //       if (item.type.name == 'groups'){
 //           html = html.concat('<a class="reqClicable">', 'Section: ', String(item.data.name),'</a>')
 //       }
-
-    
 //     //  If Object.children is not empty
 //     if (item.children !=null){
 //       //  recursiveFunction

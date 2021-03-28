@@ -33,6 +33,20 @@ toggle between hiding and showing the dropdown content */
 
 	function filterFunction() {
 		var input, filter, ul, li, a, i;
+
+		// TODO: How to revert state after searching?
+		// Make All Visible to Search
+		divAll = document.getElementsByClassName('dropdown-content');
+		for (i = 0; i < divAll.length; i++) {
+			// If it is not showing
+			if (!document.getElementById(divAll[i].id).classList.contains('show')){
+				// divAll[i].style.display = "block"
+				console.log(divAll[i].id)
+				document.getElementById(divAll[i].id).classList.add("show")
+			}
+			
+		}
+
 		input = document.getElementById("myInput");
 		filter = input.value.toUpperCase();
 		div = document.getElementsByClassName('reqSearcheableObj');
@@ -40,6 +54,8 @@ toggle between hiding and showing the dropdown content */
 			txtValue = div[i].textContent || div[i].innerText;
 			if (txtValue.toUpperCase().indexOf(filter) > -1) {
 				div[i].style.display = "";
+				console.log(divAll[i].id)
+				// document.getElementById(divAll[i].id).classList.toggle("show")
 			} else {
 				div[i].style.display = "none";
 			}
@@ -48,73 +64,86 @@ toggle between hiding and showing the dropdown content */
 
 	// TODO: The listeners should be for the div, not for the LI
 	// Once I separate the div and the Icont, they need to ahve different listeners, sicne they will have different actions
-	
+
 	function addTreeListener() {
-		// var toggler = document.getElementsByClassName("caret");
-		// var i;
-		// for (i = 0; i < toggler.length; i++) {
-		// 	toggler[i].addEventListener("click", function () {
-		// 		this.parentElement.querySelector(".nested").classList.toggle("active");
-		// 		this.classList.toggle("caret-down");
+		console.log('INside Tree Lsitener')
+	// 	// var toggler = document.getElementsByClassName("caret");
+	// 	// var i;
+	// 	// for (i = 0; i < toggler.length; i++) {
+	// 	// 	toggler[i].addEventListener("click", function () {
+	// 	// 		this.parentElement.querySelector(".nested").classList.toggle("active");
+	// 	// 		this.classList.toggle("caret-down");
 
-		// 	});
-		// }
+	// 	// 	});
+	// 	// }
 
-		// var valis = document.getElementsByClassName("vali");
-		// for (i = 0; i < valis.length; i++) {
-		// 	valis[i].addEventListener("click", function () {
-		// 		google.script.run
-		// 			.withFailureHandler(errorMessage)
-		// 			.insertVali(this.id);
-		// 	});
-		// }
+	// 	// var valis = document.getElementsByClassName("vali");
+	// 	// for (i = 0; i < valis.length; i++) {
+	// 	// 	valis[i].addEventListener("click", function () {
+	// 	// 		google.script.run
+	// 	// 			.withFailureHandler(errorMessage)
+	// 	// 			.insertVali(this.id);
+	// 	// 	});
+	// 	// }
 
-		var labels = document.getElementsByClassName("label");
-		for (i = 0; i < labels.length; i++) {
-			labels[i].addEventListener("click", function () {
-				labelId = this.id;
-				google.script.run.withFailureHandler(errorMessage).direct_insert(labelId, 'name');
-			});
-		}
+	// 	// Expand Nested Objects - children
+	// 	var objects = document.getElementsByClassName("reqSearcheableObj");
+	// 	for (i = 0; i < objects.length; i++) {
+	// 		objects[i].addEventListener("click", function () {
+	// 			console.log('children_' + this.id)
+	// 			expandObjectProperties('children_' + this.id)
+	// 			// google.script.run.withFailureHandler(errorMessage).direct_insert(this.id, 'text');
+	// 			// TODO: Insert Property is fixed to text
+	// 		});
+	// 	}
 
-		var specifications = document.getElementsByClassName("specification");
-		for (i = 0; i < specifications.length; i++) {
-			specifications[i].addEventListener("click", function () {
-				specId = this.id;
-				google.script.run.withFailureHandler(errorMessage).direct_insert(specId, 'name');
-			});
-		}
+	// 	// var labels = document.getElementsByClassName("label");
+	// 	// for (i = 0; i < labels.length; i++) {
+	// 	// 	labels[i].addEventListener("click", function () {
+	// 	// 		labelId = this.id;
+	// 	// 		google.script.run.withFailureHandler(errorMessage).direct_insert(labelId, 'name');
+	// 	// 	});
+	// 	// }
 
-		var groups = document.getElementsByClassName("group");
-		for (i = 0; i < groups.length; i++) {
-			groups[i].addEventListener("click", function () {
-				groupId = this.id;
-				google.script.run.withFailureHandler(errorMessage).direct_insert(groupId, 'name');
-			});
-		}
+	// 	// var specifications = document.getElementsByClassName("specification");
+	// 	// for (i = 0; i < specifications.length; i++) {
+	// 	// 	specifications[i].addEventListener("click", function () {
+	// 	// 		specId = this.id;
+	// 	// 		google.script.run.withFailureHandler(errorMessage).direct_insert(specId, 'name');
+	// 	// 	});
+	// 	// }
 
-		var requirements = document.getElementsByClassName("requirement");
-		for (i = 0; i < requirements.length; i++) {
-			requirements[i].addEventListener("click", function () {
-				expandObjectProperties(this.id + '_properties')
-				// google.script.run.withFailureHandler(errorMessage).direct_insert(this.id, 'text');
-				// TODO: Insert Property is fixed to text
-			});
-		}
+	// 	// var groups = document.getElementsByClassName("group");
+	// 	// for (i = 0; i < groups.length; i++) {
+	// 	// 	groups[i].addEventListener("click", function () {
+	// 	// 		groupId = this.id;
+	// 	// 		google.script.run.withFailureHandler(errorMessage).direct_insert(groupId, 'name');
+	// 	// 	});
+	// 	// }
 
-		var properties = document.getElementsByClassName("property");
-		for (i = 0; i < properties.length; i++) {
-			properties[i].addEventListener("click", function () {
-				htmlElementId = this.id.split('_property_');
-				reqId = htmlElementId[0];
-				propertyName = htmlElementId[1];
-				google.script.run.withFailureHandler(errorMessage).direct_insert(reqId, propertyName);
-			});
-		}
 
-		function errorMessage(error) {
-			//Logger.log(error);
-		}
+	// 	var requirements = document.getElementsByClassName("requirement");
+	// 	for (i = 0; i < requirements.length; i++) {
+	// 		requirements[i].addEventListener("click", function () {
+	// 			expandObjectProperties(this.id + '_properties')
+	// 			// google.script.run.withFailureHandler(errorMessage).direct_insert(this.id, 'text');
+	// 			// TODO: Insert Property is fixed to text
+	// 		});
+	// 	}
+
+	// 	var properties = document.getElementsByClassName("property");
+	// 	for (i = 0; i < properties.length; i++) {
+	// 		properties[i].addEventListener("click", function () {
+	// 			htmlElementId = this.id.split('_property_');
+	// 			reqId = htmlElementId[0];
+	// 			propertyName = htmlElementId[1];
+	// 			google.script.run.withFailureHandler(errorMessage).direct_insert(reqId, propertyName);
+	// 		});
+	// 	}
+
+	// 	function errorMessage(error) {
+	// 		//Logger.log(error);
+	// 	}
 
 	}
 

@@ -9,32 +9,32 @@
 
 
 	/* Style the caret/arrow */
-	.caret {
+	.expand_icon {
+		display: inline;
 		cursor: pointer;
 		user-select: none;
+		font-size: 15px;
 		/* Prevent text selection */
 	}
 
 	/* Create the caret/arrow with a unicode, and style it */
-	.caret::before {
-		content: "\25B6";
-		color: white;
+	.expand_icon::before {
+		color: rgb(0, 0, 0);
 		display: inline-block;
 		margin-right: 6px;
 	}
 
 	/* Rotate the caret/arrow icon when clicked on (using JavaScript) */
-	.caret-down::before {
+	.expand_icon-down::before {
 		transform: rotate(90deg);
 	}
 
 	/* Hide the nested list */
 	.nested {
-		display: none;
 		font-size: 1em;
 		padding-top: 3px;
 		padding-bottom: 3px;
-
+		padding-left: 15px;
 	}
 
 	/* Show the nested list when the user clicks on the caret/arrow (with JavaScript) */
@@ -51,35 +51,35 @@
 
 	.vali {
 		cursor: pointer;
-		font-size: 1em;
+		font-size: 0.9em;
 	}
 
 	.label {
 		cursor: pointer;
 		padding-top: 3px;
 		padding-bottom: 3px;
-		font-size: 1em;
+		font-size: 0.9em;
 	}
 
 	.specification {
 		cursor: pointer;
 		padding-top: 3px;
 		padding-bottom: 3px;
-		font-size: 1em;
+		font-size: 0.9em;
 	}
 
 	.group {
 		cursor: pointer;
 		padding-top: 3px;
 		padding-bottom: 3px;
-		font-size: 1em;
+		font-size: 0.9em;
 	}
 
 	.requirement {
 		cursor: pointer;
 		padding-top: 3px;
 		padding-bottom: 3px;
-		font-size: 1em;
+		font-size: 0.9em;
 	}
 
 
@@ -87,7 +87,7 @@
 		cursor: pointer;
 		padding-top: 1px;
 		padding-bottom: 1px;
-		font-size: 1em;
+		font-size: 0.9em;
 	}
 
 	.addSpecification {
@@ -113,9 +113,9 @@
 		font-weight: 600;
 	}
 
-	.truncate {
+	.truncated-text {
 		display: inline-block;
-		width: 80%;
+		width: 75%;
 		white-space: nowrap;
 		overflow: hidden;
 		text-overflow: ellipsis;
