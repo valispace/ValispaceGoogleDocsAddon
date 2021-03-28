@@ -85,7 +85,7 @@ function requirementHtml(item, requirement_id) {
   } else {
     reqTitle = ' - '.concat(String(item.data.title))
   }
-  subhtml = subhtml.concat('<li class="reqSearcheableObj requirement" id="', requirement_id, '">', expandIcon, reqIcon, '<div class="truncated-text">', String(item.data.identifier), reqTitle, '</div>', plusIcon);
+  subhtml = subhtml.concat('<li class="reqSearcheableObj requirement" id="', requirement_id, '">', expandIcon, reqIcon, '<div class="truncated-text">', String(item.data.identifier), reqTitle, '</div>');
   subhtml = subhtml.concat('<ul id="', requirement_id, '_properties" class="dropdown-content">');
   // TODO: Automatically get allowable properties;
   subhtml = subhtml.concat('<li class="property" id="requirements_', String(item.data.id), '_property_identifier">Identifier</a>');
