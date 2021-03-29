@@ -1,106 +1,123 @@
 <style>
 	/* Remove default bullets */
-	ul, #topUl {
-	  list-style-type: none;
-	  padding-left: 10px;
-	  font-size:0.8em;
-	  
-	
-	}
-	
-	
+
 	#navigationList {
-	
-	  z-index: 100;
-	  background-color:#52626d;
-	  opacity: 1;
+		z-index: 100;
+		background-color: #52626d;
+		opacity: 1;
 	}
-	
-	/* Remove margins and padding from the parent ul */
-	.topUl {
-	  margin: 0;
-	  padding: 0;
-	  padding-top:3px;
-	  padding-bottom:3px;
-	  padding-left: 10px;
-	  font-size:0.8em;
-	}
-	
+
+
 	/* Style the caret/arrow */
-	.caret {
-	  cursor: pointer;
-	  user-select: none; /* Prevent text selection */
+	.expand_icon {
+		display: inline;
+		cursor: pointer;
+		user-select: none;
+		font-size: 15px;
+		/* Prevent text selection */
 	}
-	
+
 	/* Create the caret/arrow with a unicode, and style it */
-	.caret::before {
-	  content: "\25B6";
-	  color: white;
-	  display: inline-block;
-	  margin-right: 6px;
+	.expand_icon::before {
+		color: rgb(0, 0, 0);
+		display: inline-block;
+		margin-right: 6px;
 	}
-	
+
 	/* Rotate the caret/arrow icon when clicked on (using JavaScript) */
-	.caret-down::before {
-	  transform: rotate(90deg);
+	.expand_icon-down::before {
+		transform: rotate(90deg);
 	}
-	
+
 	/* Hide the nested list */
 	.nested {
-	  display: none;
-	  font-size:1em;
-	  padding-top:3px;
-	  padding-bottom:3px;
-	  
+		font-size: 1em;
+		padding-top: 3px;
+		padding-bottom: 3px;
+		padding-left: 15px;
 	}
-	
+
 	/* Show the nested list when the user clicks on the caret/arrow (with JavaScript) */
 	.active {
-	  display: block;
-	   padding-top:3px;
-	  padding-bottom:3px;
+		display: block;
+		padding-top: 3px;
+		padding-bottom: 3px;
 	}
-	
-	.valispaceComponent{
-	  
+ 
+	#myDropdown {
+		padding-left: 5px;
+		padding-right: 5px;
 	}
-	
-	.vali{
-	  cursor: pointer;
-	  
-	  font-size:1em;
-	}
-	
-	.requirement{ 
-	 cursor: pointer;
-	 padding-top:3px;
-	  padding-bottom:3px;
-	  font-size:1em;
-	}
-    .Specification{
-    }
 
-    .addSpecification{
-      cursor: pointer;
-	  user-select: none; /* Prevent text selection */
-    }
-    
-	.valiIcon{
-	   margin-right: 6px;
+	.vali {
+		cursor: pointer;
+		font-size: 0.9em;
 	}
-	
-	.treeContainer{
-	  width: 100%;
-	}
-	
-	.treeTitle{
-	  padding-top: 15px;
-	  padding-bottom: 15px;
-	  text-align: center;
-	  font-weight: 600;
-	}
-    
 
-	
-	
-	</style>
+	.label {
+		cursor: pointer;
+		padding-top: 3px;
+		padding-bottom: 3px;
+		font-size: 0.9em;
+	}
+
+	.specification {
+		cursor: pointer;
+		padding-top: 3px;
+		padding-bottom: 3px;
+		font-size: 0.9em;
+	}
+
+	.group {
+		cursor: pointer;
+		padding-top: 3px;
+		padding-bottom: 3px;
+		font-size: 0.9em;
+	}
+
+	.requirement {
+		cursor: pointer;
+		padding-top: 3px;
+		padding-bottom: 3px;
+		font-size: 0.9em;
+	}
+
+
+	.property {
+		cursor: pointer;
+		padding-top: 1px;
+		padding-bottom: 1px;
+		font-size: 0.9em;
+	}
+
+	.addSpecification {
+		cursor: pointer;
+		user-select: none;
+		/* Prevent text selection */
+	}
+
+	.valiIcon {
+		margin-right: 6px;
+	}
+
+	.treeContainer {
+		width: 100%;
+		padding-left: 10px;
+		padding-right: 10px;
+	}
+
+	.treeTitle {
+		padding-top: 15px;
+		padding-bottom: 15px;
+		text-align: center;
+		font-weight: 600;
+	}
+
+	.truncated-text {
+		display: inline-block;
+		width: 75%;
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+	}
+</style>

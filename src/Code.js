@@ -1,5 +1,14 @@
 function showSidebar() {
-  var template = HtmlService.createTemplateFromFile('frontend/sidebarTemplate');
+
+  if (checkValispaceConnexion()){
+    var template = HtmlService.createTemplateFromFile('frontend/sidebarTemplate');
+    Logger.log('Already Connected')
+  } else {
+    var template = HtmlService.createTemplateFromFile('frontend/loginPage');
+    Logger.log('No Connection')
+  }
+  
+ 
   var page = template.evaluate();
   page.setTitle('Valispace on Google Docs');
  
@@ -20,12 +29,25 @@ function showSidebar() {
   // };
 }
 
+function goToMainPage(){
+  // TODO : Remove this if not necessary
+  Logger.log('Is it connected?')
+  Logger.log(checkValispaceConnexion())
+  var template = HtmlService.createTemplateFromFile('frontend/sidebarTemplate');
+  var page = template.evaluate();
+  page.setTitle('Valispace on Google Docs');
+ 
+  DocumentApp.getUi().showSidebar(page);
+}
 
 function onInstall(e){
   onOpen(e);
 }
 
 function onOpen(e) {
+
+  // TODO: Maybe we can start downloading data here to speed up
+  
   DocumentApp.getUi().createAddonMenu()
       .addItem('Show sidebar', 'showSidebar')
       .addToUi();
