@@ -4,10 +4,12 @@
     <base target="_top">
     
     <?!=HtmlService.createHtmlOutputFromFile('frontend/sidebar.css').getContent()?>
+    <?!=HtmlService.createHtmlOutputFromFile('frontend/loginPage.css').getContent()?>
     
     
   </head>
   <body>
+    <div id='loginForm'>
     <form>
         <div class="input-label">
           <label for="deployment">Deployment Url<br></label>
@@ -35,6 +37,7 @@
       </div>  
       <div id="output"></div>
     </form>
+  </div>
 
 
     <span>
