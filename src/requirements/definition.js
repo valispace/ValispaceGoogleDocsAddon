@@ -73,17 +73,48 @@ var RequirementsTree = {
       if(!Requirement.group) this.nodes_list["specs_"+Requirement.specification].children.push(this.nodes_list["requirements_" + Requirement.id])
       else this.nodes_list["groups_" + Requirement.group].children.push(this.nodes_list["requirements_" + Requirement.id])
     })
+    Requirements.forEach(Requirement => {
+      var req = this.nodes_list["requirements_" + Requirement.id]
+      req.data['parents_id'] = req.data['parents']
+      req.data['children_id'] = req.data['children']
+      req.data['parents'] = []
+      req.data['children'] = []
+      for(parent of req.data['parents_id']){
+        if (this.nodes_list["requirements_" + parent]){
+          req.data['parents'].push(this.nodes_list["requirements_" + parent].data.identifier)
+        }
+      }
+      for(child of req.data['children_id']){
+        if (this.nodes_list["requirements_" + child]){
+          req.data['children'].push(this.nodes_list["requirements_" + child].data.identifier)
+        }
+      }
+      if (req.data['group']){
+        req.data['section'] = this.nodes_list["groups_" + req.data['group']].data.name
+      }
+    })
 
     var Files = FilesCache.get(project_id)
     Files.forEach(File => this.nodes_list["files_" + File.id]= new Element(File, types.files))
     Files.forEach(File => {
-      if(File.name === "") {
-        if(!this.nodes_list["requirements_"+File.object_id].data.files) {this.nodes_list["requirements_"+File.object_id].data.files = []}
-        this.nodes_list["requirements_"+File.object_id].data.files.push(this.nodes_list['files_'+File.reference_file])
-      }else if(File.object_ids){
-        if(!this.nodes_list["requirements_"+File.object_id].data.files) {this.nodes_list["requirements_"+File.object_id].data.files = []}
-        this.nodes_list["requirements_"+File.object_id].data.files.push(this.nodes_list['files_'+File.id])
-    }})
+      if(this.nodes_list["requirements_"+File.object_id]){
+        if(!this.nodes_list["requirements_"+File.object_id].data.hasOwnProperty("files")) {this.nodes_list["requirements_"+File.object_id].data.files = []}
+        var from;
+        if(File.file_type === 2) {
+          from = File.id
+        }
+        if(File.file_type === 3){
+          from = File.reference_file
+        }
+        if(File.file_type === 1 && File.object_id !== project_id){
+          from = File.id
+        }
+        var file_name = this.nodes_list['files_'+from].data.extension 
+                        ? this.nodes_list['files_'+from].data.name + this.nodes_list['files_'+from].data.extension 
+                        : this.nodes_list['files_'+from].data.name
+        this.nodes_list["requirements_"+File.object_id].data.files.push(file_name)
+      }
+    })
     this.loaded =true
   },
   insert: function(element_name){
@@ -99,9 +130,6 @@ var RequirementsTree = {
     var url_meta = this.nodes_list[element_name].data.url;
     var data_array = [this.nodes_list[element_name].insert_value(property)]
     var insertion_type = 'text'
-    if(property.includes('parent')){
-
-    }
     if(property == 'image'){
       var img_urls = this.nodes_list[element_name].insert_image(property)
       for(x in img_urls){
@@ -109,7 +137,7 @@ var RequirementsTree = {
       }
       insertion_type = 'image'
     }
-    console.log(data_array.length)
+    // console.log(data_array.length)
     for(data of data_array){
       var insertion_data = new InsertionData(
         data,
@@ -188,8 +216,13 @@ var RequirementsTree = {
                   id = id.split('__')
                   if(RequirementsTree.nodes_list[id[0]]){
                     var new_data = RequirementsTree.nodes_list[id[0]].insert_value(id[1])
-                    console.log(`Updated: ${id[0]} ${new_data}`)
+                    var new_url =  urlTranslator(RequirementsTree.nodes_list[id[0]].data, RequirementsTree.nodes_list[id[0]].type)
+                    var attributes = el.getAttributes()
+                    delete attributes[DocumentApp.Attribute.LINK_URL]
+                    console.log(`Updated: ${id[0]} ${attributes}`)
                     if(el.getText() !== new_data) {el.replaceText("^.*$", new_data)}
+                    el.setLinkUrl(new_url + `?from=valispace&name=${id.join('__')}`)
+                    el.setAttributes(attributes)
                   }
                   else{console.log(`Not updated: ${id[0]} ${new_data}`)}
                 }
@@ -239,16 +272,29 @@ var RequirementsTree = {
             id = id.split('__')
             if(RequirementsTree.nodes_list[id[0]]){
               var new_data = RequirementsTree.nodes_list[id[0]].insert_image(id[1])
-              console.log(`Updated: ${id[0]} ${new_data}`)
+              var attributes = image.getAttributes()
+              delete attributes[DocumentApp.Attribute.LINK_URL]
+              console.log(`Updated: ${id[0]} ${attributes}`)
               var new_img = UrlFetchApp.fetch(new_data).getBlob();
+              var new_url =  urlTranslator(RequirementsTree.nodes_list[id[0]].data, RequirementsTree.nodes_list[id[0]].type)
               var parent = image.getParent();
-              parent.insertInlineImage(parent.getChildIndex(image)+1, new_img).setLinkUrl(url);
+              var new_image_element = parent.insertInlineImage(parent.getChildIndex(image)+1, new_img).setLinkUrl(url);
               image.removeFromParent();
+              image.setLinkUrl(new_url + `?from=valispace&name=${id.join('__')}`)
+              new_image_element.setAttributes(attributes);
             }
             else{console.log(`Not updated: ${id[0]} ${new_data}`)}
           }
         }
       });
     });
+  },
+  get_html_tree: function(){
+    var html = '<ul class="reqTreeMain">'
+    for(root_node of this.root_nodes){
+      html = html.concat(root_node.tree())
+    }
+    html = html.concat('</ul>')
+    return html
   }
 }

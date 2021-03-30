@@ -34,12 +34,14 @@ var Inserter = {
     }
     else{
       el = index.insertText(object.data)
-      el.setForegroundColor("#000000").setUnderline(false)
     }
     el.setLinkUrl(object.url + `?from=valispace&name=${id}`)
-    console.log(el)
+    if(type=='text'){
+      el.setForegroundColor("#000000").setUnderline(false)
+    }
+    // console.log(el)
     this.inserted_elements[id].push(el)
-    console.log(this.inserted_elements)
+    // console.log(this.inserted_elements)
   },
   update: function(){
     const all_links = getAllLinks()
