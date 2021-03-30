@@ -75,6 +75,7 @@ var RequirementsTree = {
     })
     Requirements.forEach(Requirement => {
       var req = this.nodes_list["requirements_" + Requirement.id]
+      if(!req.data['title']) {req.data['title']='-'}
       req.data['parents_id'] = req.data['parents']
       req.data['children_id'] = req.data['children']
       req.data['parents'] = []

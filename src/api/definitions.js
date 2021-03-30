@@ -121,7 +121,7 @@ types.requirements.get = function (project_id){
 
 types.requirements.tree = function (data){
   var subhtml = ''
-  if (data.title == null) {
+  if (data.title == '-') {
     reqTitle = ''
   } else {
     reqTitle = ' - '.concat(String(data.title))
@@ -138,7 +138,7 @@ types.requirements.tree = function (data){
   subhtml = subhtml.concat('<li class="property" id="requirements_', String(data.id), '_property_parents">Parents</a>');
   subhtml = subhtml.concat('<li class="property" id="requirements_', String(data.id), '_property_children">Children</a>');
   subhtml = subhtml.concat('<li class="property" id="requirements_', String(data.id), '_property_section">Section</a>');
-  subhtml = subhtml.concat('<li class="property" id="requirements_', String(data.id), '_property_images">Images</a>');
+  subhtml = subhtml.concat('<li class="property" id="requirements_', String(data.id), '_property_image">Images</a>');
   subhtml = subhtml.concat('<li class="property" id="requirements_', String(data.id), '_property_files">Files</a>');
   subhtml = subhtml.concat('</ul>');
   subhtml = subhtml.concat('</li>');
