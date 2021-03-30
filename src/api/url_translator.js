@@ -1,23 +1,19 @@
 var translations_reg = new RegExp(
-  "%<.*>%"
+  "%<\\w+>%"
 );
 
-var translations = {
-  '':'',
-  'requirements': 'project/%<project>%/specifications/requirements/%<id>%',
-  'key': ''
-}
 
 var urlTranslator = function(item_data, type){
-  base_url = translations[type.name]
+  var rel_path = type.url
+  var base_path = PropertiesService.getUserProperties().getProperty('deployment_url')
+  base_path += base_path.endsWith("/") ? "" : "/"
 
   var result;
-  while((result = translations_reg.exec(base_url)) !== null) {
-    key_str = result.substring(
-      result.lastIndexOf("<") + 1,
-      result.lastIndexOf(">")
-    );
-    base_url.replace(result, item_data[key_str])
+  var key_str;
+  while((result = translations_reg.exec(rel_path)) !== null) {
+    result = result[0]
+    key_str = result.substring(2,result.length-2)
+    rel_path = rel_path.replace(result, item_data[key_str])
   }
-  return base_url
+  return base_path + rel_path
 }

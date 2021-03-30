@@ -1,16 +1,24 @@
 var types = {
-  workspaces:{name:'workspaces'},
-  projects:{name:'projects'},
+  workspaces:{name:'workspaces',
+              url: ''},
+  projects:{name:'projects',
+              url: ''},
   requirements:{name:'requirements',
-    specifications:{name:'specifications',
-      labels:{name:'labels'},
-    },
-    groups:{name:'groups'},
-  },
-  users:{name:'users'},
-  user_groups:{name:'user_groups'},
-  tags:{name:'tags'},
-  files:{name:'files'}
+              url: 'project/%<project>%/specifications/%<specification>%/requirements/%<id>%'},
+  specifications:{name:'specs',
+              url: 'project/%<project>%/specifications/%<id>%/requirements'},
+  labels:{name:'labels',
+              url: 'project/%<project>%/specifications/groups/%<id>%/requirements'},
+  groups:{name:'groups',
+              url: 'project/%<project>%/specifications/requirements/groups/%<id>%/requirements'},
+  users:{name:'users',
+              url: ''},
+  user_groups:{name:'user_groups',
+              url: ''},
+  tags:{name:'tags',
+              url: ''},
+  files:{name:'files',
+              url: ''}
 }
 
 // ****************************************************************************************
@@ -60,8 +68,15 @@ types.projects.get = function (workspaceID){
  * @param  {int} project_id - Project ID
  * @return {[type]}      [description]
  */
-types.requirements.specifications.get = function (project_id){
+types.specifications.get = function (project_id){
   return JSON.parse(getAuthenticatedValispaceUrl('requirements/specifications/?project='+project_id));
+}
+
+types.specifications.tree = function (data){
+  var subhtml = ''
+  subhtml = subhtml.concat('<li class="reqSearcheableObj ', this.name,'" id="', this.name,'_', data.id, '">', expandIcon, specificationIcon, '<div class="truncated-text">', 'Specification: ', String(data.name), '</div>', plusIcon, '</li>');
+
+  return subhtml
 }
 
 /**
@@ -69,16 +84,30 @@ types.requirements.specifications.get = function (project_id){
  * @param  {int} project_id - Project ID
  * @return {[type]}      [description]
  */
-types.requirements.specifications.labels.get = function (project_id){
+types.labels.get = function (project_id){
   return JSON.parse(getAuthenticatedValispaceUrl('requirements/specifications/labels/?project='+project_id));
+}
+
+types.labels.tree = function (data){
+  var subhtml = ''
+  subhtml = subhtml.concat('<li class="reqSearcheableObj ', this.name,'" id="', this.name,'_', data.id, '">', expandIcon, folderIcon, '<div class="truncated-text">', 'Folder: ', String(data.name), '</div>', plusIcon, '</li>');
+
+  return subhtml
 }
 /**
  * Returns a list of groups (sections) within a project.
  * @param  {int} project_id - Project ID
  * @return {[type]}      [description]
  */
-types.requirements.groups.get = function (project_id){
+types.groups.get = function (project_id){
   return JSON.parse(getAuthenticatedValispaceUrl('requirements/groups/?project='+project_id));
+}
+
+types.groups.tree = function (data){
+  var subhtml = ''
+  subhtml = subhtml.concat('<li class="reqSearcheableObj ', this.name,'" id="', this.name,'_', data.id, '">', expandIcon, sectionIcon, '<div class="truncated-text">', 'Section: ', String(data.name), '</div>', plusIcon, '</li>');
+
+  return subhtml
 }
 
 /**
@@ -88,6 +117,32 @@ types.requirements.groups.get = function (project_id){
  */
 types.requirements.get = function (project_id){
   return JSON.parse(getAuthenticatedValispaceUrl('requirements/full_list/?project='+project_id+'&clean_text=text,comment'));
+}
+
+types.requirements.tree = function (data){
+  var subhtml = ''
+  if (data.title == null) {
+    reqTitle = ''
+  } else {
+    reqTitle = ' - '.concat(String(data.title))
+  }
+  subhtml = subhtml.concat('<li class="reqSearcheableObj ', this.name,'" id="',this.name,'_', data.id, '">', expandIcon, reqIcon, '<div class="truncated-text">', String(data.identifier), reqTitle, '</div>');
+  subhtml = subhtml.concat('<ul id="',this.name,'_', data.id, '_properties" class="dropdown-content">');
+  // TODO: Automatically get allowable properties;
+  // for(property of Object.keys(data)){
+  //   subhtml = subhtml.concat('<li class="property" id="', this.name,'_', data.id, '_property_', property,'">', property,'</a>');
+  // }
+  subhtml = subhtml.concat('<li class="property" id="requirements_', String(data.id), '_property_identifier">Identifier</a>');
+  subhtml = subhtml.concat('<li class="property" id="requirements_', String(data.id), '_property_title">Title</a>');
+  subhtml = subhtml.concat('<li class="property" id="requirements_', String(data.id), '_property_text">Text</a>');
+  subhtml = subhtml.concat('<li class="property" id="requirements_', String(data.id), '_property_parents">Parents</a>');
+  subhtml = subhtml.concat('<li class="property" id="requirements_', String(data.id), '_property_children">Children</a>');
+  subhtml = subhtml.concat('<li class="property" id="requirements_', String(data.id), '_property_section">Section</a>');
+  subhtml = subhtml.concat('<li class="property" id="requirements_', String(data.id), '_property_images">Images</a>');
+  subhtml = subhtml.concat('<li class="property" id="requirements_', String(data.id), '_property_files">Files</a>');
+  subhtml = subhtml.concat('</ul>');
+  subhtml = subhtml.concat('</li>');
+  return subhtml
 }
 
 // ****************************************************************************************

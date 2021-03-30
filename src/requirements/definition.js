@@ -40,7 +40,7 @@ var RequirementsTree = {
     //TODO: We have to create this in a for loop that loads and builds tree for every type we have
     //Add labels to the tree
     var Labels = LabelsCache.get(project_id)
-    Labels.forEach(Label => this.nodes_list["labels_" + Label.id]= new Element(Label, types.requirements.specifications.labels))
+    Labels.forEach(Label => this.nodes_list["labels_" + Label.id]= new Element(Label, types.labels))
     Labels.forEach(Label => {
       //If the label has no parent, it hangs from root, else from parent label
       if(!Label.parent) this.root_nodes.push(this.nodes_list["labels_" + Label.id])
@@ -49,7 +49,7 @@ var RequirementsTree = {
 
     //Add specs to the tree
     var Specs = SpecificationsCache.get(project_id)
-    Specs.forEach(Spec => this.nodes_list["specs_" + Spec.id]= new Element(Spec, types.requirements.specifications))
+    Specs.forEach(Spec => this.nodes_list["specs_" + Spec.id]= new Element(Spec, types.specifications))
     Specs.forEach(Spec => {
       //If the spec has no label, it hangs from root, else from the label
       if(Spec.labels.length === 0) this.root_nodes.push(this.nodes_list["specs_" + Spec.id])
@@ -58,7 +58,7 @@ var RequirementsTree = {
 
     //Add groups to the tree
     var Groups = GroupsCache.get(project_id)
-    Groups.forEach(Group => this.nodes_list["groups_" + Group.id]= new Element(Group, types.requirements.groups))
+    Groups.forEach(Group => this.nodes_list["groups_" + Group.id]= new Element(Group, types.groups))
     Groups.forEach(Group => {
       //If the group has no parent, then it hangs from the specification, else from its parent
       if(!Group.parent) this.nodes_list["specs_"+Group.specification].children.push(this.nodes_list["groups_" + Group.id])
@@ -75,7 +75,7 @@ var RequirementsTree = {
     })
 
     var Files = FilesCache.get(project_id)
-    Files.forEach(Files => this.nodes_list["files_" + Files.id]= new Element(Files, types.files))
+    Files.forEach(File => this.nodes_list["files_" + File.id]= new Element(File, types.files))
     Files.forEach(File => {
       if(File.name === "") {
         if(!this.nodes_list["requirements_"+File.object_id].data.files) {this.nodes_list["requirements_"+File.object_id].data.files = []}

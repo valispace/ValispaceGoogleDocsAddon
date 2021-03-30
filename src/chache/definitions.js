@@ -18,7 +18,7 @@ function Cache(type){
     console.log('Calling API')
     var items = this.type.get(args)
     for (var x in items){
-      //items[x].url = urlTranslator(items[x], this.type)
+      items[x].url = urlTranslator(items[x], this.type)
       this.loaded_items.push(items[x])
       this.loaded_ids.push(items[x].id)
     }
@@ -58,7 +58,7 @@ function Element(data, type, children=[]){
   }
   this.insert_image = function(){
     var images = [];
-    console.log(this.data)
+    // console.log(this.data)
     if(this.data.files){
       for(file of this.data.files){
         if(file.mimetype.includes('image')){
@@ -75,16 +75,15 @@ function Element(data, type, children=[]){
     return this.data[propertie_name]
   }
   //For now it doesn't have an use. Future: Build a tree for frontend
-  this.tree = function(){
-    if(this.children.length === 0){
-      return this.type.tree(this.data)
-    }
-    else{
-      var children_inserted = []
+  this.tree = function(html = ''){
+    html = html.concat(this.type.tree(this.data))
+    if(this.children.length !== 0){
+      html = html.concat('<div class="nested dropdown-content" id="children_', this.type.name,'_', this.data.id, '">')
       for (var x in this.children){
-        children_inserted.push(this.children[x].tree())
+        html = this.children[x].tree(html)
       }
-      return children_inserted
+      html = html.concat('</div>')
     }
+    return html
   }
 }

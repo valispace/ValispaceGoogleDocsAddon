@@ -29,6 +29,6 @@ var templates = {
 }
 
 types.requirements.template = templates.requirement
-types.requirements.specifications.template = templates.specification
-types.requirements.specifications.labels.template = templates.folder
-types.requirements.groups.template = templates.section
+types.specifications.template = templates.specification
+types.labels.template = templates.folder
+types.groups.template = templates.section
