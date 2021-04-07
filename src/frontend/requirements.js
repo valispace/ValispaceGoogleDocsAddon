@@ -10,7 +10,7 @@ var plusIcon = '<i class="add-element fas fa-plus"></i>'
 
 function buildRequirementTreeHtml() {
   // RequirementsTree = getRequirementsTree()
-  RequirementsTree.build(true);
+  //RequirementsTree.build(true);
   html = RequirementsTree.get_html_tree()
   // console.log(html)
   return html

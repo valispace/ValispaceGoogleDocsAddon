@@ -1,5 +1,6 @@
 function temp_test(){
   connect_temp();
+  PropertiesService.getUserProperties().deleteAllProperties();
   PropertiesService.getUserProperties().setProperty('deployment_url', 'https://staging.valispace.com');
   PropertiesService.getUserProperties().setProperty('projectID', '24');
   RequirementsTree.build();

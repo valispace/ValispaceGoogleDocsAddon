@@ -16,7 +16,7 @@ function Cache(type){
   }
   this.load = function(args){
     console.log('Calling API')
-    var items = this.type.get(args)
+    var items = types[this.type].get(args)
     for (var x in items){
       items[x].url = urlTranslator(items[x], this.type)
       this.loaded_items.push(items[x])
@@ -29,61 +29,82 @@ function Element(data, type, children=[]){
   this.type = type
   this.children = children
   this.data = data
-  this.sort = function(callback){
-    if(this.children.length === 0){
-      return true
-    }
-    else{
-      this.children.sort(callback)
-      for (var x in this.children){
-        this.children[x].sort(callback)
-      }
-      return children_inserted
-    }
+}
+
+function get_properties(element){
+  return Object.keys(element.data)
+}
+
+//WIP not subsituted anywhere
+function sort(callback){
+  if(this.children.length === 0){
+    return true
   }
-  this.insert = function (){
-    if(this.children.length === 0){
-      return this.type.template.insert(this.data)
+  else{
+    this.children.sort(callback)
+    for (var x in this.children){
+      this.children[x].sort(callback)
+    }
+    return children_inserted
+  }
+}
+//WIP not subsituted anywhere
+function insert(element){
+  if(this.children.length === 0){
+      return types[this.type].template.insert(this.data)
     }
     else{
-      var children_inserted = [this.type.template.insert(this.data)]
+      var children_inserted = [types[this.type].template.insert(this.data)]
       for (var x in this.children){
         children_inserted.push(this.children[x].insert())
       }
       return children_inserted
     }
+}
+
+function insert_all_images(element){
+  var images = [];
+  // console.log(element.data)
+  if(element.data.files){
+    for(file of element.data.files){
+      if(property.includes(file.data.id)){
+        images.push(file.data.download_url)
+      }
+    }
   }
-  this.get_properties = function (){
-    return Object.keys(this.data)
+  if(property=='image'){
+    if(element.data['image_file'] || element.data['image_link']){
+      images.push(element.data['image_file'] || element.data['image_link'])
+    }
   }
-  this.insert_image = function(){
-    var images = [];
-    // console.log(this.data)
-    if(this.data.files){
-      for(file of this.data.files){
-        if(file.mimetype.includes('image')){
+  return images
+}
+
+function insert_value(element,property_name){
+  return element.data[property_name]
+}
+
+function insert_image(element, property){
+  //INSERT IMAGE:
+  //Property: all_images --> Insert all images
+  //Property: image
+  //
+  if(property == 'all_images'){return insert_all_images(element)}
+  var images = [];
+  if(property=='image'){
+    if(element.data['image_file'] || element.data['image_link']){
+      images.push(element.data['image_file'] || element.data['image_link'])
+    }
+  }
+  else{
+    // console.log(element.data)
+    if(element.data.files){
+      for(file of element.data.files){
+        if(file.data.mimetype.includes('image') && property.includes(file.data.id)){
           images.push(file.download_url)
         }
       }
     }
-    if(this.data['image_file'] || this.data['image_link']){
-      images.push(this.data['image_file'] || this.data['image_link'])
-    }
-    return images
   }
-  this.insert_value = function (propertie_name){
-    return this.data[propertie_name]
-  }
-  //For now it doesn't have an use. Future: Build a tree for frontend
-  this.tree = function(html = ''){
-    html = html.concat(this.type.tree(this.data))
-    if(this.children.length !== 0){
-      html = html.concat('<div class="nested dropdown-content" id="children_', this.type.name,'_', this.data.id, '">')
-      for (var x in this.children){
-        html = this.children[x].tree(html)
-      }
-      html = html.concat('</div>')
-    }
-    return html
-  }
+  return images
 }

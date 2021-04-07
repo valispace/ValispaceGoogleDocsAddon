@@ -177,12 +177,12 @@
   }
 
   function OptionsScript() {
-    google.script.run.withUserObject(this).openOptionDialog();
+    //google.script.run.withUserObject(this).openOptionDialog();
     google.script.run
       .withUserObject(this)
       .withSuccessHandler()
       .withFailureHandler(errorMessage)
-      .openOptionDialog();
+      .logOutToLogin();
   }
 
 

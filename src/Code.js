@@ -40,6 +40,17 @@ function goToMainPage(){
   DocumentApp.getUi().showSidebar(page);
 }
 
+function logOutToLogin(){
+  // TODO : Remove this if not necessary
+  Logger.log('Is it connected?')
+  Logger.log(checkValispaceConnexion())
+  var template = HtmlService.createTemplateFromFile('frontend/loginPage');
+  var page = template.evaluate();
+  page.setTitle('Valispace on Google Docs');
+ 
+  DocumentApp.getUi().showSidebar(page);
+}
+
 function onInstall(e){
   onOpen(e);
 }
