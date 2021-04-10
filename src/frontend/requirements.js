@@ -57,32 +57,68 @@ function insertRequirementsInSpec_asText(requirements, spec_id) {
 }
 
 
-function insertRequirementsInSpec_asTable(requirements, spec_id){
-  var spec_id = spec_id.split("_")
-  spec_id = parseInt(spec_id[spec_id.length - 1])
+function insertRequirements_asTable(requirements, parent){
+  var parent = parent.split("_");
+  var parentType = parent[0].toString();
+  var parentId = parseInt(parent[1]);
+  Logger.log(parent)
+  Logger.log(parentId)
+  Logger.log(parentType)
+  // parentId = parseInt(parentId[parentId.length - 1])
   
-  var reqsInSpec = requirements.filter(x => x['specification'] === spec_id)
+  if (parentType === "specs"){
+    parentType = 'specification'
+    var reqsToInsert = requirements.filter(x => x[parentType] === parentId)
+  } else if (parentType === "groups") {
+    parentType = 'group'
+    var reqsToInsert = requirements.filter(x => x[parentType] === parentId)
+  }
 
-  doc = DocumentApp.getActiveDocument();
-  body = doc.getBody();
+
+
+  var doc = DocumentApp.getActiveDocument();
+  var body = doc.getBody();
+  var cursor = doc.getCursor();
+  var indexCursor = getCursorIndex(body, cursor)
   
   var cells = []
-  for (req in reqsInSpec){
-    if (reqsInSpec[req]['specification'] === spec_id){
-      cells.push([reqsInSpec[req]['identifier'], reqsInSpec[req]['text']])
+  for (req in reqsToInsert){
+    if (reqsToInsert[req][parentType] === parentId){
+      cells.push([reqsToInsert[req]['identifier'], reqsToInsert[req]['text']])
     }  
   }
   
-  var docTable = body.appendTable(cells)
+  var docTable = body.insertTable(indexCursor, cells)
 //  return cells
 }
 
-function direct_insert(reqId) {
-  Logger.log(`Object to be Inserted - ID:  ${reqId} and Property: ${fieldValue} `)
-  //TODO: This doesn't stay in memory needs reload, trouble
-  RequirementsTree.build()
-  RequirementsTree.insert_value(reqId, fieldValue.toLowerCase())
+function getCursorIndex(body, cursor){
+
+  if (cursor) {
+    var element = cursor.getElement();
+    // Get the first Body Section parent of the element
+    while (element.getParent().getType() != DocumentApp.ElementType.BODY_SECTION) {
+      element = element.getParent();
+    }
+    var index = body.getChildIndex(element);
+  }
+  else {
+    DocumentApp.getUi().alert("Could not find current position. Please click on the text where you want to add the requirement.");
+    return;
+  }
+  return index
 }
+
+function direct_insert(requirements, parent){
+  var parent = parent.split("_");
+  var parentType = parent[0].toString();
+  var parentId = parseInt(parent[1]);
+
+  doc = DocumentApp.getActiveDocument();
+  body = doc.getBody();
+
+}
+
 
 // function buildRequirementTreeHtml() {
 //   // RequirementsTree = getRequirementsTree()  
