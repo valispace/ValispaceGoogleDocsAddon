@@ -41,14 +41,10 @@ function get_specification(spec_id) {
 
 function insertRequirementsInSpec_asText(requirements, spec_id) {
   var spec_id = spec_id.split("_")
-  spec_id = spec_id[spec_id.length - 1]
+  spec_id = parseInt(spec_id[spec_id.length - 1])
   
-  var reqsInSpec = requirements.filter(x => x['specification'] === parseInt(spec_id))
+  var reqsInSpec = requirements.filter(x => x['specification'] === spec_id)
   
-  Logger.log(requirements)
-  Logger.log(spec_id)
-  Logger.log(reqsInSpec)
-
   var doc = DocumentApp.getActiveDocument()
   var body = doc.getBody();
 
@@ -60,6 +56,26 @@ function insertRequirementsInSpec_asText(requirements, spec_id) {
   body.appendParagraph(text)
 }
 
+
+function insertRequirementsInSpec_asTable(requirements, spec_id){
+  var spec_id = spec_id.split("_")
+  spec_id = parseInt(spec_id[spec_id.length - 1])
+  
+  var reqsInSpec = requirements.filter(x => x['specification'] === spec_id)
+
+  doc = DocumentApp.getActiveDocument();
+  body = doc.getBody();
+  
+  var cells = []
+  for (req in reqsInSpec){
+    if (reqsInSpec[req]['specification'] === spec_id){
+      cells.push([reqsInSpec[req]['identifier'], reqsInSpec[req]['text']])
+    }  
+  }
+  
+  var docTable = body.appendTable(cells)
+//  return cells
+}
 
 function direct_insert(reqId) {
   Logger.log(`Object to be Inserted - ID:  ${reqId} and Property: ${fieldValue} `)

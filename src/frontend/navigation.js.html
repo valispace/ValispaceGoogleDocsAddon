@@ -138,7 +138,7 @@ toggle between hiding and showing the dropdown content */
 				console.log('Clicked on Add Element for: ' + this.parentElement.id)
 				// TODO: Change Function to Generic
 				var requirements = JSON.parse(document.getElementById("requirementsData").getAttribute('data'));
-				google.script.run.withFailureHandler(errorMessage).insertRequirementsInSpec_asText(requirements, this.parentElement.id);
+				google.script.run.withFailureHandler(errorMessage).insertRequirementsInSpec_asTable(requirements, this.parentElement.id);
 			});
 		}
 
