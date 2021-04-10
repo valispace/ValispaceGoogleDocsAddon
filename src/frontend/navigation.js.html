@@ -257,16 +257,19 @@ toggle between hiding and showing the dropdown content */
 
 			for (index in parents) {
 				var parent = parents[index]
-				// console.log(parent['name'])
+				// console.log('parent', parent['name'])
 
 				// If Parent is a Specification, it has "requirement_groups"
 				if ("requirement_groups" in parent) {
 					var parentId_html = 'specs_' + parent['id']
+
+					// console.log('Adding Specification', parent['name'])
 					htmlToWrite = htmlToWrite.concat('<li class="reqSearcheableObj specification" id="', parentId_html, '">', expandIcon, specificationIcon, '<div class="truncated-text">', String(parent['name']), '</div>', plusIcon, '</li>')
 					// subHtml.concat(parent['name'])
 
 					var parentId = parent['id']
-					var groupsInside = groups.filter(x => x['specification'] === parentId)
+
+					var groupsInside = groups.filter(x => x['specification'] === parentId & x['parent'] === null)
 
 					htmlToWrite = htmlToWrite.concat('<div class="nested dropdown-content" id="children_', parentId_html, '">')
 					getSpecificationsAndGroups(groupsInside)
@@ -275,17 +278,20 @@ toggle between hiding and showing the dropdown content */
 				// If Parent is a Another Group, it has "children"
 				if ("children" in parent) {
 					var parentId_html = 'groups_' + parent['id']
+					
 					htmlToWrite = htmlToWrite.concat('<li class="reqSearcheableObj group" id="', parentId_html, '">', expandIcon, sectionIcon, '<div class="truncated-text">', String(parent['name']), '</div>', plusIcon, '</li>')
 					// subHtml.concat(parent['name'])
 
 					var parentId = parent['id']
-					var groupsInside = groups.filter(x => x['parent'] === parentId)
+					var groupsInside2 = groups.filter(x => x['parent'] === parentId)
+
 
 					// TODO: Write if conditinal, if there is thing inside
-					htmlToWrite = htmlToWrite.concat('<div class="nested dropdown-content show" id="children_', parentId_html, '">')
-					getSpecificationsAndGroups(groupsInside)
-					htmlToWrite = htmlToWrite.concat('</div>')
-
+					if (groupsInside2.length != 0) {
+						htmlToWrite = htmlToWrite.concat('<div class="nested dropdown-content" id="children_', parentId_html, '">')
+						getSpecificationsAndGroups(groupsInside2)
+						htmlToWrite = htmlToWrite.concat('</div>')
+					}
 				}
 			}
 		}
@@ -308,6 +314,7 @@ toggle between hiding and showing the dropdown content */
 				getLabels(labelsInside)
 
 				var specsInside = specifications.filter(x => x['labels'][0] === parent['id'])
+
 				for (index in specsInside) {
 					var specification = specsInside[index]
 					// htmlToWrite = htmlToWrite.concat('<div class="nested dropdown-content" id="children_', parentId_html, '">')
