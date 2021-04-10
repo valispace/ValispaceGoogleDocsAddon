@@ -290,12 +290,12 @@ var RequirementsTree = {
       });
     });
   },
-  get_html_tree: function(){
-    var html = '<ul class="reqTreeMain">'
-    for(root_node of this.root_nodes){
-      html = html.concat(root_node.tree())
-    }
-    html = html.concat('</ul>')
-    return html
-  }
+  // get_html_tree: function(){
+  //   var html = '<ul class="reqTreeMain">'
+  //   for(root_node of this.root_nodes){
+  //     html = html.concat(root_node.tree())
+  //   }
+  //   html = html.concat('</ul>')
+  //   return html
+  // }
 }
