@@ -23,8 +23,10 @@
 	/* When the user clicks on the button,
 toggle between hiding and showing the dropdown content */
 	function expandRequirementTree() {
+		document.getElementById("updating-status").innerHTML = 'Building Tree...'
 		document.getElementById("myDropdown").classList.toggle("show");
 		buildRequirementsTree_browser()
+		document.getElementById("updating-status").innerHTML = ''
 	}
 
 	function expandObjectProperties(objectId) {
@@ -135,10 +137,14 @@ toggle between hiding and showing the dropdown content */
 		var objects = document.getElementsByClassName("add-element");
 		for (i = 0; i < objects.length; i++) {
 			objects[i].addEventListener("click", function () {
+				document.getElementById("updating-status").innerHTML = 'Inserting Requirements...'
 				console.log('Clicked on Add Element for: ' + this.parentElement.id)
 				// TODO: Change Function to Generic
 				var requirements = JSON.parse(document.getElementById("requirementsData").getAttribute('data'));
-				google.script.run.withFailureHandler(errorMessage).insertRequirementsInSpec_asTable(requirements, this.parentElement.id);
+				google.script.run
+				.withFailureHandler(errorMessage)
+				.withSuccessHandler(function(){document.getElementById("updating-status").innerHTML = ''})
+				.insertRequirementsInSpec_asTable(requirements, this.parentElement.id);
 			});
 		}
 
@@ -227,12 +233,12 @@ toggle between hiding and showing the dropdown content */
 
 
 	function buildRequirementsTree_browser() {
-
+		document.getElementById("updating-status").innerHTML = 'Building Tree...'
 		var expandIcon = '<i class="expand_icon fas fa-angle-right"></i>'
-		var reqIcon = '<i class="tree_icon far fa-file-alt"></i>'
-		var sectionIcon = '<i class="tree_icon fas fa-copy"></i>'
-		var specificationIcon = '<i class="tree_icon fas fa-book"></i>'
 		var folderIcon = '<i class="tree_icon fas fa-folder"></i>'
+		var specificationIcon = '<i class="tree_icon fas fa-clipboard-check"></i>'
+		var reqIcon = '<i class="tree_icon far fa-file-alt"></i>'
+		var sectionIcon = '<i class="tree_icon fas fa-list-ul"></i>'
 		var plusIcon = '<i class="add-element fas fa-plus"></i>'
 
 
@@ -338,6 +344,7 @@ toggle between hiding and showing the dropdown content */
 
 		document.getElementById('requirementTreeInsertButton').innerHTML = htmlToWrite;
 		addTreeListener()
+		document.getElementById("updating-status").innerHTML = ''
 	}
 
 	// function insertTest123() {

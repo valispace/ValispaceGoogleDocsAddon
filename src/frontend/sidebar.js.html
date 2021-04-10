@@ -70,6 +70,7 @@
 
 
   function updateSelectedProjectScript() {
+    document.getElementById("updating-status").innerHTML = 'Downloading Data...'
 
     clearTreeHtml();
     var projectId = $("#options-projects").val();
@@ -85,23 +86,46 @@
     saveData(projectId, 'requirementsData')
     saveData(projectId, 'groupsData') // Sections
     saveData(projectId, 'tagsData')
-    saveData(projectId, 'filesData')
+    saveData(projectId, 'filesData', 1)
+
+    // google.script.run.withSuccessHandler(function (data) {
+    //     document.getElementById('labelsData').setAttribute('data', JSON.stringify(data));
+    //     // document.getElementById("updating-status").innerHTML = ''
+    //   }).get_data(projectId, 'labelsData')
+    //   google.script.run.withSuccessHandler(function (data) {
+    //     document.getElementById('specificationsData').setAttribute('data', JSON.stringify(data));
+    //     // document.getElementById("updating-status").innerHTML = ''
+    //   }).get_data(projectId, 'specificationsData')
+    //   google.script.run.withSuccessHandler(function (data) {
+    //     document.getElementById('requirementsData').setAttribute('data', JSON.stringify(data));
+    //     // document.getElementById("updating-status").innerHTML = ''
+    //   }).get_data(projectId, 'requirementsData')
+    //   google.script.run.withSuccessHandler(function (data) {
+    //     document.getElementById('groupsData').setAttribute('data', JSON.stringify(data));
+    //     // document.getElementById("updating-status").innerHTML = ''
+    //   }).get_data(projectId, 'groupsData')
+    //   google.script.run.withSuccessHandler(function (data) {
+    //     document.getElementById('tagsData').setAttribute('data', JSON.stringify(data));
+    //     // document.getElementById("updating-status").innerHTML = ''
+    //   }).get_data(projectId, 'tagsData')
+    //   google.script.run.withSuccessHandler(function (data) {
+    //     document.getElementById('filesData').setAttribute('data', JSON.stringify(data));
+    //     document.getElementById("updating-status").innerHTML = ''
+    //   }).get_data(projectId, 'filesData')
+
+
     console.log('Done')
-
-
-    // Build Requirements Tree
-    // TODO: Rename Function
-    // buildRequirementsTree_browser(projectId)
-
-    // addTreeHtml()
-
   }
 
-  function saveData(projectId, dataType) {
+  function saveData(projectId, dataType, clearStatusFlag=0) {
+    // document.getElementById("updating-status").innerHTML = 'Downloading Data...'
     google.script.run.withSuccessHandler(
       function (data) {
-        console.log(projectId)
+        // console.log(projectId)
         document.getElementById(dataType).setAttribute('data', JSON.stringify(data));
+        if (clearStatusFlag) {
+          document.getElementById("updating-status").innerHTML = ''
+        }
       }
     ).get_data(projectId, dataType)
   }
