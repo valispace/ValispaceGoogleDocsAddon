@@ -247,78 +247,79 @@ toggle between hiding and showing the dropdown content */
 		// Root
 		var labelsRoot = labels.filter(x => x['parent'] === null)
 		var specificationsRoot = specifications.filter(x => x['labels'].length === 0)
-		var root = [labelsRoot, specificationsRoot]
 		// TODO: Add labels and specifications to html
 
 
-		function getLabels(parents) {
-			// subHtml = ''
-			for (index in parents) {
-				parent = parents[index]
-
-				// Add to html
-				htmlToWrite = htmlToWrite.concat('<li class="reqSearcheableObj label" id="">', expandIcon, folderIcon, '<div class="truncated-text">', String(parent['name']), '</div>', plusIcon, '</li>')
-				// subHtml.concat(parent['name'])
-				console.log(parent['name'])
-
-				labelsInside = labels.filter(x => x['parent'] === parent['id'])
-
-				specsInside = specifications.filter(x => x['labels'][0] === parent['id'])
-				for (index in specsInside) {
-					specification = specsInside[index]
-					htmlToWrite = htmlToWrite.concat('<div class="nested dropdown-content" id="">')
-					getGroups([specification])
-					htmlToWrite = htmlToWrite.concat('</div>')
-					
-				}
-				htmlToWrite = htmlToWrite.concat('<div class="nested dropdown-content" id="">')
-				getLabels(labelsInside)
-				htmlToWrite = htmlToWrite.concat('</div>')
-				
-			}
-			// console.log(subHtml)
-		}
-
-		function getGroups(parents) {
+		function getSpecificationsAndGroups(parents) {
 
 			for (index in parents) {
-				parent = parents[index]
-				console.log(parent['name'])
+				var parent = parents[index]
+				// console.log(parent['name'])
 
 				// If Parent is a Specification, it has "requirement_groups"
 				if ("requirement_groups" in parent) {
-
-					htmlToWrite = htmlToWrite.concat('<li class="reqSearcheableObj specification" id="">', expandIcon, specificationIcon, '<div class="truncated-text">', String(parent['name']), '</div>', plusIcon, '</li>')
+					var parentId_html = 'specs_' + parent['id']
+					htmlToWrite = htmlToWrite.concat('<li class="reqSearcheableObj specification" id="', parentId_html, '">', expandIcon, specificationIcon, '<div class="truncated-text">', String(parent['name']), '</div>', plusIcon, '</li>')
 					// subHtml.concat(parent['name'])
 
-					parentId = parent['id']
-					groupsInside = groups.filter(x => x['specification'] === parentId)
+					var parentId = parent['id']
+					var groupsInside = groups.filter(x => x['specification'] === parentId)
 
-					htmlToWrite = htmlToWrite.concat('<div class="nested dropdown-content" id="">')
-					getGroups(groupsInside)
+					htmlToWrite = htmlToWrite.concat('<div class="nested dropdown-content" id="children_', parentId_html, '">')
+					getSpecificationsAndGroups(groupsInside)
 					htmlToWrite = htmlToWrite.concat('</div>')
 				}
 				// If Parent is a Another Group, it has "children"
 				if ("children" in parent) {
-
-					htmlToWrite = htmlToWrite.concat('<li class="reqSearcheableObj group" id="">', expandIcon, sectionIcon, '<div class="truncated-text">', String(parent['name']), '</div>', plusIcon, '</li>')
+					var parentId_html = 'groups_' + parent['id']
+					htmlToWrite = htmlToWrite.concat('<li class="reqSearcheableObj group" id="', parentId_html, '">', expandIcon, sectionIcon, '<div class="truncated-text">', String(parent['name']), '</div>', plusIcon, '</li>')
 					// subHtml.concat(parent['name'])
 
-					parentId = parent['id']
-					groupsInside = groups.filter(x => x['parent'] === parentId)
+					var parentId = parent['id']
+					var groupsInside = groups.filter(x => x['parent'] === parentId)
 
-					htmlToWrite = htmlToWrite.concat('<div class="nested dropdown-content show" id="">')
-					getGroups(groupsInside)
+					// TODO: Write if conditinal, if there is thing inside
+					htmlToWrite = htmlToWrite.concat('<div class="nested dropdown-content show" id="children_', parentId_html, '">')
+					getSpecificationsAndGroups(groupsInside)
 					htmlToWrite = htmlToWrite.concat('</div>')
-					
+
 				}
 			}
 		}
 
+		
+		function getLabels(parents) {
+			// subHtml = ''
+			for (index in parents) {
+				var parent = parents[index]
+				var parentId_html = 'labels_' + parent['id']
+
+				// Add to html
+				htmlToWrite = htmlToWrite.concat('<li class="reqSearcheableObj label" id="', parentId_html, '">', expandIcon, folderIcon, '<div class="truncated-text">', String(parent['name']), '</div>', plusIcon, '</li>')
+				// subHtml.concat(parent['name'])
+				// console.log(parent['name'])
+
+				var labelsInside = labels.filter(x => x['parent'] === parent['id'])
+				
+				htmlToWrite = htmlToWrite.concat('<div class="nested dropdown-content" id="children_', parentId_html, '">')
+				getLabels(labelsInside)
+				
+				var specsInside = specifications.filter(x => x['labels'][0] === parent['id'])
+				for (index in specsInside) {
+					var specification = specsInside[index]
+					// htmlToWrite = htmlToWrite.concat('<div class="nested dropdown-content" id="children_', parentId_html, '">')
+					getSpecificationsAndGroups([specification])
+					// htmlToWrite = htmlToWrite.concat('</div>')
+
+				}
+				htmlToWrite = htmlToWrite.concat('</div>')
+			}
+			// console.log(subHtml)
+		}
 
 		getLabels(labelsRoot)
-		getGroups(specificationsRoot)
-		
+		getSpecificationsAndGroups(specificationsRoot)
+
 
 		htmlToWrite = htmlToWrite.concat('</ul>')
 
@@ -326,6 +327,7 @@ toggle between hiding and showing the dropdown content */
 		console.log('Done Building')
 
 		document.getElementById('requirementTreeInsertButton').innerHTML = htmlToWrite;
+		addTreeListener()
 	}
 
 	// function insertTest123() {
