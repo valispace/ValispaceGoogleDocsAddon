@@ -1,5 +1,7 @@
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
 <script>
+
+
 	$(function () {
 		$('#search-specific-requirement').click(searchSpecificRequirement);
 	});
@@ -134,8 +136,9 @@ toggle between hiding and showing the dropdown content */
 		for (i = 0; i < objects.length; i++) {
 			objects[i].addEventListener("click", function () {
 				console.log('Clicked on Add Element for: ' + this.parentElement.id)
-				google.script.run.withFailureHandler(errorMessage).direct_insert(this.parentElement.id, 'name');
-				// TODO: Insert Property is fixed to text
+				// TODO: Change Function to Generic
+				var requirements = JSON.parse(document.getElementById("requirementsData").getAttribute('data'));
+				google.script.run.withFailureHandler(errorMessage).insertRequirementsInSpec_asText(requirements, this.parentElement.id);
 			});
 		}
 
@@ -287,7 +290,7 @@ toggle between hiding and showing the dropdown content */
 			}
 		}
 
-		
+
 		function getLabels(parents) {
 			// subHtml = ''
 			for (index in parents) {
@@ -300,10 +303,10 @@ toggle between hiding and showing the dropdown content */
 				// console.log(parent['name'])
 
 				var labelsInside = labels.filter(x => x['parent'] === parent['id'])
-				
+
 				htmlToWrite = htmlToWrite.concat('<div class="nested dropdown-content" id="children_', parentId_html, '">')
 				getLabels(labelsInside)
-				
+
 				var specsInside = specifications.filter(x => x['labels'][0] === parent['id'])
 				for (index in specsInside) {
 					var specification = specsInside[index]
