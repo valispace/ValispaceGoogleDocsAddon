@@ -22,6 +22,7 @@
 toggle between hiding and showing the dropdown content */
 	function expandRequirementTree() {
 		document.getElementById("myDropdown").classList.toggle("show");
+		buildRequirementsTree_browser()
 	}
 
 	function expandObjectProperties(objectId) {
@@ -187,9 +188,6 @@ toggle between hiding and showing the dropdown content */
 
 	}
 
-	function addPropertyListener() {
-
-	}
 
 	function updateTree(id, name) {
 		$('#projectTree').html("Loading tree " + name + "....");
@@ -206,23 +204,7 @@ toggle between hiding and showing the dropdown content */
 			.getProjectTree(id);
 	}
 
-	//	function updateRequirementTree(id, name){
-	//	  $('#requirementTree').html("Loading requirements for " + name + "....");
-	//	  google.script.run
-	//		.withSuccessHandler(
-	//		  function(newHtml){
-	//			$('#requirementTree').html(newHtml);
-	//			addTreeListener();
-	//		  }
-	//		)
-	//		.withFailureHandler(
-	//		  function(error){
-	//			$('#requirementTree').html("Failed to load requirement tree. Please try again, if the problem persist contact support@valispace.com");
-	//		  }
-	//		)
-	//		.getRequirementTree(id);
-	//	
-	//	}
+
 
 	function updateAllTrees(projectId, projectName) {
 		$('#projectTree').html("Loading components for " + name + "....");
@@ -237,30 +219,96 @@ toggle between hiding and showing the dropdown content */
 
 	}
 
-	function saveData(projectId, dataType){
-		google.script.run.withSuccessHandler(
-			function (data) {
-				console.log(projectId)
-				document.getElementById(dataType).setAttribute(dataType, JSON.stringify(data));
+
+	function buildRequirementsTree_browser() {
+		console.log('Building Requirement Tree')
+		document.getElementById("updating-status").innerHTML = 'Building Tree'
+		var labels = JSON.parse(document.getElementById("labelsData").getAttribute('data'));
+		var specifications = JSON.parse(document.getElementById("specificationsData").getAttribute('data'));
+		var groups = JSON.parse(document.getElementById("groupsData").getAttribute('data'));
+		var requirements = JSON.parse(document.getElementById("requirementsData").getAttribute('data'));
+
+		// Root
+
+		var labelsRoot = labels.filter(x => x['parent'] === null)
+		var specificationsRoot = specifications.filter(x => x['labels'].length === 0)
+		var root = [labelsRoot, specificationsRoot]
+		// TODO: Add labels and specifications to html
+
+
+		function getLabels(parents) {
+			for (index in parents) {
+				parent = parents[index]
+				console.log(parent['name'])
+				labelsInside = labels.filter(x => x['parent'] === parent['id'])
+				
+				specsInside = specifications.filter(x => x['labels'][0] === parent['id'])
+				for (index in specsInside) {
+					specification = specsInside[index]
+					// console.log(specification['name'])
+					getGroups([specification])
+				}
+				
+				getLabels(labelsInside)
 			}
-		).get_data(projectId, dataType)
+		}
+
+		function getGroups(parents) {
+			for (index in parents) {
+				parent = parents[index]
+				console.log(parent['name'])
+
+				// If Parent is a Specification, it has "requirement_groups"
+				if ("requirement_groups" in parent) {
+					parentId = parent['id']
+					groupsInside = groups.filter(x => x['specification'] === parentId)
+					getGroups(groupsInside)
+				}
+				// If Parent is a Another Group, it has "children"
+				if ("children" in parent) {
+					parentId = parent['id']
+					groupsInside = groups.filter(x => x['parent'] === parentId)
+					getGroups(groupsInside)
+				}
+			}
+		}
+
+
+		// function getChild(elementsIDs){
+		// 	for (index in elements){
+		// 		element = elements[index]
+		// 		console.log(element)
+		// 		if (element['children']){
+		// 			childrenId = element['children']
+		// 			getChild(children)
+		// 		}
+		// 		if (element['requirement_groups']){
+		// 			children = element['requirement_groups']
+		// 			getChild(children)
+		// 		}
+		// 	}
+		// }
+
+		getLabels(labelsRoot)
+		getGroups(specificationsRoot)
+		// console.log(groupsInside)
+		// console.log(specificationsRoot)
+		document.getElementById("updating-status").innerHTML = ''
+		console.log('Done Building')
 	}
 
+	// function insertTest123() {
+	// 	console.log('Trying to insert Requirements')
+	// 	spec_id = 52241
 
+	// 	var requirementsString = document.getElementById('requirementsData').getAttribute('data');
+	// 	var requirements = JSON.parse(requirementsString);
 
-	function insertTest(){
-		console.log('Trying to insert Requirements')
-		spec_id = 19227
-		
-		requirementsString = document.getElementById("requirementsData").getAttribute('requirementsData');
-		requirements = JSON.parse(requirementsString);
-		
-		console.log(requirements)
-		google.script.run.
-		withFailureHandler('failed!')
-		.withSuccessHandler(console.log('inserted!'))
-		.insertRequirementsInSpec_asText(spec_id, requirements)
-	}
-
+	// 	console.log(requirements)
+	// 	google.script.run.
+	// 		withFailureHandler('failed!')
+	// 		.withSuccessHandler(console.log('inserted!'))
+	// 		.insertRequirementsInSpec_asTable2(spec_id, requirements)
+	// }
 
 </script>

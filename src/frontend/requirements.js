@@ -5,16 +5,14 @@ var specificationIcon = '<i class="tree_icon fas fa-book"></i>'
 var folderIcon = '<i class="tree_icon fas fa-folder"></i>'
 var plusIcon = '<i class="add-element fas fa-plus"></i>'
 
-// function buildRequirementTreeHtml() {
-//   // RequirementsTree = getRequirementsTree()
-//   //RequirementsTree.build(true);
-//   html = RequirementsTree.get_html_tree()
-//   // console.log(html)
-//   return html
-// }
+
 
 function get_data(projectId, dataType) {
   switch (dataType) {
+    case 'labelsData':
+      return JSON.parse(getAuthenticatedValispaceUrl('requirements/specifications/labels/?project=' + projectId));
+    case 'specificationsData':
+      return JSON.parse(getAuthenticatedValispaceUrl('requirements/specifications/?project=' + projectId));
     case 'requirementsData':
       return JSON.parse(getAuthenticatedValispaceUrl('requirements/full_list/?project=' + projectId + '&clean_text=text,comment'));
     case 'tagsData':
@@ -23,18 +21,17 @@ function get_data(projectId, dataType) {
       return JSON.parse(getAuthenticatedValispaceUrl('files/?project=' + projectId));
     case 'groupsData':
       return JSON.parse(getAuthenticatedValispaceUrl('requirements/groups/?project=' + projectId));
-    case 'specificationsData':
-      return JSON.parse(getAuthenticatedValispaceUrl('requirements/specifications/?project=' + projectId));
 
   }
 }
 
+// TODO: Move this to a more Generic
 function get_tag(tag_id) {
   return JSON.parse(getAuthenticatedValispaceUrl('tag/' + tag_id + '/'));
 }
 
-function get_requirement(req_id){
-  return JSON.parse(getAuthenticatedValispaceUrl('requirements/'+req_id+'/'));
+function get_requirement(req_id) {
+  return JSON.parse(getAuthenticatedValispaceUrl('requirements/' + req_id + '/'));
 }
 
 function get_specification(spec_id) {
@@ -42,28 +39,27 @@ function get_specification(spec_id) {
 }
 
 
-  
-  function insertRequirementsInSpec_asText(spec_id, requirements){
-    var doc = DocumentApp.getActiveDocument()
-    var body = doc.getBody();
+function insertRequirementsInSpec_asText(spec_id, requirements) {
+  var doc = DocumentApp.getActiveDocument()
+  var body = doc.getBody();
 
-    var text = ''
-    for (req in requirements){
-      if (requirements[req]['specification'] === spec_id){
-        text += requirements[req]['identifier'] + ': '+ requirements[req]['text'] + '\n'
-      }  
+  var text = ''
+  for (req in requirements) {
+    if (requirements[req]['specification'] === spec_id) {
+      text += requirements[req]['identifier'] + ': ' + requirements[req]['text'] + '\n'
     }
-    body.appendParagraph(text)
   }
-
-function buildRequirementTreeHtml() {
-  RequirementsTree = getRequirementsTree()  
-  RequirementsTree.build(true);
-  html = '<ul class="reqTreeMain">'
-  html = html.concat(recursiveFunction(RequirementsTree.root_nodes))
-  html.concat('</ul>')
-  return html
+  body.appendParagraph(text)
 }
+
+// function buildRequirementTreeHtml() {
+//   // RequirementsTree = getRequirementsTree()  
+//   RequirementsTree.build(true);
+//   html = '<ul class="reqTreeMain">'
+//   html = html.concat(recursiveFunction(RequirementsTree.root_nodes))
+//   html.concat('</ul>')
+//   return html
+// }
 
 function recursiveFunction(object, html = '') {
   //  Insert HTML text
@@ -105,47 +101,47 @@ function recursiveFunction(object, html = '') {
   return html
 }
 
-function labelHtml(item, label_id) {
-  var subhtml = ''
-  subhtml = subhtml.concat('<li class="reqSearcheableObj label" id="', label_id, '">', expandIcon, folderIcon, '<div class="truncated-text">', 'Folder: ', String(item.data.name), '</div>', plusIcon, '</li>');
+// function labelHtml(item, label_id) {
+//   var subhtml = ''
+//   subhtml = subhtml.concat('<li class="reqSearcheableObj label" id="', label_id, '">', expandIcon, folderIcon, '<div class="truncated-text">', 'Folder: ', String(item.data.name), '</div>', plusIcon, '</li>');
 
-  return subhtml
-}
+//   return subhtml
+// }
 
-function specificationHtml(item, spec_id) {
-  var subhtml = ''
-  subhtml = subhtml.concat('<li class="reqSearcheableObj specification" id="', spec_id, '">', expandIcon, specificationIcon, '<div class="truncated-text">', 'Specification: ', String(item.data.name), '</div>', plusIcon, '</li>');
+// function specificationHtml(item, spec_id) {
+//   var subhtml = ''
+//   subhtml = subhtml.concat('<li class="reqSearcheableObj specification" id="', spec_id, '">', expandIcon, specificationIcon, '<div class="truncated-text">', 'Specification: ', String(item.data.name), '</div>', plusIcon, '</li>');
 
-  return subhtml
-}
+//   return subhtml
+// }
 
-function groupHtml(item, group_id) {
-  var subhtml = ''
-  subhtml = subhtml.concat('<li class="reqSearcheableObj group" id="', group_id, '">', expandIcon, sectionIcon, '<div class="truncated-text">', 'Section: ', String(item.data.name), '</div>', plusIcon, '</li>');
+// function groupHtml(item, group_id) {
+//   var subhtml = ''
+//   subhtml = subhtml.concat('<li class="reqSearcheableObj group" id="', group_id, '">', expandIcon, sectionIcon, '<div class="truncated-text">', 'Section: ', String(item.data.name), '</div>', plusIcon, '</li>');
 
-  return subhtml
-}
+//   return subhtml
+// }
 
-function requirementHtml(item, requirement_id) {
-  var subhtml = ''
-  if (item.data.title == null) {
-    reqTitle = ''
-  } else {
-    reqTitle = ' - '.concat(String(item.data.title))
-  }
-  subhtml = subhtml.concat('<li class="reqSearcheableObj requirement" id="', requirement_id, '">', expandIcon, reqIcon, '<div class="truncated-text">', String(item.data.identifier), reqTitle, '</div>');
-  subhtml = subhtml.concat('<ul id="', requirement_id, '_properties" class="dropdown-content">');
-  // TODO: Automatically get allowable properties;
-  subhtml = subhtml.concat('<li class="property" id="requirements_', String(item.data.id), '_property_identifier">Identifier</a>');
-  subhtml = subhtml.concat('<li class="property" id="requirements_', String(item.data.id), '_property_title">Title</a>');
-  subhtml = subhtml.concat('<li class="property" id="requirements_', String(item.data.id), '_property_text">Text</a>');
-  subhtml = subhtml.concat('<li class="property" id="requirements_', String(item.data.id), '_property_parent">Parent</a>');
-  subhtml = subhtml.concat('<li class="property" id="requirements_', String(item.data.id), '_property_children">Children</a>');
-  subhtml = subhtml.concat('<li class="property" id="requirements_', String(item.data.id), '_property_section">Section</a>');
-  subhtml = subhtml.concat('<li class="property" id="requirements_', String(item.data.id), '_property_images">Images</a>');
-  subhtml = subhtml.concat('<li class="property" id="requirements_', String(item.data.id), '_property_files">Files</a>');
-  subhtml = subhtml.concat('</ul>');
-  subhtml = subhtml.concat('</li>');
+// function requirementHtml(item, requirement_id) {
+//   var subhtml = ''
+//   if (item.data.title == null) {
+//     reqTitle = ''
+//   } else {
+//     reqTitle = ' - '.concat(String(item.data.title))
+//   }
+//   subhtml = subhtml.concat('<li class="reqSearcheableObj requirement" id="', requirement_id, '">', expandIcon, reqIcon, '<div class="truncated-text">', String(item.data.identifier), reqTitle, '</div>');
+//   subhtml = subhtml.concat('<ul id="', requirement_id, '_properties" class="dropdown-content">');
+//   // TODO: Automatically get allowable properties;
+//   subhtml = subhtml.concat('<li class="property" id="requirements_', String(item.data.id), '_property_identifier">Identifier</a>');
+//   subhtml = subhtml.concat('<li class="property" id="requirements_', String(item.data.id), '_property_title">Title</a>');
+//   subhtml = subhtml.concat('<li class="property" id="requirements_', String(item.data.id), '_property_text">Text</a>');
+//   subhtml = subhtml.concat('<li class="property" id="requirements_', String(item.data.id), '_property_parent">Parent</a>');
+//   subhtml = subhtml.concat('<li class="property" id="requirements_', String(item.data.id), '_property_children">Children</a>');
+//   subhtml = subhtml.concat('<li class="property" id="requirements_', String(item.data.id), '_property_section">Section</a>');
+//   subhtml = subhtml.concat('<li class="property" id="requirements_', String(item.data.id), '_property_images">Images</a>');
+//   subhtml = subhtml.concat('<li class="property" id="requirements_', String(item.data.id), '_property_files">Files</a>');
+//   subhtml = subhtml.concat('</ul>');
+//   subhtml = subhtml.concat('</li>');
 
-  return subhtml
-}
+//   return subhtml
+// }

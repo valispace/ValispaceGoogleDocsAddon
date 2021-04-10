@@ -8,60 +8,22 @@
     updateWorkspacesOptionsScript()
     // getPreviousWorkspace()
 
-    $('#valispace-disconnect').click(disconnectValispaceScript);
-    $('#valispace-options').click(OptionsScript);
-
-    // $('#update-all-valis').click(updateAllValisScript);
-    // $('#update-all-requirements').click(updateAllRequirementsScript);
-
     // Updates List of Workspaces when Refresh button is pressed
     $('#update-workspaces').click(updateWorkspacesOptionsScript);
     // Updates List of Projects when Refresh button is pressed
     $('#update-projects').click(updateProjectOptionsScript);
-
-
-    // $('#update-tree').click(updateSelectedProjectScript);
 
     // Function Triggered when A workspace is selected
     $('#options-workspaces').change(updateSelectedWorkspaceScript);
 
     // Function Triggered when A Project is selected
     $('#options-projects').change(updateSelectedProjectScript);
-    // $('#connectionStatus').html("Not Connected");
+
+    $('#valispace-disconnect').click(disconnectValispaceScript);
+    $('#valispace-options').click(OptionsScript);
 
   });
 
-  // TODO: Remove those if I cannot load previous workspace and project automatically
-  // function setSelectedOption(s, valueSearch) {
-  //   console.log('Try the Selection', String(valueSearch))
-  //   // Loop through all the items in drop down list
-  //   for (i = 0; i < s.options.length; i++) {
-  //     if (s.options[i].value == valueSearch) {
-  //       // Item is found. Set its property and exit
-  //       s.options[i].selected = true;
-  //       break;
-  //     }
-  //   }
-  //   return;
-  // }
-  // function getPreviousWorkspace() {
-  //   google.script.run
-  //     .withSuccessHandler(function (workspaceId) {
-  //       console.log('Previous WOrkspace ID',  workspaceId)
-  //       setSelectedOption(document.getElementById("options-workspaces"), workspaceId);
-  //       console.log('Getting Project')
-  //       getPreviousProject();
-  //     })
-  //     .get_previous_workspace();
-  // }
-  // function getPreviousProject() {
-  //   google.script.run
-  //     .withSuccessHandler(function (projectId) {
-  //       console.log('Previous Project ID',  projectId)
-  //       setSelectedOption(document.getElementById("options-projects", projectId));
-  //     })
-  //     .get_previous_project()
-  // }
 
   function updateWorkspacesOptionsScript() {
     document.getElementById("updating-status").innerHTML = 'Getting Workspaces'
@@ -104,91 +66,48 @@
     var workspaceID = $("#options-workspaces").val();
     var name = $("#options-workspaces option:selected").text();
     updateProjectOptionsScript(workspaceID);
-    google.script.run.set_workspace(workspaceID)
   }
-
-  function getFakeMemory(spec_id) {
-    requirementsString = document.getElementById("fakeMemory").innerHTML;
-    requirements = JSON.parse(requirementsString);
-    table = google.script.run.insertRequirementsInSpec_asTable2(spec_id, requirements)
-    //Logger.log(table)
-    var docTable = body.appendTable(table)
-  }
-
 
 
   function updateSelectedProjectScript() {
 
     clearTreeHtml();
     var projectId = $("#options-projects").val();
+
+    google.script.run.set_project(projectId)
     var projectName = $("#options-projects option:selected").text();
-    // google.script.run.build_requirements_tree(projectId);
-    replaceRequirementsTreeHtml()
+
+
+    // Save All Data in the HTML 
+    console.log('Saving Project Data...')
+    saveData(projectId, 'labelsData') // Folders
     saveData(projectId, 'specificationsData')
     saveData(projectId, 'requirementsData')
-    saveData(projectId, 'groupsData')
+    saveData(projectId, 'groupsData') // Sections
     saveData(projectId, 'tagsData')
     saveData(projectId, 'filesData')
-    // insertTest()
-    google.script.run.set_project(projectId)
+    console.log('Done')
+
+
+    // Build Requirements Tree
+    // TODO: Rename Function
+    // buildRequirementsTree_browser(projectId)
+
+    // addTreeHtml()
+
+  }
+
+  function saveData(projectId, dataType) {
+    google.script.run.withSuccessHandler(
+      function (data) {
+        console.log(projectId)
+        document.getElementById(dataType).setAttribute('data', JSON.stringify(data));
+      }
+    ).get_data(projectId, dataType)
   }
 
   function clearTreeHtml() {
     document.getElementById('requirementTreeInsertButton').innerHTML = '';
-  }
-
-  function insertNewValiScript() {
-    google.script.run
-      .withUserObject(this)
-      .insertVali();
-  }
-
-  function updateAllRequirementsScript() {
-    $('#updating-requirements-status').html("Updating...");
-    google.script.run
-      .withUserObject(this)
-      .withSuccessHandler(
-        function () {
-          $('#updating-requirements-status').html("");
-        }
-      )
-      .withFailureHandler(logError)
-      .updateAllRequirements();
-  }
-
-  function updateAllValisScript() {
-    $('#updating-valis-status').html("Updating...");
-    google.script.run
-      .withUserObject(this)
-      .withSuccessHandler(
-        function () {
-          $('#updating-valis-status').html("");
-        }
-      )
-      .withFailureHandler(logError)
-      .updateValis();
-  }
-
-  function logError(error) {
-    Logger.log(error)
-  }
-
-  function connectValispaceScript() {
-    google.script.run
-      .withUserObject(this)
-      .withSuccessHandler(
-        function (res) {
-          if (res) {
-            $('#connectionStatus').html("Connected");
-            updateWorkspacesOptionsScript();
-          } else {
-            $('#connectionStatus').html("Not connected");
-          }
-        }
-      )
-      .withFailureHandler(errorMessage)
-      .connectValispace();
-
   }
 
   function goToLoginPage() {
@@ -200,7 +119,6 @@
 
   function disconnectValispaceScript() {
     google.script.run.disconnect();
-
   };
 
   function errorMessage(error) {
@@ -214,11 +132,5 @@
       .withSuccessHandler()
       .withFailureHandler(errorMessage)
       .openOptionDialog();
-  }
-
-
-  function showError(msg, element) {
-    var div = $('<div id="error" class="error">' + msg + '</div>');
-    $(element).after(div);
   }
 </script>
