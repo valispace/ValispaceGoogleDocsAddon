@@ -1,0 +1,21 @@
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+<script>
+function connect(){
+        var div = document.getElementById('connectionStatus');
+        div.innerHTML = "Connecting...";         
+        google.script.run
+          .withSuccessHandler(goToMainPage)
+          .withFailureHandler(errorMessage)
+          .valispaceAskToken($('#deployment').val(), $('#username').val(), $('#pass').val());
+      };
+      
+      function errorMessage(error) {
+        var div = document.getElementById('output');
+        div.innerHTML = "Error Connecting.";
+      }
+      
+      function goToMainPage(){
+        google.script.run.goToMainPage() 
+      };
+
+</script>

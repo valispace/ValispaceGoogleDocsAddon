@@ -1,0 +1,242 @@
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+<script>
+	$(function () {
+		$('#search-specific-requirement').click(searchSpecificRequirement);
+	});
+
+	function updateAllReferences() {
+		// TODO: The function inside update_all_values doesn't return anything, so it is not waiting to finish and the updating-status is modified instantly.
+		console.log('clicked on update');
+		document.getElementById("updating-status").innerHTML = 'Updating All References...';
+		google.script.run
+		.withSuccessHandler(document.getElementById("updating-status").innerHTML = '')
+		.update_all_values()
+	}
+
+	function searchSpecificRequirement() {
+		google.script.run.openSearchRequirementDialog()
+	}
+
+
+	/* When the user clicks on the button,
+toggle between hiding and showing the dropdown content */
+	function expandRequirementTree() {
+		document.getElementById("myDropdown").classList.toggle("show");
+	}
+
+	function expandObjectProperties(objectId) {
+		document.getElementById(objectId).classList.toggle("show");
+		// addPropertyListener()
+	}
+
+	// Rename and Repurpose
+	// IN this function the real Requirement Tree will be called and html generated
+	function replaceRequirementsTreeHtml() {
+		document.getElementById("updating-status").innerHTML = 'Updating Tree...';
+		google.script.run.withSuccessHandler(function (htmlToWrite) {
+			document.getElementById('requirementTreeInsertButton').innerHTML = htmlToWrite;
+			addTreeListener()
+			document.getElementById("updating-status").innerHTML = ''
+		}).buildRequirementTreeHtml();
+	}
+
+	function filterFunction() {
+		var input, filter, ul, li, a, i;
+
+		// TODO: How to revert state after searching?
+		// Make All Visible to Search
+		divAll = document.getElementsByClassName('dropdown-content');
+		for (i = 0; i < divAll.length; i++) {
+			// If it is not showing
+			if (!document.getElementById(divAll[i].id).classList.contains('show')) {
+				// divAll[i].style.display = "block"
+				// console.log(divAll[i].id)
+				document.getElementById(divAll[i].id).classList.add("show")
+			}
+
+		}
+
+		input = document.getElementById("myInput");
+		filter = input.value.toUpperCase();
+		div = document.getElementsByClassName('reqSearcheableObj');
+		for (i = 0; i < div.length; i++) {
+			txtValue = div[i].textContent || div[i].innerText;
+			if (txtValue.toUpperCase().indexOf(filter) > -1) {
+				div[i].style.display = "";
+				// console.log(divAll[i].id)
+				// document.getElementById(divAll[i].id).classList.toggle("show")
+			} else {
+				div[i].style.display = "none";
+			}
+		}
+
+		// If Filter Empty, close all
+		if (filter == "") {
+			divAll = document.getElementsByClassName('dropdown-content')
+			for (i = 0; i < divAll.length; i++) {
+				if (document.getElementById(divAll[i].id).classList.contains('show')) {
+					// divAll[i].style.display = "block"
+					// console.log(divAll[i].id)
+					document.getElementById(divAll[i].id).classList.remove("show")
+				}
+			}
+		}
+	}
+
+	// TODO: The listeners should be for the div, not for the LI
+	// Once I separate the div and the Icont, they need to ahve different listeners, sicne they will have different actions
+
+	function addTreeListener() {
+
+
+		// var toggler = document.getElementsByClassName("caret");
+		// var i;
+		// for (i = 0; i < toggler.length; i++) {
+		// 	toggler[i].addEventListener("click", function () {
+		// 		this.parentElement.querySelector(".nested").classList.toggle("active");
+		// 		this.classList.toggle("caret-down");
+
+		// 	});
+		// }
+
+		// var valis = document.getElementsByClassName("vali");
+		// for (i = 0; i < valis.length; i++) {
+		// 	valis[i].addEventListener("click", function () {
+		// 		google.script.run
+		// 			.withFailureHandler(errorMessage)
+		// 			.insertVali(this.id);
+		// 	});
+		// }
+
+		// // Listener to Text - Expand Nested Objects
+		var objects = document.getElementsByClassName("truncated-text", "expand_icon", "tree_icon");
+		for (i = 0; i < objects.length; i++) {
+			objects[i].addEventListener("click", function () {
+				console.log('Clicked on to expand: ' + 'children_' + this.parentElement.id)
+				expandObjectProperties('children_' + this.parentElement.id)
+
+
+				// google.script.run.withFailureHandler(errorMessage).direct_insert(this.id, 'text');
+			});
+		}
+		// merge this with above function, with if conditional (?)
+		var requirements = document.getElementsByClassName("requirements");
+		for (i = 0; i < requirements.length; i++) {
+			requirements[i].addEventListener("click", function () {
+				expandObjectProperties(this.id + '_properties')
+				// google.script.run.withFailureHandler(errorMessage).direct_insert(this.id, 'text');
+				// TODO: Insert Property is fixed to text
+			});
+		}
+		// Listener to Plus Button - Add Element
+		var objects = document.getElementsByClassName("add-element");
+		for (i = 0; i < objects.length; i++) {
+			objects[i].addEventListener("click", function () {
+				console.log('Clicked on Add Element for: ' + this.parentElement.id)
+				google.script.run.withFailureHandler(errorMessage).direct_insert(this.parentElement.id, 'name');
+				// TODO: Insert Property is fixed to text
+			});
+		}
+
+
+		// var labels = document.getElementsByClassName("label");
+		// for (i = 0; i < labels.length; i++) {
+		// 	labels[i].addEventListener("click", function () {
+		// 		labelId = this.id;
+		// 		google.script.run.withFailureHandler(errorMessage).direct_insert(labelId, 'name');
+		// 	});
+		// }
+
+		// var specifications = document.getElementsByClassName("specification");
+		// for (i = 0; i < specifications.length; i++) {
+		// 	specifications[i].addEventListener("click", function () {
+		// 		specId = this.id;
+		// 		google.script.run.withFailureHandler(errorMessage).direct_insert(specId, 'name');
+		// 	});
+		// }
+
+		// var groups = document.getElementsByClassName("group");
+		// for (i = 0; i < groups.length; i++) {
+		// 	groups[i].addEventListener("click", function () {
+		// 		groupId = this.id;
+		// 		google.script.run.withFailureHandler(errorMessage).direct_insert(groupId, 'name');
+		// 	});
+		// }
+
+		
+
+		var properties = document.getElementsByClassName("property");
+		for (i = 0; i < properties.length; i++) {
+			properties[i].addEventListener("click", function () {
+				document.getElementById("updating-status").innerHTML = 'Inserting Element';
+				htmlElementId = this.id.split('_property_');
+				reqId = htmlElementId[0];
+				propertyName = htmlElementId[1];
+				google.script.run
+				.withFailureHandler(errorMessage)
+				.withSuccessHandler(function (error) {document.getElementById("updating-status").innerHTML = ''})
+				.direct_insert(reqId, propertyName);
+				// Reexpand after Insertion ( Workaround )
+				expandObjectProperties(this.parentElement.id)
+			});
+		}
+
+		function errorMessage(error) {
+			//Logger.log(error);
+		}
+
+	}
+
+	function addPropertyListener() {
+
+	}
+
+	function updateTree(id, name) {
+		$('#projectTree').html("Loading tree " + name + "....");
+		google.script.run.withSuccessHandler(
+			function (newHtml) {
+				$('#projectTree').html(newHtml);
+				addTreeListener();
+			}
+		)
+			.withFailureHandler(
+				function (error) {
+					$('#projectTree').html("Failed to load project tree. Please try again, if the problem persist contact support@valispace.com");
+				})
+			.getProjectTree(id);
+	}
+
+	//	function updateRequirementTree(id, name){
+	//	  $('#requirementTree').html("Loading requirements for " + name + "....");
+	//	  google.script.run
+	//		.withSuccessHandler(
+	//		  function(newHtml){
+	//			$('#requirementTree').html(newHtml);
+	//			addTreeListener();
+	//		  }
+	//		)
+	//		.withFailureHandler(
+	//		  function(error){
+	//			$('#requirementTree').html("Failed to load requirement tree. Please try again, if the problem persist contact support@valispace.com");
+	//		  }
+	//		)
+	//		.getRequirementTree(id);
+	//	
+	//	}
+
+	function updateAllTrees(projectId, projectName) {
+		$('#projectTree').html("Loading components for " + name + "....");
+		$('#requirementTree').html("Loading requirements for " + name + "....");
+		google.script.run
+			.withSuccessHandler()
+			.withFailureHandler(
+				function (error) {
+					$('#requirementTree').html("Failed to load requirements. Please try again, if the problem persist contact support@valispace.com");
+				})
+			.getRequirementTree(projectId);
+
+	}
+
+
+
+</script>

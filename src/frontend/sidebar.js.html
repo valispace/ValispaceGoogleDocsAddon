@@ -1,0 +1,223 @@
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+<script>
+  /**
+   * On document load, assign click handlers to each button and try to load the
+   * user's origin and destination language preferences if previously set.
+   */
+  $(function () {
+    updateWorkspacesOptionsScript()
+    // getPreviousWorkspace()
+
+    $('#valispace-disconnect').click(disconnectValispaceScript);
+    $('#valispace-options').click(OptionsScript);
+
+    // $('#update-all-valis').click(updateAllValisScript);
+    // $('#update-all-requirements').click(updateAllRequirementsScript);
+
+    // Updates List of Workspaces when Refresh button is pressed
+    $('#update-workspaces').click(updateWorkspacesOptionsScript);
+    // Updates List of Projects when Refresh button is pressed
+    $('#update-projects').click(updateProjectOptionsScript);
+
+
+    // $('#update-tree').click(updateSelectedProjectScript);
+
+    // Function Triggered when A workspace is selected
+    $('#options-workspaces').change(updateSelectedWorkspaceScript);
+
+    // Function Triggered when A Project is selected
+    $('#options-projects').change(updateSelectedProjectScript);
+    // $('#connectionStatus').html("Not Connected");
+
+  });
+
+  // TODO: Remove those if I cannot load previous workspace and project automatically
+  // function setSelectedOption(s, valueSearch) {
+  //   console.log('Try the Selection', String(valueSearch))
+  //   // Loop through all the items in drop down list
+  //   for (i = 0; i < s.options.length; i++) {
+  //     if (s.options[i].value == valueSearch) {
+  //       // Item is found. Set its property and exit
+  //       s.options[i].selected = true;
+  //       break;
+  //     }
+  //   }
+  //   return;
+  // }
+  // function getPreviousWorkspace() {
+  //   google.script.run
+  //     .withSuccessHandler(function (workspaceId) {
+  //       console.log('Previous WOrkspace ID',  workspaceId)
+  //       setSelectedOption(document.getElementById("options-workspaces"), workspaceId);
+  //       console.log('Getting Project')
+  //       getPreviousProject();
+  //     })
+  //     .get_previous_workspace();
+  // }
+  // function getPreviousProject() {
+  //   google.script.run
+  //     .withSuccessHandler(function (projectId) {
+  //       console.log('Previous Project ID',  projectId)
+  //       setSelectedOption(document.getElementById("options-projects", projectId));
+  //     })
+  //     .get_previous_project()
+  // }
+
+  function updateWorkspacesOptionsScript() {
+    document.getElementById("updating-status").innerHTML = 'Getting Workspaces'
+    google.script.run
+      .withSuccessHandler(function (options) {
+        var insertedHTML = '<option value = "">Select your Workspace</option>';
+        var i;
+        for (i = 0; i < options.length; i++) {
+          insertedHTML += "<option "
+          insertedHTML += 'value="' + options[i].id + '">';
+          insertedHTML += options[i].name;
+          insertedHTML += "</option>"
+        }
+        $('#options-workspaces').html(insertedHTML);
+        document.getElementById("updating-status").innerHTML = ''
+      })
+      .get_workspaces();
+      
+  }
+
+  function updateProjectOptionsScript(workspaceID) {
+    document.getElementById("updating-status").innerHTML = 'Updating Project List'
+    google.script.run
+      .withSuccessHandler(function (options) {
+        var insertedHTML = '<option value = "">Select your Project</option>';
+        var i;
+        for (i = 0; i < options.length; i++) {
+          insertedHTML += "<option "
+          insertedHTML += 'value="' + options[i].id + '">';
+          insertedHTML += options[i].name;
+          insertedHTML += "</option>"
+        }
+        $('#options-projects').html(insertedHTML);
+        document.getElementById("updating-status").innerHTML = ''
+      })
+      .get_projects(workspaceID);
+  }
+
+  function updateSelectedWorkspaceScript() {
+    var workspaceID = $("#options-workspaces").val();
+    var name = $("#options-workspaces option:selected").text();
+    updateProjectOptionsScript(workspaceID);
+    google.script.run.set_workspace(workspaceID)
+  }
+
+  function getFakeMemory(spec_id) {
+    requirementsString = document.getElementById("fakeMemory").innerHTML;
+    requirements = JSON.parse(requirementsString);
+    table = google.script.run.insertRequirementsInSpec_asTable2(spec_id, requirements)
+    //Logger.log(table)
+    var docTable = body.appendTable(table)
+  }
+
+  function updateSelectedProjectScript() {
+
+    clearTreeHtml();
+    var projectId = $("#options-projects").val();
+    var projectName = $("#options-projects option:selected").text();
+    google.script.run.build_requirements_tree(projectId);
+    replaceRequirementsTreeHtml()
+    google.script.run.set_project(projectId)
+    google.script.run.withSuccessHandler(
+      function (requirements) {
+        console.log(projectId)
+        document.getElementById("fakeMemory").setAttribute("fakeMemory", JSON.stringify(requirements));
+      }
+    ).get_requirements(projectId)
+    
+  }
+
+  function clearTreeHtml(){
+    document.getElementById('requirementTreeInsertButton').innerHTML = '';
+  }
+
+  function insertNewValiScript() {
+    google.script.run
+      .withUserObject(this)
+      .insertVali();
+  }
+
+  function updateAllRequirementsScript() {
+    $('#updating-requirements-status').html("Updating...");
+    google.script.run
+      .withUserObject(this)
+      .withSuccessHandler(
+        function () {
+          $('#updating-requirements-status').html("");
+        }
+      )
+      .withFailureHandler(logError)
+      .updateAllRequirements();
+  }
+
+  function updateAllValisScript() {
+    $('#updating-valis-status').html("Updating...");
+    google.script.run
+      .withUserObject(this)
+      .withSuccessHandler(
+        function () {
+          $('#updating-valis-status').html("");
+        }
+      )
+      .withFailureHandler(logError)
+      .updateValis();
+  }
+
+  function logError(error) {
+    Logger.log(error)
+  }
+
+  function connectValispaceScript() {
+    google.script.run
+      .withUserObject(this)
+      .withSuccessHandler(
+        function (res) {
+          if (res) {
+            $('#connectionStatus').html("Connected");
+            updateWorkspacesOptionsScript();
+          } else {
+            $('#connectionStatus').html("Not connected");
+          }
+        }
+      )
+      .withFailureHandler(errorMessage)
+      .connectValispace();
+
+  }
+
+  function goToLoginPage() {
+    google.script.run
+    .withUserObject(this)
+    .withSuccessHandler()
+    .withFailureHandler(errorMessage).goToMainPage()
+  };
+
+  function disconnectValispaceScript() {
+    google.script.run.disconnect();
+
+  };
+
+  function errorMessage(error) {
+    console.log(error);
+  };
+
+  function OptionsScript() {
+    google.script.run.withUserObject(this).openOptionDialog();
+    google.script.run
+      .withUserObject(this)
+      .withSuccessHandler()
+      .withFailureHandler(errorMessage)
+      .openOptionDialog();
+  }
+
+
+  function showError(msg, element) {
+    var div = $('<div id="error" class="error">' + msg + '</div>');
+    $(element).after(div);
+  }
+</script>

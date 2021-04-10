@@ -1,0 +1,52 @@
+<div id="updating-status">
+  <span id="updating-status"></span>
+</div>
+
+<div class="sidebarLine">
+  <p class="selectionTitle">Workspace:</p>
+  <select class="valiButton selecionList" id="options-workspaces"></select>
+  <button mat-raised-button class="valiButton refreshButton" title="Refresh the Workspaces list."
+    id="update-workspaces"><i class="fas fa-sync-alt"></i></button>
+</div>
+
+
+<div class="sidebarLine">
+  <p class="selectionTitle">Project:</p>
+  <select class="valiButton selecionList" id="options-projects"></select>
+  <button mat-raised-button class="valiButton refreshButton" title="Refresh the Projects list." id="update-projects"><i
+      class="fas fa-sync-alt"></i></button>
+</div>
+
+<p id="fakeMemory" style="display: none"></p>
+
+
+<div id="navigationList">
+
+
+  <div class="treeContainer">
+    <div class="treeTitle"><i class="fas fa-clipboard-check"></i> Requirements</div>
+    <div id="requirementTree"></div>
+  </div>
+</div>
+
+<div class="sidebarLine buttonContainer">
+
+
+  <button class="valiButton" id="update-all" onclick="updateAllReferences()">Update everything</button>
+
+  <div class="dropdown">
+    <button onclick="expandRequirementTree()" class="valiButton">View Requirements Tree</button>
+    <div id="myDropdown" class="dropdown-content-main">
+      <input type="text" placeholder="Search.." id="myInput" onkeyup="filterFunction()">
+      <p class="requirementTreeInsertButton" id="requirementTreeInsertButton"></p>
+      <!-- TODO: Rename this class and id -->
+    </div>
+
+  </div>
+
+</div>
+
+<div class="buttonContainer sidebarLine">
+  <button class="valiButton" id="valispace-options"><i class="fas fa-cog"></i></button>
+  <button class="valiButton" id="valispace-disconnect">Disconnect</button>
+</div>
