@@ -79,7 +79,7 @@
         document.getElementById("updating-status").innerHTML = ''
       })
       .get_workspaces();
-      
+
   }
 
   function updateProjectOptionsScript(workspaceID) {
@@ -115,24 +115,25 @@
     var docTable = body.appendTable(table)
   }
 
+
+
   function updateSelectedProjectScript() {
 
     clearTreeHtml();
     var projectId = $("#options-projects").val();
     var projectName = $("#options-projects option:selected").text();
-    google.script.run.build_requirements_tree(projectId);
+    // google.script.run.build_requirements_tree(projectId);
     replaceRequirementsTreeHtml()
+    saveData(projectId, 'specificationsData')
+    saveData(projectId, 'requirementsData')
+    saveData(projectId, 'groupsData')
+    saveData(projectId, 'tagsData')
+    saveData(projectId, 'filesData')
+    // insertTest()
     google.script.run.set_project(projectId)
-    google.script.run.withSuccessHandler(
-      function (requirements) {
-        console.log(projectId)
-        document.getElementById("fakeMemory").setAttribute("fakeMemory", JSON.stringify(requirements));
-      }
-    ).get_requirements(projectId)
-    
   }
 
-  function clearTreeHtml(){
+  function clearTreeHtml() {
     document.getElementById('requirementTreeInsertButton').innerHTML = '';
   }
 
@@ -192,9 +193,9 @@
 
   function goToLoginPage() {
     google.script.run
-    .withUserObject(this)
-    .withSuccessHandler()
-    .withFailureHandler(errorMessage).goToMainPage()
+      .withUserObject(this)
+      .withSuccessHandler()
+      .withFailureHandler(errorMessage).goToMainPage()
   };
 
   function disconnectValispaceScript() {

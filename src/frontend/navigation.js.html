@@ -9,8 +9,8 @@
 		console.log('clicked on update');
 		document.getElementById("updating-status").innerHTML = 'Updating All References...';
 		google.script.run
-		.withSuccessHandler(document.getElementById("updating-status").innerHTML = '')
-		.update_all_values()
+			.withSuccessHandler(document.getElementById("updating-status").innerHTML = '')
+			.update_all_values()
 	}
 
 	function searchSpecificRequirement() {
@@ -163,7 +163,7 @@ toggle between hiding and showing the dropdown content */
 		// 	});
 		// }
 
-		
+
 
 		var properties = document.getElementsByClassName("property");
 		for (i = 0; i < properties.length; i++) {
@@ -173,9 +173,9 @@ toggle between hiding and showing the dropdown content */
 				reqId = htmlElementId[0];
 				propertyName = htmlElementId[1];
 				google.script.run
-				.withFailureHandler(errorMessage)
-				.withSuccessHandler(function (error) {document.getElementById("updating-status").innerHTML = ''})
-				.direct_insert(reqId, propertyName);
+					.withFailureHandler(errorMessage)
+					.withSuccessHandler(function (error) { document.getElementById("updating-status").innerHTML = '' })
+					.direct_insert(reqId, propertyName);
 				// Reexpand after Insertion ( Workaround )
 				expandObjectProperties(this.parentElement.id)
 			});
@@ -237,6 +237,30 @@ toggle between hiding and showing the dropdown content */
 
 	}
 
+	function saveData(projectId, dataType){
+		google.script.run.withSuccessHandler(
+			function (data) {
+				console.log(projectId)
+				document.getElementById(dataType).setAttribute(dataType, JSON.stringify(data));
+			}
+		).get_data(projectId, dataType)
+	}
+
+
+
+	function insertTest(){
+		console.log('Trying to insert Requirements')
+		spec_id = 19227
+		
+		requirementsString = document.getElementById("requirementsData").getAttribute('requirementsData');
+		requirements = JSON.parse(requirementsString);
+		
+		console.log(requirements)
+		google.script.run.
+		withFailureHandler('failed!')
+		.withSuccessHandler(console.log('inserted!'))
+		.insertRequirementsInSpec_asText(spec_id, requirements)
+	}
 
 
 </script>
