@@ -244,6 +244,8 @@ function insertRequirementsInSpec_asTable_fromTemplate(projectId, parentId, requ
   var body = doc.getBody();
   var cursor = doc.getCursor();
 
+  Logger.log(previousTableIndex)
+
   if (previousTableIndex == null) {
     var indexCursor = getCursorIndex(body, cursor);
     if (indexCursor == 0) {
@@ -256,7 +258,7 @@ function insertRequirementsInSpec_asTable_fromTemplate(projectId, parentId, requ
   var docTable = body.insertTable(indexCursor, table)
   var tableIndex = body.getChildIndex(docTable)
 
-  // Logger.log(tableIndex)
+  Logger.log(tableIndex)
 
   // Logger.log('Table Inserted')
   // var tableIndex = body.getChildIndex(docTable)

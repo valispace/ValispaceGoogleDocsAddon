@@ -207,9 +207,9 @@ toggle between hiding and showing the dropdown content */
 							return 1;
 					})
 
-				iteration = 0
-				maxIterations = 10
-				limitNumRows = 500
+				var iteration = 0
+				var maxIterations = 10
+				var limitNumRows = 500
 				// numberofReq = requirementsToInsert.length
 				callInsertRequirement(projectId, parentId, requirementsToInsert, requirements, tags, groups, files)
 
@@ -227,7 +227,7 @@ toggle between hiding and showing the dropdown content */
 								iteration++;
 								if (iteration < maxIterations) {
 									document.getElementById("updating-status").innerHTML = 'Inserting Requirements - Part: ' + (iteration + 1)
-									callInsertRequirement(projectId, parentId, requirementsToInsert, tags, groups, files, previousTableIndex);
+									callInsertRequirement(projectId, parentId, requirementsToInsert,requirements, tags, groups, files, previousTableIndex);
 								}
 							})
 							.insertRequirementsInSpec_asTable_fromTemplate(projectId, parentId, subset, requirements, tags, groups, files, previousTableIndex);
