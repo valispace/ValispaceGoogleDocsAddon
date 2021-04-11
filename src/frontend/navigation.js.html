@@ -191,7 +191,7 @@ toggle between hiding and showing the dropdown content */
 					.withSuccessHandler(function (previousTableIndex) {
 						console.log(previousTableIndex)
 						document.getElementById("updating-status").innerHTML = 'Part 1 Inserted'
-						// google.script.run.insertRequirementsInSpec_asTable_fromTemplate(projectId, parentId, requirementsToInsert.slice(10, 20), tags, groups, files, previousTableIndex)
+						google.script.run.insertRequirementsInSpec_asTable_fromTemplate(projectId, parentId, requirementsToInsert.slice(10, 20), tags, groups, files, previousTableIndex)
 					})
 					// TODO: Change Function to Generic
 					// .insertRequirements_asTable(requirements, this.parentElement.id);

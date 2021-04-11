@@ -162,7 +162,7 @@ function getTemplateTable2(documentId) {
   return [templateTableData, templateTableCellAttributes]
 }
 
-function insertRequirementsInSpec_asTable_fromTemplate(projectId, parentId, requirements, tagsList, groupsList, filesList, previousTableIndex=null) {
+function insertRequirementsInSpec_asTable_fromTemplate(projectId, parentId, requirements, tagsList, groupsList, filesList, previousTableIndex = null) {
 
   // var parent = parent.split("_");
   // var parentType = parent[0].toString();
@@ -233,65 +233,34 @@ function insertRequirementsInSpec_asTable_fromTemplate(projectId, parentId, requ
     }
   }
 
-  // ---------------- Single INSERTION START ----------------
+  // Inserting Table
   var doc = DocumentApp.getActiveDocument();
   var body = doc.getBody();
   var cursor = doc.getCursor();
-  
-  var indexCursor = getCursorIndex(body, cursor)
-  Logger.log('Inserting Table')
 
-  if (indexCursor == 0){
-    indexCursor = 1
-  }
-  
+  if (previousTableIndex == null) {
+    var indexCursor = getCursorIndex(body, cursor);
+    if (indexCursor == 0) {
+      indexCursor = 1;
+    };
+  } else {
+    var indexCursor = previousTableIndex + 1;
+  };
+
   var docTable = body.insertTable(indexCursor, table)
-
   var tableIndex = body.getChildIndex(docTable)
-  
+
+  Logger.log(tableIndex)
+
   Logger.log('Table Inserted')
   // var tableIndex = body.getChildIndex(docTable)
   doc.saveAndClose()
   Logger.log('Saved and Closed')
-  // ---------------- Single INSERTION END ----------------
 
 
-  // ---------------- LOOP INSERTION START ----------------
-  // var doc = DocumentApp.getActiveDocument();
-  // var body = doc.getBody();
-  // var cursor = doc.getCursor();
-  // var indexCursor = getCursorIndex(body, cursor)
-  // var docIndex
-
-  // var rowIndex = 0
-  // rowsLimit = 100000 // TODO Change for Cells limit
-  // while (rowIndex < table.length) {
-  //   var doc = DocumentApp.getActiveDocument();
-  //   var body = doc.getBody();
-
-  //   if (docIndex==null){
-  //     docIndex = indexCursor
-  //   }
-
-  //   // var docTablePartial = insertTablePartial(body, indexCursor, table, rowIndex, cellLimit)
-
-  //   subTable = table.slice(rowIndex,rowIndex+rowsLimit)
-  //   Logger.log('Inserting Table from Row', rowIndex, ' to row ', rowIndex+rowsLimit)
-  //   var docTable = body.insertTable(docIndex, subTable)
-  //   docIndex = body.getChildIndex(docTable)
-
-  //   Logger.log('Table Inserted')
-  //   doc.saveAndClose()
-  //   Logger.log('Saved and Closed')
-  //   rowIndex = rowIndex +rowsLimit
-  // }
-  // ---------------- LOOP INSERTION END ----------------  
-
-  // 
 
   // Formating Table
   tableLength = docTable.getNumRows()
-  Logger.log(tableLength)
   cellLimit = 4000
   rowIndex = 0
   while (rowIndex < tableLength) {
@@ -300,9 +269,16 @@ function insertRequirementsInSpec_asTable_fromTemplate(projectId, parentId, requ
     var doc = DocumentApp.getActiveDocument();
     var body = doc.getBody();
 
-    Logger.log(tableIndex)
     //TODO Chck if child is not a table
     var docTable = body.getChild(tableIndex)
+
+    if (docTable.getType() == DocumentApp.ElementType.PARAGRAPH) {
+      tableIndex = tableIndex + 1;
+      docTable = body.getChild(tableIndex);
+    }
+    Logger.log('Table Index: ' + tableIndex)
+    Logger.log('Child Type: ' + docTable.getType())
+    Logger.log('Child Text: ' + docTable.getText())
 
     Logger.log('Formating Table')
     rowIndex = formatingTable3(docTable, styleTableMapping, templateTableCellAttributes, rowIndex, cellLimit)
