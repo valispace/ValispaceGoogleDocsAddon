@@ -42,9 +42,9 @@ function get_specification(spec_id) {
 function insertRequirementsInSpec_asText(requirements, spec_id) {
   var spec_id = spec_id.split("_")
   spec_id = parseInt(spec_id[spec_id.length - 1])
-  
+
   var reqsInSpec = requirements.filter(x => x['specification'] === spec_id)
-  
+
   var doc = DocumentApp.getActiveDocument()
   var body = doc.getBody();
 
@@ -57,7 +57,7 @@ function insertRequirementsInSpec_asText(requirements, spec_id) {
 }
 
 
-function insertRequirements_asTable(requirements, parent){
+function insertRequirements_asTable(requirements, parent) {
   var parent = parent.split("_");
   var parentType = parent[0].toString();
   var parentId = parseInt(parent[1]);
@@ -65,8 +65,8 @@ function insertRequirements_asTable(requirements, parent){
   Logger.log(parentId)
   Logger.log(parentType)
   // parentId = parseInt(parentId[parentId.length - 1])
-  
-  if (parentType === "specs"){
+
+  if (parentType === "specs") {
     parentType = 'specification'
     var reqsToInsert = requirements.filter(x => x[parentType] === parentId)
   } else if (parentType === "groups") {
@@ -80,19 +80,19 @@ function insertRequirements_asTable(requirements, parent){
   var body = doc.getBody();
   var cursor = doc.getCursor();
   var indexCursor = getCursorIndex(body, cursor)
-  
+
   var cells = []
-  for (req in reqsToInsert){
-    if (reqsToInsert[req][parentType] === parentId){
+  for (req in reqsToInsert) {
+    if (reqsToInsert[req][parentType] === parentId) {
       cells.push([reqsToInsert[req]['identifier'], reqsToInsert[req]['text']])
-    }  
+    }
   }
-  
+
   var docTable = body.insertTable(indexCursor, cells)
-//  return cells
+  //  return cells
 }
 
-function getCursorIndex(body, cursor){
+function getCursorIndex(body, cursor) {
 
   if (cursor) {
     var element = cursor.getElement();
@@ -109,14 +109,38 @@ function getCursorIndex(body, cursor){
   return index
 }
 
-function direct_insert(requirements, parent){
+
+function direct_insert(objectList, parent, property) {
   var parent = parent.split("_");
   var parentType = parent[0].toString();
   var parentId = parseInt(parent[1]);
 
-  doc = DocumentApp.getActiveDocument();
-  body = doc.getBody();
+  // if (parentType === "specs"){
+  //   parentType = 'specification'
+  //   var reqsToInsert = requirements.filter(x => x[parentType] === parentId)
+  // } else if (parentType === "groups") {
+  //   parentType = 'group'
+  //   var reqsToInsert = requirements.filter(x => x[parentType] === parentId)
+  // }
 
+  Logger.log(objectList)
+  Logger.log(parentId)
+  Logger.log(parentType)
+  
+  var object = objectList.find(x => x['id'] === parentId)
+
+  Logger.log(object)
+  var text = ''
+  text += object['name'] + '\n'
+  Logger.log(text)
+
+
+  var doc = DocumentApp.getActiveDocument();
+  var body = doc.getBody();
+  var cursor = doc.getCursor();
+  var indexCursor = getCursorIndex(body, cursor)
+
+  var docTable = body.insertParagraph(indexCursor, text)
 }
 
 

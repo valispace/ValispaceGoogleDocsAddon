@@ -127,7 +127,18 @@ toggle between hiding and showing the dropdown content */
 		for (i = 0; i < objects.length; i++) {
 			objects[i].addEventListener("click", function () {
 				console.log('Clicked on to element: ' + this.parentElement.id)
-				google.script.run.withFailureHandler(errorMessage).direct_insert(this.parentElement.id, 'name');
+				if (this.parentElement.classList.contains('label')){
+					var labels = JSON.parse(document.getElementById("labelsData").getAttribute('data'));
+					google.script.run.withFailureHandler(errorMessage).direct_insert(labels, this.parentElement.id, 'name');
+
+				} else if (this.parentElement.classList.contains('specification')){
+					var specifications = JSON.parse(document.getElementById("specificationsData").getAttribute('data'));
+					google.script.run.withFailureHandler(errorMessage).direct_insert(specifications, this.parentElement.id, 'name');
+					
+				} else if (this.parentElement.classList.contains('group')){
+					var groups = JSON.parse(document.getElementById("groupsData").getAttribute('data'));
+					google.script.run.withFailureHandler(errorMessage).direct_insert(groups, this.parentElement.id, 'name');
+				} 
 			});
 		}
 
