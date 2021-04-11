@@ -93,34 +93,6 @@
     saveData(projectId, 'filesData', 1)
     // IMPORTANT: Last Save data must have a flag 1
 
-    // google.script.run.withSuccessHandler(function (data) {
-    //     document.getElementById('labelsData').setAttribute('data', JSON.stringify(data));
-    //     // document.getElementById("updating-status").innerHTML = ''
-    //   }).get_data(projectId, 'labelsData')
-    //   google.script.run.withSuccessHandler(function (data) {
-    //     document.getElementById('specificationsData').setAttribute('data', JSON.stringify(data));
-    //     // document.getElementById("updating-status").innerHTML = ''
-    //   }).get_data(projectId, 'specificationsData')
-    //   google.script.run.withSuccessHandler(function (data) {
-    //     document.getElementById('requirementsData').setAttribute('data', JSON.stringify(data));
-    //     // document.getElementById("updating-status").innerHTML = ''
-    //   }).get_data(projectId, 'requirementsData')
-    //   google.script.run.withSuccessHandler(function (data) {
-    //     document.getElementById('groupsData').setAttribute('data', JSON.stringify(data));
-    //     // document.getElementById("updating-status").innerHTML = ''
-    //   }).get_data(projectId, 'groupsData')
-    //   google.script.run.withSuccessHandler(function (data) {
-    //     document.getElementById('tagsData').setAttribute('data', JSON.stringify(data));
-    //     // document.getElementById("updating-status").innerHTML = ''
-    //   }).get_data(projectId, 'tagsData')
-    //   google.script.run.withSuccessHandler(function (data) {
-    //     document.getElementById('filesData').setAttribute('data', JSON.stringify(data));
-    //     document.getElementById("updating-status").innerHTML = ''
-    //   }).get_data(projectId, 'filesData')
-
-
-    
-
     console.log('Done')
   }
 
@@ -131,7 +103,7 @@
         // console.log(projectId)
         document.getElementById(dataType).setAttribute('data', JSON.stringify(data));
         if (lastSaveData) {
-          document.getElementById("updating-status").innerHTML = ''
+          document.getElementById("updating-status").innerHTML = '';
           $('#viewRequirementsTree').click(expandRequirementTree);
         }
       }

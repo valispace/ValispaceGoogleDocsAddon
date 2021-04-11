@@ -30,18 +30,24 @@
 	/* When the user clicks on the button,
 toggle between hiding and showing the dropdown content */
 	function expandRequirementTree() {
-		if (!document.getElementById("myDropdown").classList.contains('show')){
-			console.log('It wasnt expanded - Building and Expanding it')
+		if (!document.getElementById("myDropdown").classList.contains('show')) {
 			document.getElementById("updating-status").innerHTML = 'Building Tree...';
 			buildRequirementsTree_browser();
 			getRequirements();
 			addTreeListener()
 			document.getElementById("updating-status").innerHTML = '';
 			document.getElementById("myDropdown").classList.add("show");
-		} else{
-			console.log('It Was already expanded, closing it')
+		} else {
 			document.getElementById("myDropdown").classList.remove("show");
 		}
+	}
+
+	function buildTreeOnProjectSelect() {
+		document.getElementById("updating-status").innerHTML = 'Building Tree...';
+		buildRequirementsTree_browser();
+		getRequirements();
+		addTreeListener()
+		document.getElementById("updating-status").innerHTML = '';
 	}
 
 	function expandObjectProperties(objectId) {
@@ -203,7 +209,7 @@ toggle between hiding and showing the dropdown content */
 
 				iteration = 0
 				maxIterations = 10
-				limitNumRows = 1000
+				limitNumRows = 500
 				// numberofReq = requirementsToInsert.length
 				callInsertRequirement(projectId, parentId, requirementsToInsert, requirements, tags, groups, files)
 
