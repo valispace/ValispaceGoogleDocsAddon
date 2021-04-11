@@ -190,7 +190,7 @@ toggle between hiding and showing the dropdown content */
 				maxIterations = 10
 				limitNumRows = 1000
 				// numberofReq = requirementsToInsert.length
-				callInsertRequirement(projectId, parentId, requirementsToInsert, tags, groups, files)
+				callInsertRequirement(projectId, parentId, requirementsToInsert, requirements, tags, groups, files)
 				// google.script.run
 				// 	.withFailureHandler(function () { document.getElementById("updating-status").innerHTML = 'Error Inserting Part 1' })
 				// 	.withSuccessHandler(function (previousTableIndex) {
@@ -205,7 +205,9 @@ toggle between hiding and showing the dropdown content */
 				// 	// .insertRequirements_asTable(requirements, this.parentElement.id);
 				// 	.insertRequirementsInSpec_asTable_fromTemplate(projectId, parentId, requirementsToInsert.slice(0, 3), tags, groups, files)
 
-				function callInsertRequirement(projectId, parentId, requirementsToInsert, tags, groups, files, previousTableIndex = null) {
+				// TODO: Avoid sending duplicated requirements; Instead of a Subset, I could pass the index only
+				// THis is needed when we are referencing to a requriement that is not in the subset (e.g. as a parent)
+				function callInsertRequirement(projectId, parentId, requirementsToInsert, requirements, tags, groups, files, previousTableIndex = null) {
 					subset = requirementsToInsert.slice(iteration * (limitNumRows), iteration * (limitNumRows) + limitNumRows)
 					console.log(requirementsToInsert.length)
 					if (subset.length > 0) {
@@ -218,7 +220,7 @@ toggle between hiding and showing the dropdown content */
 									callInsertRequirement(projectId, parentId, requirementsToInsert, tags, groups, files, previousTableIndex);
 								}
 							})
-							.insertRequirementsInSpec_asTable_fromTemplate(projectId, parentId, subset, tags, groups, files, previousTableIndex);
+							.insertRequirementsInSpec_asTable_fromTemplate(projectId, parentId, subset, requirements, tags, groups, files, previousTableIndex);
 					} else {
 						document.getElementById("updating-status").innerHTML = '';
 					}

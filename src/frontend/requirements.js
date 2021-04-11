@@ -162,7 +162,7 @@ function getTemplateTable2(documentId) {
   return [templateTableData, templateTableCellAttributes]
 }
 
-function insertRequirementsInSpec_asTable_fromTemplate(projectId, parentId, requirements, tagsList, groupsList, filesList, previousTableIndex = null) {
+function insertRequirementsInSpec_asTable_fromTemplate(projectId, parentId, requirements, requirementsList, tagsList, groupsList, filesList, previousTableIndex = null) {
 
   // var parent = parent.split("_");
   // var parentType = parent[0].toString();
@@ -203,7 +203,13 @@ function insertRequirementsInSpec_asTable_fromTemplate(projectId, parentId, requ
           // Replacing Parent Name
           else if (cellValue.includes('$parents')) {
             //            textToInsert = replaceParents(requirements, req, 'identifier')
-            replaceAttributesWithId('parents', requirements, requirements, req, 'identifier')
+            replaceAttributesWithId('parents', requirementsList, requirements, req, 'identifier')
+            subTableRow.push(textToInsert)
+          }
+          // Replacing Children Name
+          else if (cellValue.includes('$children')) {
+            //            textToInsert = replaceParents(requirements, req, 'identifier')
+            replaceAttributesWithId('children', requirementsList, requirements, req, 'identifier')
             subTableRow.push(textToInsert)
           }
           // Replacing Files Names
