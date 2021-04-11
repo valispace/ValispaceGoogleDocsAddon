@@ -1,6 +1,13 @@
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
 <script>
 
+	var expandIcon = '<i class="expand_icon fas fa-caret-right"></i>'
+	var folderIcon = '<i class="tree_icon fas fa-folder"></i>'
+	var specificationIcon = '<i class="tree_icon fas fa-clipboard-check"></i>'
+	var reqIcon = '<i class="tree_icon far fa-file-alt"></i>'
+	var sectionIcon = '<i class="tree_icon fas fa-list-ul"></i>'
+	var plusIcon = '<i class="add-element fas fa-plus-circle"></i>'
+	// var childAddIcon = '<i class="add-element fas fa-plus"></i>' // 
 
 	$(function () {
 		$('#search-specific-requirement').click(searchSpecificRequirement);
@@ -23,10 +30,12 @@
 	/* When the user clicks on the button,
 toggle between hiding and showing the dropdown content */
 	function expandRequirementTree() {
-		document.getElementById("updating-status").innerHTML = 'Building Tree...'
+		document.getElementById("updating-status").innerHTML = 'Building Tree...';
 		document.getElementById("myDropdown").classList.toggle("show");
-		buildRequirementsTree_browser()
-		document.getElementById("updating-status").innerHTML = ''
+		buildRequirementsTree_browser();
+		getRequirements();
+		addTreeListener()
+		document.getElementById("updating-status").innerHTML = '';
 	}
 
 	function expandObjectProperties(objectId) {
@@ -36,14 +45,14 @@ toggle between hiding and showing the dropdown content */
 
 	// Rename and Repurpose
 	// IN this function the real Requirement Tree will be called and html generated
-	function replaceRequirementsTreeHtml() {
-		document.getElementById("updating-status").innerHTML = 'Updating Tree...';
-		google.script.run.withSuccessHandler(function (htmlToWrite) {
-			document.getElementById('requirementTreeInsertButton').innerHTML = htmlToWrite;
-			addTreeListener()
-			document.getElementById("updating-status").innerHTML = ''
-		}).buildRequirementTreeHtml();
-	}
+	// function replaceRequirementsTreeHtml() {
+	// 	document.getElementById("updating-status").innerHTML = 'Updating Tree...';
+	// 	google.script.run.withSuccessHandler(function (htmlToWrite) {
+	// 		document.getElementById('requirementTreeInsertButton').innerHTML = htmlToWrite;
+	// 		addTreeListener()
+	// 		document.getElementById("updating-status").innerHTML = ''
+	// 	}).buildRequirementTreeHtml();
+	// }
 
 	function filterFunction() {
 		var input, filter, ul, li, a, i;
@@ -113,16 +122,17 @@ toggle between hiding and showing the dropdown content */
 		// 	});
 		// }
 
-		// // Listener to Text - Expand Nested Objects
+		// // Listener to Expand Icon
 		var objects = document.getElementsByClassName("expand_icon");
 		for (i = 0; i < objects.length; i++) {
+			console.log('Added Listener on: '+ objects[i].id)
 			objects[i].addEventListener("click", function () {
-				console.log('Clicked on to expand: ' + 'children_' + this.parentElement.id)
+				console.log('Clicked on to expand: children_' + this.parentElement.id)
 				expandObjectProperties('children_' + this.parentElement.id)
-				// google.script.run.withFailureHandler(errorMessage).direct_insert(this.id, 'text');
 			});
 		}
 
+		// Listener to Text Area
 		var objects = document.getElementsByClassName("truncated-text");
 		for (i = 0; i < objects.length; i++) {
 			objects[i].addEventListener("click", function () {
@@ -146,7 +156,9 @@ toggle between hiding and showing the dropdown content */
 		var requirements = document.getElementsByClassName("requirements");
 		for (i = 0; i < requirements.length; i++) {
 			requirements[i].addEventListener("click", function () {
-				expandObjectProperties(this.id + '_properties')
+
+				// Generate HTML Instead of Expanding an existing node
+				// expandObjectProperties(this.id + '_properties')
 				// google.script.run.withFailureHandler(errorMessage).direct_insert(this.id, 'text');
 				// TODO: Insert Property is fixed to text
 			});
@@ -191,23 +203,12 @@ toggle between hiding and showing the dropdown content */
 				limitNumRows = 1000
 				// numberofReq = requirementsToInsert.length
 				callInsertRequirement(projectId, parentId, requirementsToInsert, requirements, tags, groups, files)
-				// google.script.run
-				// 	.withFailureHandler(function () { document.getElementById("updating-status").innerHTML = 'Error Inserting Part 1' })
-				// 	.withSuccessHandler(function (previousTableIndex) {
-				// 		console.log(previousTableIndex)
-				// 		document.getElementById("updating-status").innerHTML = 'Part 1 Inserted'
-				// 		requirementsToInsert = requirementsToInsert.slice(3, 6)
-				// 		if (requirementsToInsert.length > 0) {
-				// 			google.script.run.insertRequirementsInSpec_asTable_fromTemplate(projectId, parentId, requirementsToInsert, tags, groups, files, previousTableIndex)
-				// 		}
-				// 	})
-				// 	// TODO: Change Function to Generic
-				// 	// .insertRequirements_asTable(requirements, this.parentElement.id);
-				// 	.insertRequirementsInSpec_asTable_fromTemplate(projectId, parentId, requirementsToInsert.slice(0, 3), tags, groups, files)
 
-				// TODO: Avoid sending duplicated requirements; Instead of a Subset, I could pass the index only
-				// THis is needed when we are referencing to a requriement that is not in the subset (e.g. as a parent)
+
+				// Recursive Function to Insert Requirements
 				function callInsertRequirement(projectId, parentId, requirementsToInsert, requirements, tags, groups, files, previousTableIndex = null) {
+					// TODO: Avoid sending duplicated requirements; Instead of a Subset, I could pass the index only - requirementsToInsert and rrequirements
+					// THis is needed when we are referencing to a requriement that is not in the subset (e.g. as a parent)
 					subset = requirementsToInsert.slice(iteration * (limitNumRows), iteration * (limitNumRows) + limitNumRows)
 					console.log(requirementsToInsert.length)
 					if (subset.length > 0) {
@@ -316,21 +317,12 @@ toggle between hiding and showing the dropdown content */
 
 	function buildRequirementsTree_browser() {
 		document.getElementById("updating-status").innerHTML = 'Building Tree...'
-		var expandIcon = '<i class="expand_icon fas fa-caret-right"></i>'
-		var folderIcon = '<i class="tree_icon fas fa-folder"></i>'
-		var specificationIcon = '<i class="tree_icon fas fa-clipboard-check"></i>'
-		var reqIcon = '<i class="tree_icon far fa-file-alt"></i>'
-		var sectionIcon = '<i class="tree_icon fas fa-list-ul"></i>'
-		var plusIcon = '<i class="add-element fas fa-plus-circle"></i>'
-		// var childAddIcon = '<i class="add-element fas fa-plus"></i>' // 
-
 
 		console.log('Building Requirement Tree')
 		document.getElementById("updating-status").innerHTML = 'Building Tree'
 		var labels = JSON.parse(document.getElementById("labelsData").getAttribute('data'));
 		var specifications = JSON.parse(document.getElementById("specificationsData").getAttribute('data'));
 		var groups = JSON.parse(document.getElementById("groupsData").getAttribute('data'));
-		var requirements = JSON.parse(document.getElementById("requirementsData").getAttribute('data'));
 
 
 		// HTML Initial
@@ -375,12 +367,11 @@ toggle between hiding and showing the dropdown content */
 					var groupsInside2 = groups.filter(x => x['parent'] === parentId)
 
 
-					// TODO: Write if conditinal, if there is thing inside
+					htmlToWrite = htmlToWrite.concat('<div class="nested dropdown-content" id="children_', parentId_html, '">')
 					if (groupsInside2.length != 0) {
-						htmlToWrite = htmlToWrite.concat('<div class="nested dropdown-content" id="children_', parentId_html, '">')
 						getSpecificationsAndGroups(groupsInside2)
-						htmlToWrite = htmlToWrite.concat('</div>')
 					}
+					htmlToWrite = htmlToWrite.concat('</div>')
 				}
 			}
 		}
@@ -416,7 +407,11 @@ toggle between hiding and showing the dropdown content */
 			// console.log(subHtml)
 		}
 
+
+
+		console.log('Building Label Roots')
 		getLabels(labelsRoot)
+		console.log('Building SPecification Roots')
 		getSpecificationsAndGroups(specificationsRoot)
 
 
@@ -426,9 +421,42 @@ toggle between hiding and showing the dropdown content */
 		console.log('Done Building')
 
 		document.getElementById('requirementTreeInsertButton').innerHTML = htmlToWrite;
-		addTreeListener()
 		document.getElementById("updating-status").innerHTML = ''
 	}
+
+	function getRequirements() {
+		var requirements = JSON.parse(document.getElementById("requirementsData").getAttribute('data'));
+		for (index in requirements) {
+			var requirement = requirements[index]
+			console.log(requirement['identifier'])
+
+			displayName = requirement['identifier'] + " "+  requirement['title']
+
+			// If Not in a Group ['group'] = null, it is in a specificaiton only
+			if (requirement['group'] == null) {
+				var parentId = 'children_specs_' + requirement['specification'].toString()
+				console.log(parentId)
+				var htmlToWrite = document.getElementById(parentId).innerHTML
+				htmlToWrite = htmlToWrite.concat('<li class="reqSearcheableObj requirement" id="', requirement['id'], '">', reqIcon, '<div class="truncated-text">', displayName, '</div>');
+
+				document.getElementById(parentId).innerHTML = htmlToWrite
+			} else {
+				var parentId = 'children_groups_' + requirement['group'].toString()
+				console.log(parentId)
+				var htmlToWrite = document.getElementById(parentId).innerHTML
+				htmlToWrite = htmlToWrite.concat('<li class="reqSearcheableObj requirement" id="', requirement['id'], '">', reqIcon, '<div class="truncated-text">', displayName, '</div>');
+
+				document.getElementById(parentId).innerHTML = htmlToWrite
+			}
+
+		}
+	}
+	// function addRequirementsFromSpecToTree(requirements){
+	// 	this.parentElement.id
+
+	// 	var requirementsToInser = requirements.filter(x => x['specification'] === parentId)
+
+	// }
 
 	// function insertTest123() {
 	// 	console.log('Trying to insert Requirements')
