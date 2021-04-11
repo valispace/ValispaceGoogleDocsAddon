@@ -134,7 +134,7 @@ toggle between hiding and showing the dropdown content */
 				} else if (this.parentElement.classList.contains('specification')){
 					var specifications = JSON.parse(document.getElementById("specificationsData").getAttribute('data'));
 					google.script.run.withFailureHandler(errorMessage).direct_insert(specifications, this.parentElement.id, 'name');
-					
+
 				} else if (this.parentElement.classList.contains('group')){
 					var groups = JSON.parse(document.getElementById("groupsData").getAttribute('data'));
 					google.script.run.withFailureHandler(errorMessage).direct_insert(groups, this.parentElement.id, 'name');
@@ -157,12 +157,23 @@ toggle between hiding and showing the dropdown content */
 			objects[i].addEventListener("click", function () {
 				document.getElementById("updating-status").innerHTML = 'Inserting Requirements...'
 				console.log('Clicked on Add Element for: ' + this.parentElement.id)
+
+				var projectId = $("#options-projects").val();
+
+				// TODO: Try checking INput to download only the necessary data; Maybe do it on google script
+				var specifications = JSON.parse(document.getElementById("specificationsData").getAttribute('data'));
+				var labels = JSON.parse(document.getElementById("labelsData").getAttribute('data'));
 				var requirements = JSON.parse(document.getElementById("requirementsData").getAttribute('data'));
+				var groups = JSON.parse(document.getElementById("groupsData").getAttribute('data'));
+				var tags = JSON.parse(document.getElementById("tagsData").getAttribute('data'));
+				var files = JSON.parse(document.getElementById("filesData").getAttribute('data'));
+
 				google.script.run
 				.withFailureHandler(errorMessage)
 				.withSuccessHandler(function(){document.getElementById("updating-status").innerHTML = ''})
 				// TODO: Change Function to Generic
-				.insertRequirements_asTable(requirements, this.parentElement.id);
+				// .insertRequirements_asTable(requirements, this.parentElement.id);
+				.insertRequirementsInSpec_asTable_fromTemplate(projectId, this.parentElement.id, requirements, tags, groups, files)
 			});
 		}
 
@@ -257,7 +268,8 @@ toggle between hiding and showing the dropdown content */
 		var specificationIcon = '<i class="tree_icon fas fa-clipboard-check"></i>'
 		var reqIcon = '<i class="tree_icon far fa-file-alt"></i>'
 		var sectionIcon = '<i class="tree_icon fas fa-list-ul"></i>'
-		var plusIcon = '<i class="add-element fas fa-plus"></i>'
+		var plusIcon = '<i class="add-element fas fa-plus-circle"></i>'
+		// var childAddIcon = '<i class="add-element fas fa-plus"></i>' // 
 
 
 		console.log('Building Requirement Tree')

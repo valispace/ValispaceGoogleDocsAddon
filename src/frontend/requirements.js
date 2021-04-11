@@ -1,12 +1,3 @@
-var expandIcon = '<i class="expand_icon fas fa-angle-right"></i>'
-var reqIcon = '<i class="tree_icon far fa-file-alt"></i>'
-var sectionIcon = '<i class="tree_icon fas fa-copy"></i>'
-var specificationIcon = '<i class="tree_icon fas fa-book"></i>'
-var folderIcon = '<i class="tree_icon fas fa-folder"></i>'
-var plusIcon = '<i class="add-element fas fa-plus"></i>'
-
-
-
 function get_data(projectId, dataType) {
   switch (dataType) {
     case 'labelsData':
@@ -126,7 +117,7 @@ function direct_insert(objectList, parent, property) {
   Logger.log(objectList)
   Logger.log(parentId)
   Logger.log(parentType)
-  
+
   var object = objectList.find(x => x['id'] === parentId)
 
   Logger.log(object)
@@ -142,6 +133,237 @@ function direct_insert(objectList, parent, property) {
 
   var docTable = body.insertParagraph(indexCursor, text)
 }
+
+function getTemplateTable2(documentId) {
+  templateTableData = []
+  templateTableCellAttributes = []
+  //  templateTableTextAttributes = []
+
+  var body = DocumentApp.openById(documentId).getBody()
+  table = body.getTables()[0]
+
+  numColumns = table.getRow(0).getNumCells()
+  for (let rowIndex = 0; rowIndex < table.getNumRows(); rowIndex++) {
+    rowData = []
+    rowCellAttributes = []
+    //    rowTextAttributes = []
+
+    for (let columnIndex = 0; columnIndex < numColumns; columnIndex++) {
+      rowData.push(table.getCell(rowIndex, columnIndex).getText())
+      rowCellAttributes.push(table.getCell(rowIndex, columnIndex).getAttributes())
+      //      rowTextAttributes.push(table.getCell(rowIndex, columnIndex).getAttributes())
+    }
+    templateTableData.push(rowData)
+    templateTableCellAttributes.push(rowCellAttributes)
+    //    templateTableTextAttributes.push(rowTextAttributes)
+  }
+
+  //  return [templateTableData, templateTableCellAttributes, templateTableTextAttributes]
+  return [templateTableData, templateTableCellAttributes]
+}
+
+function insertRequirementsInSpec_asTable_fromTemplate(projectId, parent, requirements, tagsList, groupsList, filesList) {
+  Logger.log('Inside Insert Requirement as Table From Template')
+  
+  var parent = parent.split("_");
+  var parentType = parent[0].toString();
+  var parentId = parseInt(parent[1]);
+  // TODO: Fix the Parent ID, I am using only for specification bellow.
+
+  // TODO: Missing other objects list
+
+  // TODO: Get From UserProperties
+  documentId = '1bDQClCWVcvzPARYl5ohGvBgZlQ519NGGCStqizzK-bU';
+  values = getTemplateTable2(documentId)
+  templateTableData = values[0]
+  templateTableCellAttributes = values[1]
+
+  Logger.log('Got Template')
+
+  var table = []
+  var styleTableMapping = []
+
+  for (req in requirements) {
+    if (requirements[req]['specification'] === parentId) {
+      for (let rowIndex = 1; rowIndex < templateTableData.length; rowIndex++) {
+        subTableRow = []
+        subTableStyleRow = []
+        for (let cellIndex = 0; cellIndex < templateTableData[rowIndex].length; cellIndex++) {
+          cellValue = templateTableData[rowIndex][cellIndex]
+          // Replacing Tags (folder) Name
+          if (cellValue.includes('$tags')) {
+            textToInsert = replaceAttributesWithId('tags', tagsList, requirements, req, 'name')
+            subTableRow.push(textToInsert)
+          }
+          // Replacing Group (Section) Name
+          else if (cellValue.includes('$section')) {
+            textToInsert = replaceAttributesWithId('group', groupsList, requirements, req, 'name')
+            subTableRow.push(textToInsert)
+          }
+          // Replacing Parent Name
+          else if (cellValue.includes('$parents')) {
+            //            textToInsert = replaceParents(requirements, req, 'identifier')
+            replaceAttributesWithId('parents', requirements, requirements, req, 'identifier')
+            subTableRow.push(textToInsert)
+          }
+          // Replacing Files Names
+          else if (cellValue.includes('$files')) {
+            reqId = requirements[req]['id']
+            textToInsert = getFilesInRequirement(filesList, reqId)
+            subTableRow.push(textToInsert)
+          }
+          // Replacing Images
+          else if (cellValue.includes('$images')) {
+            reqId = requirements[req]['id']
+            imgBlob = getImagesinFilesInRequirement(filesList, reqId)
+            subTableRow.push(imgBlob)
+          }
+          // Replacing Other Attributes
+          else if (cellValue.includes('$')) {
+            attribute = cellValue.replace('$', '')
+            subTableRow.push(requirements[req][attribute].toString())
+          } else {
+            subTableRow.push(cellValue)
+          }
+          subTableStyleRow.push([[rowIndex], [cellIndex]])
+        }
+        table.push(subTableRow)
+        styleTableMapping.push(subTableStyleRow)
+      }
+    }
+  }
+
+
+  Logger.log('Inserting Table')
+  var doc = DocumentApp.getActiveDocument();
+  var body = doc.getBody();
+  var cursor = doc.getCursor();
+  var indexCursor = getCursorIndex(body, cursor)
+  var docTable = body.insertTable(indexCursor, table)
+  // var tableIndex = body.getChildIndex(docTable)
+  
+  // Logger.log('Table Index', tableIndex)
+  
+
+  doc.saveAndClose()
+  Logger.log('Table Inserted')
+
+
+
+  tableLength = docTable.getNumRows()
+  cellLimit = 4000
+  rowIndex = 0
+  while (rowIndex < tableLength) {
+
+    var doc = DocumentApp.getActiveDocument();
+    var body = doc.getBody();
+    // var cursor = doc.getCursor();
+    // var indexCursor = getCursorIndex(body, cursor)
+
+    //TODO Chck if child is not a table
+    var docTable = body.getChild(indexCursor)
+    Logger.log('Found Table?  ', docTable)
+
+
+    Logger.log('Formating Table')
+    rowIndex = formatingTable3(docTable, styleTableMapping, templateTableCellAttributes, rowIndex, cellLimit)
+    doc.saveAndClose()
+  }
+
+
+  // return [table, styleTableMapping]
+}
+
+
+function replaceAttributesWithId(attribute, objectsList, requirementsList, req, attributeToInsert){
+  objectsIds = requirementsList[req][attribute]
+  textToInsert = ''
+  for (index in objectsIds) {
+    objectId = objectsIds[index]
+//    Logger.log(objectId)
+    var object = objectsList.find(x => x['id'] === objectId)
+    textToInsert += object[attributeToInsert] + ', '
+  }
+  return textToInsert
+}
+
+function getFilesInRequirement(filesList, reqId){
+    
+  textToInsert = ''
+  var filesOnReq = filesList.filter(x => x['object_id'] === reqId)
+  
+  
+  for (fileIndex in filesOnReq) {
+    
+    if (filesOnReq[fileIndex]['file_type']===1){
+      textToInsert += filesOnReq[fileIndex]['name'] + ", "
+    } else if (filesOnReq[fileIndex]['file_type']===2){
+      textToInsert += filesOnReq[fileIndex]['name'] + ", "
+    } else if (filesOnReq[fileIndex]['file_type']===3){
+      referenceFileId = filesOnReq[fileIndex]['reference_file']
+      originalFileId = filesList.find(x => x['id'] === referenceFileId)
+      textToInsert += originalFileId['name'] + ", "
+    } 
+    
+  }
+  return textToInsert
+}
+
+function getImagesinFilesInRequirement(filesList, reqId){
+  
+  textToInsert = ''
+  var filesOnReq = filesList.filter(x => x['object_id'] === reqId & x['mimetype'] === "image/jpeg")
+  
+  for (fileIndex in filesOnReq) {
+    var imageURL = filesOnReq[fileIndex]['download_url']
+    textToInsert += '$START_IMG_URL='+imageURL+'$ENG_IMG_URL '
+//     
+  }
+  return textToInsert
+}
+
+function formatingTable3(table, styleTableMapping, templateTableCellAttributes, startingRow, cellLimit) {
+  counter = 0
+
+  //  Logger.log(startingRow)
+
+  numColumns = table.getRow(0).getNumCells()
+  for (let rowIndex = startingRow; rowIndex < table.getNumRows(); rowIndex++) {
+    for (let columnIndex = 0; columnIndex < numColumns; columnIndex++) {
+      counter += 1
+      cellStyleLocation = styleTableMapping[rowIndex][columnIndex]
+      styleCellAttributes = templateTableCellAttributes[cellStyleLocation[0]][cellStyleLocation[1]]
+      //      styleTextAttributes = templateTableTextAttributes[cellStyleLocation[0]][cellStyleLocation[1]]
+
+      styleCell = {};
+      for (attributeName in styleCellAttributes) {
+        if (styleCellAttributes[attributeName] != null && styleCellAttributes[attributeName] != "") {
+          styleCell[DocumentApp.Attribute[attributeName]] = styleCellAttributes[attributeName]
+        }
+      }
+
+      table.getCell(rowIndex, columnIndex).setAttributes(styleCell)
+
+
+    }
+    if (counter > cellLimit) {
+      return rowIndex
+    }
+  }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 // function buildRequirementTreeHtml() {
