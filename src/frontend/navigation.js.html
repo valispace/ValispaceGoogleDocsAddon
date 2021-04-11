@@ -127,18 +127,18 @@ toggle between hiding and showing the dropdown content */
 		for (i = 0; i < objects.length; i++) {
 			objects[i].addEventListener("click", function () {
 				console.log('Clicked on to element: ' + this.parentElement.id)
-				if (this.parentElement.classList.contains('label')){
+				if (this.parentElement.classList.contains('label')) {
 					var labels = JSON.parse(document.getElementById("labelsData").getAttribute('data'));
 					google.script.run.withFailureHandler(errorMessage).direct_insert(labels, this.parentElement.id, 'name');
 
-				} else if (this.parentElement.classList.contains('specification')){
+				} else if (this.parentElement.classList.contains('specification')) {
 					var specifications = JSON.parse(document.getElementById("specificationsData").getAttribute('data'));
 					google.script.run.withFailureHandler(errorMessage).direct_insert(specifications, this.parentElement.id, 'name');
 
-				} else if (this.parentElement.classList.contains('group')){
+				} else if (this.parentElement.classList.contains('group')) {
 					var groups = JSON.parse(document.getElementById("groupsData").getAttribute('data'));
 					google.script.run.withFailureHandler(errorMessage).direct_insert(groups, this.parentElement.id, 'name');
-				} 
+				}
 			});
 		}
 
@@ -168,12 +168,42 @@ toggle between hiding and showing the dropdown content */
 				var tags = JSON.parse(document.getElementById("tagsData").getAttribute('data'));
 				var files = JSON.parse(document.getElementById("filesData").getAttribute('data'));
 
+				// 
+				// Order Requirements by Identifier - TODO: Function to Select what to order by
+
+				var parent = this.parentElement.id.split("_");
+				var parentType = parent[0].toString();
+				var parentId = parseInt(parent[1]);
+
+				var requirementsToInsert = requirements
+					.filter(x => x['specification'] === parentId)
+					.sort(function (a, b) {
+						if (a.identifier == b.identifier)
+							return 0;
+						if (a.identifier < b.identifier)
+							return -1;
+						if (a.identifier > b.identifier)
+							return 1;
+					})
+
 				google.script.run
-				.withFailureHandler(errorMessage)
-				.withSuccessHandler(function(){document.getElementById("updating-status").innerHTML = ''})
-				// TODO: Change Function to Generic
-				// .insertRequirements_asTable(requirements, this.parentElement.id);
-				.insertRequirementsInSpec_asTable_fromTemplate(projectId, this.parentElement.id, requirements, tags, groups, files)
+					.withFailureHandler(function () { document.getElementById("updating-status").innerHTML = 'Error Inserting Part 1' })
+					.withSuccessHandler(function (previousTableIndex) {
+						console.log(previousTableIndex)
+						document.getElementById("updating-status").innerHTML = 'Part 1 Inserted'
+						// google.script.run.insertRequirementsInSpec_asTable_fromTemplate(projectId, parentId, requirementsToInsert.slice(10, 20), tags, groups, files, previousTableIndex)
+					})
+					// TODO: Change Function to Generic
+					// .insertRequirements_asTable(requirements, this.parentElement.id);
+					.insertRequirementsInSpec_asTable_fromTemplate(projectId, parentId, requirementsToInsert.slice(0, 10), tags, groups, files)
+
+				// google.script.run
+				// 	.withFailureHandler(function () { document.getElementById("updating-status").innerHTML = 'Error Inserting Part 2' })
+				// 	.withSuccessHandler(function () { document.getElementById("updating-status").innerHTML = 'Part 2 Inserted' })
+				// 	// TODO: Change Function to Generic
+				// 	// .insertRequirements_asTable(requirements, this.parentElement.id);
+				// 	.insertRequirementsInSpec_asTable_fromTemplate(projectId, this.parentElement.id, requirementsToInsert.slice(100, 200), tags, groups, files)
+
 			});
 		}
 
@@ -314,7 +344,7 @@ toggle between hiding and showing the dropdown content */
 				// If Parent is a Another Group, it has "children"
 				if ("children" in parent) {
 					var parentId_html = 'groups_' + parent['id']
-					
+
 					htmlToWrite = htmlToWrite.concat('<li class="reqSearcheableObj group" id="', parentId_html, '">', expandIcon, sectionIcon, '<div class="truncated-text">', String(parent['name']), '</div>', plusIcon, '</li>')
 					// subHtml.concat(parent['name'])
 

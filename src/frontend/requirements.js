@@ -41,7 +41,7 @@ function insertRequirementsInSpec_asText(requirements, spec_id) {
 
   var text = ''
   for (req in reqsInSpec) {
-    Logger.log(reqsInSpec[req])
+    // Logger.log(reqsInSpec[req])
     text += reqsInSpec[req]['identifier'] + ': ' + reqsInSpec[req]['text'] + '\n'
   }
   body.appendParagraph(text)
@@ -52,9 +52,9 @@ function insertRequirements_asTable(requirements, parent) {
   var parent = parent.split("_");
   var parentType = parent[0].toString();
   var parentId = parseInt(parent[1]);
-  Logger.log(parent)
-  Logger.log(parentId)
-  Logger.log(parentType)
+  // Logger.log(parent)
+  // Logger.log(parentId)
+  // Logger.log(parentType)
   // parentId = parseInt(parentId[parentId.length - 1])
 
   if (parentType === "specs") {
@@ -114,16 +114,16 @@ function direct_insert(objectList, parent, property) {
   //   var reqsToInsert = requirements.filter(x => x[parentType] === parentId)
   // }
 
-  Logger.log(objectList)
-  Logger.log(parentId)
-  Logger.log(parentType)
+  // Logger.log(objectList)
+  // Logger.log(parentId)
+  // Logger.log(parentType)
 
   var object = objectList.find(x => x['id'] === parentId)
 
-  Logger.log(object)
+  // Logger.log(object)
   var text = ''
   text += object['name'] + '\n'
-  Logger.log(text)
+  // Logger.log(text)
 
 
   var doc = DocumentApp.getActiveDocument();
@@ -162,12 +162,11 @@ function getTemplateTable2(documentId) {
   return [templateTableData, templateTableCellAttributes]
 }
 
-function insertRequirementsInSpec_asTable_fromTemplate(projectId, parent, requirements, tagsList, groupsList, filesList) {
-  Logger.log('Inside Insert Requirement as Table From Template')
-  
-  var parent = parent.split("_");
-  var parentType = parent[0].toString();
-  var parentId = parseInt(parent[1]);
+function insertRequirementsInSpec_asTable_fromTemplate(projectId, parentId, requirements, tagsList, groupsList, filesList, previousTableIndex=null) {
+
+  // var parent = parent.split("_");
+  // var parentType = parent[0].toString();
+  // var parentId = parseInt(parent[1]);
   // TODO: Fix the Parent ID, I am using only for specification bellow.
 
   // TODO: Missing other objects list
@@ -178,10 +177,11 @@ function insertRequirementsInSpec_asTable_fromTemplate(projectId, parent, requir
   templateTableData = values[0]
   templateTableCellAttributes = values[1]
 
-  Logger.log('Got Template')
+  // Logger.log('Got Template')
 
   var table = []
   var styleTableMapping = []
+
 
   for (req in requirements) {
     if (requirements[req]['specification'] === parentId) {
@@ -233,93 +233,190 @@ function insertRequirementsInSpec_asTable_fromTemplate(projectId, parent, requir
     }
   }
 
-
-  Logger.log('Inserting Table')
+  // ---------------- Single INSERTION START ----------------
   var doc = DocumentApp.getActiveDocument();
   var body = doc.getBody();
   var cursor = doc.getCursor();
+  
   var indexCursor = getCursorIndex(body, cursor)
+  Logger.log('Inserting Table')
+
+  if (indexCursor == 0){
+    indexCursor = 1
+  }
+  
   var docTable = body.insertTable(indexCursor, table)
-  // var tableIndex = body.getChildIndex(docTable)
-  
-  // Logger.log('Table Index', tableIndex)
-  
 
-  doc.saveAndClose()
+  var tableIndex = body.getChildIndex(docTable)
+  
   Logger.log('Table Inserted')
+  // var tableIndex = body.getChildIndex(docTable)
+  doc.saveAndClose()
+  Logger.log('Saved and Closed')
+  // ---------------- Single INSERTION END ----------------
 
 
+  // ---------------- LOOP INSERTION START ----------------
+  // var doc = DocumentApp.getActiveDocument();
+  // var body = doc.getBody();
+  // var cursor = doc.getCursor();
+  // var indexCursor = getCursorIndex(body, cursor)
+  // var docIndex
 
+  // var rowIndex = 0
+  // rowsLimit = 100000 // TODO Change for Cells limit
+  // while (rowIndex < table.length) {
+  //   var doc = DocumentApp.getActiveDocument();
+  //   var body = doc.getBody();
+
+  //   if (docIndex==null){
+  //     docIndex = indexCursor
+  //   }
+
+  //   // var docTablePartial = insertTablePartial(body, indexCursor, table, rowIndex, cellLimit)
+
+  //   subTable = table.slice(rowIndex,rowIndex+rowsLimit)
+  //   Logger.log('Inserting Table from Row', rowIndex, ' to row ', rowIndex+rowsLimit)
+  //   var docTable = body.insertTable(docIndex, subTable)
+  //   docIndex = body.getChildIndex(docTable)
+
+  //   Logger.log('Table Inserted')
+  //   doc.saveAndClose()
+  //   Logger.log('Saved and Closed')
+  //   rowIndex = rowIndex +rowsLimit
+  // }
+  // ---------------- LOOP INSERTION END ----------------  
+
+  // 
+
+  // Formating Table
   tableLength = docTable.getNumRows()
+  Logger.log(tableLength)
   cellLimit = 4000
   rowIndex = 0
   while (rowIndex < tableLength) {
 
+
     var doc = DocumentApp.getActiveDocument();
     var body = doc.getBody();
-    // var cursor = doc.getCursor();
-    // var indexCursor = getCursorIndex(body, cursor)
 
+    Logger.log(tableIndex)
     //TODO Chck if child is not a table
-    var docTable = body.getChild(indexCursor)
-    Logger.log('Found Table?  ', docTable)
-
+    var docTable = body.getChild(tableIndex)
 
     Logger.log('Formating Table')
     rowIndex = formatingTable3(docTable, styleTableMapping, templateTableCellAttributes, rowIndex, cellLimit)
+    Logger.log('Table Formated')
     doc.saveAndClose()
+    Logger.log('Saved and Closed')
+
   }
 
+  // TODO: Put this Function inside the Loop and work with cell, instead of entire table
+  var doc = DocumentApp.getActiveDocument();
+  var body = doc.getBody();
+  var docTable = body.getChild(indexCursor)
+  findAndReplaceImages(body, docTable)
+  doc.saveAndClose()
 
+  return tableIndex
   // return [table, styleTableMapping]
 }
 
 
-function replaceAttributesWithId(attribute, objectsList, requirementsList, req, attributeToInsert){
+function replaceAttributesWithId(attribute, objectsList, requirementsList, req, attributeToInsert) {
   objectsIds = requirementsList[req][attribute]
   textToInsert = ''
   for (index in objectsIds) {
     objectId = objectsIds[index]
-//    Logger.log(objectId)
+    //    Logger.log(objectId)
     var object = objectsList.find(x => x['id'] === objectId)
     textToInsert += object[attributeToInsert] + ', '
   }
   return textToInsert
 }
 
-function getFilesInRequirement(filesList, reqId){
-    
+function getFilesInRequirement(filesList, reqId) {
+
   textToInsert = ''
   var filesOnReq = filesList.filter(x => x['object_id'] === reqId)
-  
-  
+
+
   for (fileIndex in filesOnReq) {
-    
-    if (filesOnReq[fileIndex]['file_type']===1){
+
+    if (filesOnReq[fileIndex]['file_type'] === 1) {
       textToInsert += filesOnReq[fileIndex]['name'] + ", "
-    } else if (filesOnReq[fileIndex]['file_type']===2){
+    } else if (filesOnReq[fileIndex]['file_type'] === 2) {
       textToInsert += filesOnReq[fileIndex]['name'] + ", "
-    } else if (filesOnReq[fileIndex]['file_type']===3){
+    } else if (filesOnReq[fileIndex]['file_type'] === 3) {
       referenceFileId = filesOnReq[fileIndex]['reference_file']
       originalFileId = filesList.find(x => x['id'] === referenceFileId)
       textToInsert += originalFileId['name'] + ", "
-    } 
-    
+    }
+
   }
   return textToInsert
 }
 
-function getImagesinFilesInRequirement(filesList, reqId){
-  
+function getImagesinFilesInRequirement(filesList, reqId) {
+
   textToInsert = ''
   var filesOnReq = filesList.filter(x => x['object_id'] === reqId & x['mimetype'] === "image/jpeg")
-  
+
+  // Logger.log('Files on Req:', filesOnReq)
+
   for (fileIndex in filesOnReq) {
     var imageURL = filesOnReq[fileIndex]['download_url']
-    textToInsert += '$START_IMG_URL='+imageURL+'$ENG_IMG_URL '
-//     
+    textToInsert += '$START_IMG_URL=' + imageURL + '$ENG_IMG_URL '
+    //     
   }
   return textToInsert
+}
+
+function escapeRegExp(text) {
+  return text.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&');
+}
+
+function replaceImagesURLToFile(body, text) {
+
+
+  var image_urls = text.split('$ENG_IMG_URL')
+
+  for (index in image_urls) {
+    var url = image_urls[index]
+    if (url.includes('$START_IMG_URL')) {
+
+      url = url.split('$START_IMG_URL=')[1]
+      //      Logger.log(url)
+
+      var imgBlob = UrlFetchApp.fetch(url).getBlob();
+
+      var searchText = '$START_IMG_URL=' + url + '$ENG_IMG_URL'
+      searchText = escapeRegExp(searchText)
+      // Logger.log(searchText)
+
+      var element = body.findText(searchText);
+      // Logger.log(element)
+
+      if (element != null) {
+        var textElement = element.getElement();
+        var img = textElement.getParent().asParagraph().insertInlineImage(0, imgBlob);
+        body.replaceText(searchText, '');
+      }
+    }
+  }
+}
+
+function findAndReplaceImages(body, table) {
+
+  for (let rowIndex = 0; rowIndex < table.getNumRows(); rowIndex++) {
+    for (let columnIndex = 0; columnIndex < numColumns; columnIndex++) {
+      cellContent = table.getCell(rowIndex, columnIndex).getText()
+      if (cellContent.includes('$START_IMG_URL=')) {
+        replaceImagesURLToFile(body, cellContent)
+      }
+    }
+  }
 }
 
 function formatingTable3(table, styleTableMapping, templateTableCellAttributes, startingRow, cellLimit) {
