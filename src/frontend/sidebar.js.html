@@ -70,6 +70,10 @@
 
 
   function updateSelectedProjectScript() {
+    // Disable View Requirements Tree Button and Closes DropDown Div
+    $('#viewRequirementsTree').off()
+    document.getElementById("myDropdown").classList.remove("show");
+
     document.getElementById("updating-status").innerHTML = 'Downloading Data...'
 
     clearTreeHtml();
@@ -87,6 +91,7 @@
     saveData(projectId, 'groupsData') // Sections
     saveData(projectId, 'tagsData')
     saveData(projectId, 'filesData', 1)
+    // IMPORTANT: Last Save data must have a flag 1
 
     // google.script.run.withSuccessHandler(function (data) {
     //     document.getElementById('labelsData').setAttribute('data', JSON.stringify(data));
@@ -114,17 +119,20 @@
     //   }).get_data(projectId, 'filesData')
 
 
+    
+
     console.log('Done')
   }
 
-  function saveData(projectId, dataType, clearStatusFlag=0) {
+  function saveData(projectId, dataType, lastSaveData=0) {
     // document.getElementById("updating-status").innerHTML = 'Downloading Data...'
     google.script.run.withSuccessHandler(
       function (data) {
         // console.log(projectId)
         document.getElementById(dataType).setAttribute('data', JSON.stringify(data));
-        if (clearStatusFlag) {
+        if (lastSaveData) {
           document.getElementById("updating-status").innerHTML = ''
+          $('#viewRequirementsTree').click(expandRequirementTree);
         }
       }
     ).get_data(projectId, dataType)

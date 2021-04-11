@@ -30,12 +30,18 @@
 	/* When the user clicks on the button,
 toggle between hiding and showing the dropdown content */
 	function expandRequirementTree() {
-		document.getElementById("updating-status").innerHTML = 'Building Tree...';
-		document.getElementById("myDropdown").classList.toggle("show");
-		buildRequirementsTree_browser();
-		getRequirements();
-		addTreeListener()
-		document.getElementById("updating-status").innerHTML = '';
+		if (!document.getElementById("myDropdown").classList.contains('show')){
+			console.log('It wasnt expanded - Building and Expanding it')
+			document.getElementById("updating-status").innerHTML = 'Building Tree...';
+			buildRequirementsTree_browser();
+			getRequirements();
+			addTreeListener()
+			document.getElementById("updating-status").innerHTML = '';
+			document.getElementById("myDropdown").classList.add("show");
+		} else{
+			console.log('It Was already expanded, closing it')
+			document.getElementById("myDropdown").classList.remove("show");
+		}
 	}
 
 	function expandObjectProperties(objectId) {
@@ -64,7 +70,6 @@ toggle between hiding and showing the dropdown content */
 			// If it is not showing
 			if (!document.getElementById(divAll[i].id).classList.contains('show')) {
 				// divAll[i].style.display = "block"
-				// console.log(divAll[i].id)
 				document.getElementById(divAll[i].id).classList.add("show")
 			}
 
@@ -77,7 +82,6 @@ toggle between hiding and showing the dropdown content */
 			txtValue = div[i].textContent || div[i].innerText;
 			if (txtValue.toUpperCase().indexOf(filter) > -1) {
 				div[i].style.display = "";
-				// console.log(divAll[i].id)
 				// document.getElementById(divAll[i].id).classList.toggle("show")
 			} else {
 				div[i].style.display = "none";
@@ -90,7 +94,6 @@ toggle between hiding and showing the dropdown content */
 			for (i = 0; i < divAll.length; i++) {
 				if (document.getElementById(divAll[i].id).classList.contains('show')) {
 					// divAll[i].style.display = "block"
-					// console.log(divAll[i].id)
 					document.getElementById(divAll[i].id).classList.remove("show")
 				}
 			}
@@ -125,9 +128,9 @@ toggle between hiding and showing the dropdown content */
 		// // Listener to Expand Icon
 		var objects = document.getElementsByClassName("expand_icon");
 		for (i = 0; i < objects.length; i++) {
-			console.log('Added Listener on: '+ objects[i].id)
+			// console.log('Added Listener on: '+ objects[i].id)
 			objects[i].addEventListener("click", function () {
-				console.log('Clicked on to expand: children_' + this.parentElement.id)
+				// console.log('Clicked on to expand: children_' + this.parentElement.id)
 				expandObjectProperties('children_' + this.parentElement.id)
 			});
 		}
@@ -136,7 +139,7 @@ toggle between hiding and showing the dropdown content */
 		var objects = document.getElementsByClassName("truncated-text");
 		for (i = 0; i < objects.length; i++) {
 			objects[i].addEventListener("click", function () {
-				console.log('Clicked on to element: ' + this.parentElement.id)
+				// console.log('Clicked on to element: ' + this.parentElement.id)
 				if (this.parentElement.classList.contains('label')) {
 					var labels = JSON.parse(document.getElementById("labelsData").getAttribute('data'));
 					google.script.run.withFailureHandler(errorMessage).direct_insert(labels, this.parentElement.id, 'name');
@@ -168,7 +171,7 @@ toggle between hiding and showing the dropdown content */
 		for (i = 0; i < objects.length; i++) {
 			objects[i].addEventListener("click", function () {
 				document.getElementById("updating-status").innerHTML = 'Inserting Requirements...'
-				console.log('Clicked on Add Element for: ' + this.parentElement.id)
+				// console.log('Clicked on Add Element for: ' + this.parentElement.id)
 
 				var projectId = $("#options-projects").val();
 
@@ -210,7 +213,7 @@ toggle between hiding and showing the dropdown content */
 					// TODO: Avoid sending duplicated requirements; Instead of a Subset, I could pass the index only - requirementsToInsert and rrequirements
 					// THis is needed when we are referencing to a requriement that is not in the subset (e.g. as a parent)
 					subset = requirementsToInsert.slice(iteration * (limitNumRows), iteration * (limitNumRows) + limitNumRows)
-					console.log(requirementsToInsert.length)
+					// console.log(requirementsToInsert.length)
 					if (subset.length > 0) {
 						google.script.run
 							.withFailureHandler(function () { document.getElementById("updating-status").innerHTML = 'Error Inserting Part ' + iteration })
@@ -318,8 +321,7 @@ toggle between hiding and showing the dropdown content */
 	function buildRequirementsTree_browser() {
 		document.getElementById("updating-status").innerHTML = 'Building Tree...'
 
-		console.log('Building Requirement Tree')
-		document.getElementById("updating-status").innerHTML = 'Building Tree'
+		// console.log('Building Requirement Tree')
 		var labels = JSON.parse(document.getElementById("labelsData").getAttribute('data'));
 		var specifications = JSON.parse(document.getElementById("specificationsData").getAttribute('data'));
 		var groups = JSON.parse(document.getElementById("groupsData").getAttribute('data'));
@@ -409,16 +411,16 @@ toggle between hiding and showing the dropdown content */
 
 
 
-		console.log('Building Label Roots')
+		// console.log('Building Label Roots')
 		getLabels(labelsRoot)
-		console.log('Building SPecification Roots')
+		// console.log('Building SPecification Roots')
 		getSpecificationsAndGroups(specificationsRoot)
 
 
 		htmlToWrite = htmlToWrite.concat('</ul>')
 
 		document.getElementById("updating-status").innerHTML = ''
-		console.log('Done Building')
+		// console.log('Done Building')
 
 		document.getElementById('requirementTreeInsertButton').innerHTML = htmlToWrite;
 		document.getElementById("updating-status").innerHTML = ''
@@ -428,21 +430,21 @@ toggle between hiding and showing the dropdown content */
 		var requirements = JSON.parse(document.getElementById("requirementsData").getAttribute('data'));
 		for (index in requirements) {
 			var requirement = requirements[index]
-			console.log(requirement['identifier'])
+			// console.log(requirement['identifier'])
 
-			displayName = requirement['identifier'] + " "+  requirement['title']
+			displayName = requirement['identifier'] + " " + requirement['title']
 
 			// If Not in a Group ['group'] = null, it is in a specificaiton only
 			if (requirement['group'] == null) {
 				var parentId = 'children_specs_' + requirement['specification'].toString()
-				console.log(parentId)
+				// console.log(parentId)
 				var htmlToWrite = document.getElementById(parentId).innerHTML
 				htmlToWrite = htmlToWrite.concat('<li class="reqSearcheableObj requirement" id="', requirement['id'], '">', reqIcon, '<div class="truncated-text">', displayName, '</div>');
 
 				document.getElementById(parentId).innerHTML = htmlToWrite
 			} else {
 				var parentId = 'children_groups_' + requirement['group'].toString()
-				console.log(parentId)
+				// console.log(parentId)
 				var htmlToWrite = document.getElementById(parentId).innerHTML
 				htmlToWrite = htmlToWrite.concat('<li class="reqSearcheableObj requirement" id="', requirement['id'], '">', reqIcon, '<div class="truncated-text">', displayName, '</div>');
 
