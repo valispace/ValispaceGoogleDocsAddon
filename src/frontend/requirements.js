@@ -250,12 +250,12 @@ function insertRequirementsInSpec_asTable_fromTemplate(projectId, parentId, requ
   var docTable = body.insertTable(indexCursor, table)
   var tableIndex = body.getChildIndex(docTable)
 
-  Logger.log(tableIndex)
+  // Logger.log(tableIndex)
 
-  Logger.log('Table Inserted')
+  // Logger.log('Table Inserted')
   // var tableIndex = body.getChildIndex(docTable)
   doc.saveAndClose()
-  Logger.log('Saved and Closed')
+  // Logger.log('Saved and Closed')
 
 
 
@@ -276,22 +276,25 @@ function insertRequirementsInSpec_asTable_fromTemplate(projectId, parentId, requ
       tableIndex = tableIndex + 1;
       docTable = body.getChild(tableIndex);
     }
-    Logger.log('Table Index: ' + tableIndex)
-    Logger.log('Child Type: ' + docTable.getType())
-    Logger.log('Child Text: ' + docTable.getText())
+    // Logger.log('Table Index: ' + tableIndex)
+    // Logger.log('Child Type: ' + docTable.getType())
+    // Logger.log('Child Text: ' + docTable.getText())
 
-    Logger.log('Formating Table')
+    // Logger.log('Formating Table')
     rowIndex = formatingTable3(docTable, styleTableMapping, templateTableCellAttributes, rowIndex, cellLimit)
-    Logger.log('Table Formated')
+    // Logger.log('Table Formated')
     doc.saveAndClose()
-    Logger.log('Saved and Closed')
+    // Logger.log('Saved and Closed')
 
   }
 
   // TODO: Put this Function inside the Loop and work with cell, instead of entire table
   var doc = DocumentApp.getActiveDocument();
   var body = doc.getBody();
-  var docTable = body.getChild(indexCursor)
+  var docTable = body.getChild(tableIndex)
+  Logger.log('Table Index: ' + tableIndex)
+  Logger.log('Child Type: ' + docTable.getType())
+  Logger.log('Child Text: ' + docTable.getText())
   findAndReplaceImages(body, docTable)
   doc.saveAndClose()
 

@@ -186,23 +186,43 @@ toggle between hiding and showing the dropdown content */
 							return 1;
 					})
 
-				google.script.run
-					.withFailureHandler(function () { document.getElementById("updating-status").innerHTML = 'Error Inserting Part 1' })
-					.withSuccessHandler(function (previousTableIndex) {
-						console.log(previousTableIndex)
-						document.getElementById("updating-status").innerHTML = 'Part 1 Inserted'
-						google.script.run.insertRequirementsInSpec_asTable_fromTemplate(projectId, parentId, requirementsToInsert.slice(10, 20), tags, groups, files, previousTableIndex)
-					})
-					// TODO: Change Function to Generic
-					// .insertRequirements_asTable(requirements, this.parentElement.id);
-					.insertRequirementsInSpec_asTable_fromTemplate(projectId, parentId, requirementsToInsert.slice(0, 10), tags, groups, files)
-
+				iteration = 0
+				maxIterations = 10
+				limitNumRows = 1000
+				// numberofReq = requirementsToInsert.length
+				callInsertRequirement(projectId, parentId, requirementsToInsert, tags, groups, files)
 				// google.script.run
-				// 	.withFailureHandler(function () { document.getElementById("updating-status").innerHTML = 'Error Inserting Part 2' })
-				// 	.withSuccessHandler(function () { document.getElementById("updating-status").innerHTML = 'Part 2 Inserted' })
+				// 	.withFailureHandler(function () { document.getElementById("updating-status").innerHTML = 'Error Inserting Part 1' })
+				// 	.withSuccessHandler(function (previousTableIndex) {
+				// 		console.log(previousTableIndex)
+				// 		document.getElementById("updating-status").innerHTML = 'Part 1 Inserted'
+				// 		requirementsToInsert = requirementsToInsert.slice(3, 6)
+				// 		if (requirementsToInsert.length > 0) {
+				// 			google.script.run.insertRequirementsInSpec_asTable_fromTemplate(projectId, parentId, requirementsToInsert, tags, groups, files, previousTableIndex)
+				// 		}
+				// 	})
 				// 	// TODO: Change Function to Generic
 				// 	// .insertRequirements_asTable(requirements, this.parentElement.id);
-				// 	.insertRequirementsInSpec_asTable_fromTemplate(projectId, this.parentElement.id, requirementsToInsert.slice(100, 200), tags, groups, files)
+				// 	.insertRequirementsInSpec_asTable_fromTemplate(projectId, parentId, requirementsToInsert.slice(0, 3), tags, groups, files)
+
+				function callInsertRequirement(projectId, parentId, requirementsToInsert, tags, groups, files, previousTableIndex = null) {
+					subset = requirementsToInsert.slice(iteration * (limitNumRows), iteration * (limitNumRows) + limitNumRows)
+					console.log(requirementsToInsert.length)
+					if (subset.length > 0) {
+						google.script.run
+							.withFailureHandler(function () { document.getElementById("updating-status").innerHTML = 'Error Inserting Part ' + iteration })
+							.withSuccessHandler(function (previousTableIndex) {
+								iteration++;
+								if (iteration < maxIterations) {
+									document.getElementById("updating-status").innerHTML = 'Inserting Requirements - Part: ' + (iteration + 1)
+									callInsertRequirement(projectId, parentId, requirementsToInsert, tags, groups, files, previousTableIndex);
+								}
+							})
+							.insertRequirementsInSpec_asTable_fromTemplate(projectId, parentId, subset, tags, groups, files, previousTableIndex);
+					} else {
+						document.getElementById("updating-status").innerHTML = '';
+					}
+				}
 
 			});
 		}
@@ -255,6 +275,7 @@ toggle between hiding and showing the dropdown content */
 		}
 
 	}
+
 
 
 	function updateTree(id, name) {
