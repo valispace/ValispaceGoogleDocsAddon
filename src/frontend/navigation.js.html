@@ -7,6 +7,7 @@
 	var reqIcon = '<i class="tree_icon far fa-file-alt"></i>'
 	var sectionIcon = '<i class="tree_icon fas fa-list-ul"></i>'
 	var plusIcon = '<i class="add-element fas fa-plus-circle"></i>'
+	var propertiesIcon = '<i class="show-properties fas fa-ellipsis-v"></i>'
 	// var childAddIcon = '<i class="add-element fas fa-plus"></i>' // 
 
 	$(function () {
@@ -50,9 +51,64 @@ toggle between hiding and showing the dropdown content */
 		document.getElementById("updating-status").innerHTML = '';
 	}
 
-	function expandObjectProperties(objectId) {
+	function expandObjectChildren(objectId) {
 		document.getElementById(objectId).classList.toggle("show");
-		// addPropertyListener()
+	}
+
+	function toggleObjectProperties(objectId) {
+		// console.log(objectId);
+		if (document.contains(document.getElementById(objectId+ '_properties'))) {
+      document.getElementById(objectId+ '_properties').remove();
+		} else {
+			var types = {
+				'labels':[],
+				'specs': ["Name", "Description", "Owner"],
+				'groups': ["Name", "Description", "Owner"],
+				'requirement': ["identifier","title","text","parents","children","section","images","files"]
+			}
+			var subhtml = ''
+			var parent = objectId.split("_");
+			var parentType = parent[0].toString();
+			var parentId = parseInt(parent[1]);
+			subhtml = subhtml.concat('<ul id="',objectId, '_properties" class="dropdown-content show">');
+
+			function capitalizeFirstLetter(string) {
+				return string.charAt(0).toUpperCase() + string.slice(1);
+			}
+
+			// TODO: Automatically get allowable properties;
+			for(property of types[parentType]){
+				subhtml = subhtml.concat('<li class="property" id="', objectId, '_property_', property,'">', capitalizeFirstLetter(property),'</a>');
+			}
+			subhtml = subhtml.concat('</ul>');
+			document.getElementById(objectId).insertAdjacentHTML('beforeend', subhtml);
+			var properties = document.getElementById(objectId).getElementsByClassName("property");
+			for (i = 0; i < properties.length; i++) {
+				properties[i].addEventListener("click", function () {
+					// console.log('Clicked on to element: ' + this.parentElement.id)
+					document.getElementById("updating-status").innerHTML = 'Inserting Element';
+					htmlElementId = this.id.split('_property_');
+					reqId = htmlElementId[0];
+					propertyName = htmlElementId[1];
+					console.log(reqId, propertyName);
+					var types_2 = {
+						'label':"labelsData",
+						'specification': "specificationsData",
+						'group': "groupsData",
+						'requirement': "requirementsData"
+					}
+					for([key, key_dataId]  of Object.entries(types_2)){
+						if (reqId.includes(key)) {
+							var data = JSON.parse(document.getElementById(key_dataId).getAttribute('data'));
+							google.script.run.withFailureHandler(errorMessage).direct_insert(data, this.parentElement.id, propertyName);
+							break;
+						}
+					}
+					// Reexpand after Insertion ( Workaround )
+					// expandObjectChildren(this.parentElement.id)
+				});
+			}
+		}
 	}
 
 	// Rename and Repurpose
@@ -65,7 +121,7 @@ toggle between hiding and showing the dropdown content */
 	// 		document.getElementById("updating-status").innerHTML = ''
 	// 	}).buildRequirementTreeHtml();
 	// }
-
+						
 	function filterFunction() {
 		var input, filter, ul, li, a, i;
 
@@ -132,46 +188,24 @@ toggle between hiding and showing the dropdown content */
 		// }
 
 		// // Listener to Expand Icon
-		var objects = document.getElementsByClassName("expand_icon");
+		var objects = document.querySelectorAll(".expand_icon, .truncated-text");
 		for (i = 0; i < objects.length; i++) {
 			// console.log('Added Listener on: '+ objects[i].id)
 			objects[i].addEventListener("click", function () {
 				// console.log('Clicked on to expand: children_' + this.parentElement.id)
-				expandObjectProperties('children_' + this.parentElement.id)
+				expandObjectChildren('children_' + this.parentElement.id)
 			});
 		}
 
 		// Listener to Text Area
-		var objects = document.getElementsByClassName("truncated-text");
+		var objects = document.querySelectorAll(".show-properties");
 		for (i = 0; i < objects.length; i++) {
 			objects[i].addEventListener("click", function () {
-				// console.log('Clicked on to element: ' + this.parentElement.id)
-				if (this.parentElement.classList.contains('label')) {
-					var labels = JSON.parse(document.getElementById("labelsData").getAttribute('data'));
-					google.script.run.withFailureHandler(errorMessage).direct_insert(labels, this.parentElement.id, 'name');
-
-				} else if (this.parentElement.classList.contains('specification')) {
-					var specifications = JSON.parse(document.getElementById("specificationsData").getAttribute('data'));
-					google.script.run.withFailureHandler(errorMessage).direct_insert(specifications, this.parentElement.id, 'name');
-
-				} else if (this.parentElement.classList.contains('group')) {
-					var groups = JSON.parse(document.getElementById("groupsData").getAttribute('data'));
-					google.script.run.withFailureHandler(errorMessage).direct_insert(groups, this.parentElement.id, 'name');
-				}
+				// console.log("Clicked button");
+				toggleObjectProperties(this.parentElement.id)
 			});
 		}
 
-		// merge this with above function, with if conditional (?)
-		var requirements = document.getElementsByClassName("requirements");
-		for (i = 0; i < requirements.length; i++) {
-			requirements[i].addEventListener("click", function () {
-
-				// Generate HTML Instead of Expanding an existing node
-				// expandObjectProperties(this.id + '_properties')
-				// google.script.run.withFailureHandler(errorMessage).direct_insert(this.id, 'text');
-				// TODO: Insert Property is fixed to text
-			});
-		}
 		// Listener to Plus Button - Add Element
 		var objects = document.getElementsByClassName("add-element");
 		for (i = 0; i < objects.length; i++) {
@@ -266,21 +300,30 @@ toggle between hiding and showing the dropdown content */
 
 
 
-		var properties = document.getElementsByClassName("property");
-		for (i = 0; i < properties.length; i++) {
-			properties[i].addEventListener("click", function () {
-				document.getElementById("updating-status").innerHTML = 'Inserting Element';
-				htmlElementId = this.id.split('_property_');
-				reqId = htmlElementId[0];
-				propertyName = htmlElementId[1];
-				google.script.run
-					.withFailureHandler(errorMessage)
-					.withSuccessHandler(function (error) { document.getElementById("updating-status").innerHTML = '' })
-					.direct_insert(reqId, propertyName);
-				// Reexpand after Insertion ( Workaround )
-				expandObjectProperties(this.parentElement.id)
-			});
-		}
+		// var properties = document.getElementsByClassName("property");
+		// for (i = 0; i < properties.length; i++) {
+		// 	properties[i].addEventListener("click", function () {
+		// 		// console.log('Clicked on to element: ' + this.parentElement.id)
+		// 		document.getElementById("updating-status").innerHTML = 'Inserting Element';
+		// 		htmlElementId = this.id.split('_property_');
+		// 		reqId = htmlElementId[0];
+		// 		propertyName = htmlElementId[1];
+		// 		var types = {
+		// 			'label':"labelsData",
+		// 			'specification': "specificationsData",
+		// 			'group': "groupsData",
+		// 			'requirement': "requirementsData"
+		// 		}
+		// 		for([key, key_dataId]  of Object.entries(types)){
+		// 			if (this.parentElement.classList.contains(key)) {
+		// 				var data = JSON.parse(document.getElementById(key_dataId).getAttribute('data'));
+		// 				google.script.run.withFailureHandler(errorMessage).direct_insert(data, this.parentElement.id, propertyName);
+		// 			}
+		// 		}
+		// 		// Reexpand after Insertion ( Workaround )
+		// 		expandObjectChildren(this.parentElement.id)
+		// 	});
+		// }
 
 		function errorMessage(error) {
 			//Logger.log(error);
@@ -353,7 +396,7 @@ toggle between hiding and showing the dropdown content */
 					var parentId_html = 'specs_' + parent['id']
 
 					// console.log('Adding Specification', parent['name'])
-					htmlToWrite = htmlToWrite.concat('<li class="reqSearcheableObj specification" id="', parentId_html, '">', expandIcon, specificationIcon, '<div class="truncated-text">', String(parent['name']), '</div>', plusIcon, '</li>')
+					htmlToWrite = htmlToWrite.concat('<li class="reqSearcheableObj specification" id="', parentId_html, '">', expandIcon, specificationIcon, '<div class="truncated-text">', String(parent['name']), '</div>', plusIcon, propertiesIcon, '</li>')
 					// subHtml.concat(parent['name'])
 
 					var parentId = parent['id']
@@ -368,7 +411,7 @@ toggle between hiding and showing the dropdown content */
 				if ("children" in parent) {
 					var parentId_html = 'groups_' + parent['id']
 
-					htmlToWrite = htmlToWrite.concat('<li class="reqSearcheableObj group" id="', parentId_html, '">', expandIcon, sectionIcon, '<div class="truncated-text">', String(parent['name']), '</div>', plusIcon, '</li>')
+					htmlToWrite = htmlToWrite.concat('<li class="reqSearcheableObj group" id="', parentId_html, '">', expandIcon, sectionIcon, '<div class="truncated-text">', String(parent['name']), '</div>', plusIcon, propertiesIcon,'</li>')
 					// subHtml.concat(parent['name'])
 
 					var parentId = parent['id']
@@ -439,20 +482,20 @@ toggle between hiding and showing the dropdown content */
 			// console.log(requirement['identifier'])
 
 			displayName = requirement['identifier'] + " " + requirement['title']
-
+			var reqName = 'requirement_'+requirement['id']
 			// If Not in a Group ['group'] = null, it is in a specificaiton only
 			if (requirement['group'] == null) {
 				var parentId = 'children_specs_' + requirement['specification'].toString()
 				// console.log(parentId)
 				var htmlToWrite = document.getElementById(parentId).innerHTML
-				htmlToWrite = htmlToWrite.concat('<li class="reqSearcheableObj requirement" id="', requirement['id'], '">', reqIcon, '<div class="truncated-text">', displayName, '</div>');
+				htmlToWrite = htmlToWrite.concat('<li class="reqSearcheableObj requirement" id="', reqName, '">', reqIcon, '<div class="truncated-text">', displayName, '</div>', propertiesIcon);
 
 				document.getElementById(parentId).innerHTML = htmlToWrite
 			} else {
 				var parentId = 'children_groups_' + requirement['group'].toString()
 				// console.log(parentId)
 				var htmlToWrite = document.getElementById(parentId).innerHTML
-				htmlToWrite = htmlToWrite.concat('<li class="reqSearcheableObj requirement" id="', requirement['id'], '">', reqIcon, '<div class="truncated-text">', displayName, '</div>');
+				htmlToWrite = htmlToWrite.concat('<li class="reqSearcheableObj requirement" id="', reqName, '">', reqIcon, '<div class="truncated-text">', displayName, '</div>', propertiesIcon);
 
 				document.getElementById(parentId).innerHTML = htmlToWrite
 			}

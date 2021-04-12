@@ -121,8 +121,7 @@ function direct_insert(objectList, parent, property) {
   var object = objectList.find(x => x['id'] === parentId)
 
   // Logger.log(object)
-  var text = ''
-  text += object['name'] + '\n'
+  var text = object[property]
   // Logger.log(text)
 
 
