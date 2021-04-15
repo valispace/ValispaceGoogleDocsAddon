@@ -5,7 +5,7 @@ var types = {
               url: ''},
   requirements:{name:'requirements',
               url: 'project/%<project>%/specifications/%<specification>%/requirements/%<id>%'},
-  specifications:{name:'specs',
+  specifications:{name:'specifications',
               url: 'project/%<project>%/specifications/%<id>%/requirements'},
   labels:{name:'labels',
               url: 'project/%<project>%/specifications/groups/%<id>%/requirements'},

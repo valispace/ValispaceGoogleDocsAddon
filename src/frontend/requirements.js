@@ -57,7 +57,7 @@ function insertRequirements_asTable(requirements, parent) {
   // Logger.log(parentType)
   // parentId = parseInt(parentId[parentId.length - 1])
 
-  if (parentType === "specs") {
+  if (parentType === 'specification') {
     parentType = 'specification'
     var reqsToInsert = requirements.filter(x => x[parentType] === parentId)
   } else if (parentType === "groups") {
@@ -101,36 +101,34 @@ function getCursorIndex(body, cursor) {
 }
 
 
-function direct_insert(objectList, parent, property) {
-  var parent = parent.split("_");
-  var parentType = parent[0].toString();
-  var parentId = parseInt(parent[1]);
 
-  // if (parentType === "specs"){
-  //   parentType = 'specification'
-  //   var reqsToInsert = requirements.filter(x => x[parentType] === parentId)
-  // } else if (parentType === "groups") {
-  //   parentType = 'group'
-  //   var reqsToInsert = requirements.filter(x => x[parentType] === parentId)
-  // }
+function direct_insert(objectList, objectName, property) {
+  var id = objectName.split("_");
+  var parentType = id[0].toString();
+  var parentId = parseInt(id[1]);
 
-  // Logger.log(objectList)
-  // Logger.log(parentId)
-  // Logger.log(parentType)
+
 
   var object = objectList.find(x => x['id'] === parentId)
+  var url_meta = urlTranslator(object, types[parentType]);
+  var insertion_type = 'text'
+  text_to_insert = '-'
+  if(object[property]){
+    text_to_insert = object[property]
+  }
+  if(property == 'image'){
+    imageBlob = getImagesinFilesInRequirement(objectList)
+    insertion_type = 'image'
+  }
 
-  // Logger.log(object)
-  var text = object[property]
-  // Logger.log(text)
-
-
-  var doc = DocumentApp.getActiveDocument();
-  var body = doc.getBody();
-  var cursor = doc.getCursor();
-  var indexCursor = getCursorIndex(body, cursor)
-
-  var docTable = body.insertParagraph(indexCursor, text)
+  // console.log(data_array.length)
+  var insertion_data = new InsertionData(
+    text_to_insert,
+    url_meta,
+    objectName,
+    property
+  );
+  Inserter.insert(insertion_data, insertion_type);
 }
 
 function getTemplateTable2(documentId) {
@@ -434,6 +432,8 @@ function formatingTable3(table, styleTableMapping, templateTableCellAttributes, 
     }
   }
 }
+
+
 
 
 
