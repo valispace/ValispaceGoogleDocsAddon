@@ -10,7 +10,7 @@ function update_text(objectList){
   var links = [];
   var mergeAdjacent=false;
   var doc = DocumentApp.getActiveDocument();
-  
+
 
   iterateSections(doc, function(section, sectionIndex, isFirstPageSection) {
     if (!("getParagraphs" in section)) {

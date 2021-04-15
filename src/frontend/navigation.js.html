@@ -139,7 +139,11 @@ toggle between hiding and showing the dropdown content */
 					propertyName = htmlElementId[1];
 					console.log(reqId, propertyName);
 					var data = JSON.parse(document.getElementById(types[reqType].data).getAttribute('data'));
-					google.script.run.withFailureHandler(errorMessage).direct_insert(data, reqName, propertyName);
+					var files = JSON.parse(document.getElementById(types.files.data).getAttribute('data'));
+					google.script.run.withFailureHandler(errorMessage).direct_insert(data, reqName, propertyName, files);
+					// if(propertyName==='images'){
+					// 	google.script.run.withFailureHandler(errorMessage).findAndReplaceImages();
+					// }
 				});
 			}
 		}

@@ -102,26 +102,25 @@ function getCursorIndex(body, cursor) {
 
 
 
-function direct_insert(objectList, objectName, property) {
+function direct_insert(objectList, objectName, property, filesList) {
   var id = objectName.split("_");
   var parentType = id[0].toString();
   var parentId = parseInt(id[1]);
 
 
 
-  var object = objectList.find(x => x['id'] === parentId)
+  var object = objectList.find(x => x['id'] === parentId);
   var url_meta = urlTranslator(object, types[parentType]);
-  var insertion_type = 'text'
-  text_to_insert = '-'
+  var insertion_type = 'text';
+  text_to_insert = '-';
   if(object[property]){
-    text_to_insert = object[property]
+    text_to_insert = object[property];
   }
-  if(property == 'image'){
-    imageBlob = getImagesinFilesInRequirement(objectList)
-    insertion_type = 'image'
+  if(property == 'images'){
+    text_to_insert = getImagesinFilesInRequirement(filesList, parentId);
+    insertion_type = 'image';
   }
 
-  // console.log(data_array.length)
   var insertion_data = new InsertionData(
     text_to_insert,
     url_meta,
@@ -300,7 +299,7 @@ function insertRequirementsInSpec_asTable_fromTemplate(projectId, parentId, pare
   Logger.log('Table Index: ' + tableIndex)
   Logger.log('Child Type: ' + docTable.getType())
   Logger.log('Child Text: ' + docTable.getText())
-  findAndReplaceImages(body, docTable)
+  findAndReplaceImages(docTable)
   doc.saveAndClose()
 
   return tableIndex
@@ -343,16 +342,15 @@ function getFilesInRequirement(filesList, reqId) {
 }
 
 function getImagesinFilesInRequirement(filesList, reqId) {
-
   textToInsert = ''
   var filesOnReq = filesList.filter(x => x['object_id'] === reqId & x['mimetype'] === "image/jpeg")
 
-  // Logger.log('Files on Req:', filesOnReq)
+  Logger.log('Files on Req:', filesOnReq)
 
   for (fileIndex in filesOnReq) {
     var imageURL = filesOnReq[fileIndex]['download_url']
-    textToInsert += '$START_IMG_URL=' + imageURL + '$ENG_IMG_URL '
-    //     
+    textToInsert += '$START_IMG_URL=' + imageURL + '$ENG_IMG_URL'
+    //
   }
   return textToInsert
 }
@@ -361,9 +359,9 @@ function escapeRegExp(text) {
   return text.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&');
 }
 
-function replaceImagesURLToFile(body, text) {
+function replaceImagesURLToFile(element) {
 
-
+  var text = element.getText()
   var image_urls = text.split('$ENG_IMG_URL')
 
   for (index in image_urls) {
@@ -379,28 +377,34 @@ function replaceImagesURLToFile(body, text) {
       searchText = escapeRegExp(searchText)
       // Logger.log(searchText)
 
-      var element = body.findText(searchText);
+      // var element = body.findText(searchText);
       // Logger.log(element)
 
-      if (element != null) {
-        var textElement = element.getElement();
-        var img = textElement.getParent().asParagraph().insertInlineImage(0, imgBlob);
-        body.replaceText(searchText, '');
-      }
+      
+      var img = element.getParent().asParagraph().insertInlineImage(0, imgBlob);
+      element.replaceText(searchText, '');
+      // img.setLinkUrl(element_url)
     }
   }
 }
 
-function findAndReplaceImages(body, table) {
-
-  for (let rowIndex = 0; rowIndex < table.getNumRows(); rowIndex++) {
-    for (let columnIndex = 0; columnIndex < numColumns; columnIndex++) {
-      cellContent = table.getCell(rowIndex, columnIndex).getText()
-      if (cellContent.includes('$START_IMG_URL=')) {
-        replaceImagesURLToFile(body, cellContent)
-      }
-    }
+function findAndReplaceImages(origin) {
+  if(origin == undefined || origin == null){
+    origin = DocumentApp.getActiveDocument().getBody();
   }
+  element = origin.findText('$START_IMG_URL=')
+  while(element != null){
+    replaceImagesURLToFile(element.getElement())
+    element = origin.findText('$START_IMG_URL=')
+  }
+  // for (let rowIndex = 0; rowIndex < table.getNumRows(); rowIndex++) {
+  //   for (let columnIndex = 0; columnIndex < numColumns; columnIndex++) {
+  //     cellContent = table.getCell(rowIndex, columnIndex).getText()
+  //     if (cellContent.includes('$START_IMG_URL=')) {
+  //       replaceImagesURLToFile(body, cellContent)
+  //     }
+  //   }
+  // }
 }
 
 function formatingTable3(table, styleTableMapping, templateTableCellAttributes, startingRow, cellLimit) {
