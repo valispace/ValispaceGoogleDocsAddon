@@ -159,7 +159,7 @@ function getTemplateTable2(documentId) {
   return [templateTableData, templateTableCellAttributes]
 }
 
-function insertRequirementsInSpec_asTable_fromTemplate(projectId, parentId, requirements, requirementsList, tagsList, groupsList, filesList, previousTableIndex = null) {
+function insertRequirementsInSpec_asTable_fromTemplate(projectId, parentId, parentType, requirements, requirementsList, tagsList, groupsList, filesList, previousTableIndex = null) {
 
   // var parent = parent.split("_");
   // var parentType = parent[0].toString();
@@ -181,7 +181,7 @@ function insertRequirementsInSpec_asTable_fromTemplate(projectId, parentId, requ
 
 
   for (req in requirements) {
-    if (requirements[req]['specification'] === parentId) {
+    if (requirements[req][types[parentType].filter] === parentId) {
       for (let rowIndex = 1; rowIndex < templateTableData.length; rowIndex++) {
         subTableRow = []
         subTableStyleRow = []

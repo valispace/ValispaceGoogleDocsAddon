@@ -10,18 +10,21 @@
 		requirements:{name:'requirements',
 								url: 'project/%<project>%/specifications/%<specification>%/requirements/%<id>%',
 							  data:'requirementsData',
-							  properties:["identifier","title","text","parents","children","section","images","files"]},
+							  properties:["identifier","title","text","parents","children","section","images","files"],
+								filter: 'id'},
 		specifications:{name:'specifications',
 								url: 'project/%<project>%/specifications/%<id>%/requirements',
 							  data:'specificationsData',
-							  properties:["Name", "Description", "Owner"]},
+							  properties:["Name", "Description", "Owner"],
+								filter: 'specification'},
 		labels:{name:'labels',
 								url: 'project/%<project>%/specifications/groups/%<id>%/requirements',
 							  data:'labelsData'},
 		groups:{name:'groups',
 								url: 'project/%<project>%/specifications/requirements/groups/%<id>%/requirements',
 							  data:'groupsData',
-							  properties:["Name", "Description", "Owner"]},
+							  properties:["Name", "Description", "Owner"],
+								filter: 'group'},
 		users:{name:'users',
 								url: '',
 							  data:'usersData'},
@@ -259,9 +262,9 @@ toggle between hiding and showing the dropdown content */
 				var parent = this.parentElement.id.split("_");
 				var parentType = parent[0].toString();
 				var parentId = parseInt(parent[1]);
-
+				console.log(parentType, parentId)
 				var requirementsToInsert = requirements
-					.filter(x => x['specification'] === parentId)
+					.filter(x => x[types[parentType].filter] === parentId)
 					.sort(function (a, b) {
 						if (a.identifier == b.identifier)
 							return 0;
@@ -275,15 +278,15 @@ toggle between hiding and showing the dropdown content */
 				var maxIterations = 10
 				var limitNumRows = 500
 				// numberofReq = requirementsToInsert.length
-				callInsertRequirement(projectId, parentId, requirementsToInsert, requirements, tags, groups, files)
+				callInsertRequirement(projectId, parentId, parentType, requirementsToInsert, requirements, tags, groups, files)
 
 
 				// Recursive Function to Insert Requirements
-				function callInsertRequirement(projectId, parentId, requirementsToInsert, requirements, tags, groups, files, previousTableIndex = null) {
+				function callInsertRequirement(projectId, parentId, parentType, requirementsToInsert, requirements, tags, groups, files, previousTableIndex = null) {
 					// TODO: Avoid sending duplicated requirements; Instead of a Subset, I could pass the index only - requirementsToInsert and rrequirements
 					// THis is needed when we are referencing to a requriement that is not in the subset (e.g. as a parent)
 					subset = requirementsToInsert.slice(iteration * (limitNumRows), iteration * (limitNumRows) + limitNumRows)
-					// console.log(requirementsToInsert.length)
+					console.log(requirementsToInsert.length)
 					if (subset.length > 0) {
 						google.script.run
 							.withFailureHandler(function () { document.getElementById("updating-status").innerHTML = 'Error Inserting Part ' + iteration })
@@ -291,10 +294,10 @@ toggle between hiding and showing the dropdown content */
 								iteration++;
 								if (iteration < maxIterations) {
 									document.getElementById("updating-status").innerHTML = 'Inserting Requirements - Part: ' + (iteration + 1)
-									callInsertRequirement(projectId, parentId, requirementsToInsert,requirements, tags, groups, files, previousTableIndex);
+									callInsertRequirement(projectId, parentId, parentType, requirementsToInsert,requirements, tags, groups, files, previousTableIndex);
 								}
 							})
-							.insertRequirementsInSpec_asTable_fromTemplate(projectId, parentId, subset, requirements, tags, groups, files, previousTableIndex);
+							.insertRequirementsInSpec_asTable_fromTemplate(projectId, parentId, parentType, subset, requirements, tags, groups, files, previousTableIndex);
 					} else {
 						document.getElementById("updating-status").innerHTML = '';
 					}
@@ -518,14 +521,14 @@ toggle between hiding and showing the dropdown content */
 				var parentId = 'children_'+types.specifications.name + '_' + requirement['specification'].toString()
 				// console.log(parentId)
 				var htmlToWrite = document.getElementById(parentId).innerHTML
-				htmlToWrite = htmlToWrite.concat('<li class="reqSearcheableObj requirement" id="', reqName, '">', reqIcon, '<div class="truncated-text">', displayName, '</div>', propertiesIcon);
+				htmlToWrite = htmlToWrite.concat('<li class="reqSearcheableObj requirement" id="', reqName, '">', reqIcon, '<div class="truncated-text">', displayName, '</div>', plusIcon, propertiesIcon);
 
 				document.getElementById(parentId).innerHTML = htmlToWrite
 			} else {
 				var parentId = 'children_'+types.groups.name + '_' + requirement['group'].toString()
 				// console.log(parentId)
 				var htmlToWrite = document.getElementById(parentId).innerHTML
-				htmlToWrite = htmlToWrite.concat('<li class="reqSearcheableObj requirement" id="', reqName, '">', reqIcon, '<div class="truncated-text">', displayName, '</div>', propertiesIcon);
+				htmlToWrite = htmlToWrite.concat('<li class="reqSearcheableObj requirement" id="', reqName, '">', reqIcon, '<div class="truncated-text">', displayName, '</div>', plusIcon, propertiesIcon);
 
 				document.getElementById(parentId).innerHTML = htmlToWrite
 			}
