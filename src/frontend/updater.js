@@ -22,8 +22,7 @@ function update_text(objectList){
                       section.getType() + " has no .getParagraphs() method. " +
         "Stopping script.");
     }
-
-    section.getParagraphs().forEach(function(par) {
+    var find_links = function(par) {
       // skip empty paragraphs
       if (par.getNumChildren() == 0) {
         return;
@@ -31,9 +30,17 @@ function update_text(objectList){
 
       // go over all text elements in paragraph / list-item
       for (var el=par.getChild(0); el!=null; el=el.getNextSibling()) {
+        console.log(el.getType().name())
+        if (el.getType() == DocumentApp.ElementType.TABLE ||
+        el.getType() == DocumentApp.ElementType.TABLE_ROW ||
+        el.getType() == DocumentApp.ElementType.TABLE_CELL ||
+        el.getType() == DocumentApp.ElementType.PARAGRAPH){
+
+          find_links(el);
+        }
         if (el.getType() == DocumentApp.ElementType.TEXT) {
 
-
+          console.log(el.getText(), el.getLinkUrl())
           // go over all styling segments in text element
           var attributeIndices = el.getTextAttributeIndices();
           var lastLink = null;
@@ -67,7 +74,7 @@ function update_text(objectList){
                   var new_url =  urlTranslator(objData, types[objType]);
                   var attributes = el.getAttributes()
                   delete attributes[DocumentApp.Attribute.LINK_URL]
-                  console.log(`Updated: ${objId} ${attributes}`)
+                  console.log(`Updated: ${objId} ${new_data}`)
                   if(el.getText() !== new_data) {el.replaceText("^.*$", new_data)}
                   el.setLinkUrl(new_url + `?from=valispace&name=${urlName}`)
                   el.setAttributes(attributes)
@@ -90,7 +97,9 @@ function update_text(objectList){
           });
         }
       }
-    });
+    };
+    section.getParagraphs().forEach(find_links);
+    section.getTables().forEach(find_links)
   });
 }
 

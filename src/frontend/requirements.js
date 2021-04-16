@@ -177,60 +177,58 @@ function insertRequirementsInSpec_asTable_fromTemplate(projectId, parentId, pare
 
   var table = []
   var styleTableMapping = []
-
+  var urlMapping = []
 
   for (req in requirements) {
     if (requirements[req][types[parentType].filter] === parentId) {
       for (let rowIndex = 1; rowIndex < templateTableData.length; rowIndex++) {
         subTableRow = []
         subTableStyleRow = []
+        subUrlMapping = []
         for (let cellIndex = 0; cellIndex < templateTableData[rowIndex].length; cellIndex++) {
           cellValue = templateTableData[rowIndex][cellIndex]
           // Replacing Tags (folder) Name
           if (cellValue.includes('$tags')) {
             textToInsert = replaceAttributesWithId('tags', tagsList, requirements, req, 'name')
-            subTableRow.push(textToInsert)
           }
           // Replacing Group (Section) Name
           else if (cellValue.includes('$section')) {
             textToInsert = replaceAttributesWithId('group', groupsList, requirements, req, 'name')
-            subTableRow.push(textToInsert)
           }
           // Replacing Parent Name
           else if (cellValue.includes('$parents')) {
             //            textToInsert = replaceParents(requirements, req, 'identifier')
             replaceAttributesWithId('parents', requirementsList, requirements, req, 'identifier')
-            subTableRow.push(textToInsert)
           }
           // Replacing Children Name
           else if (cellValue.includes('$children')) {
             //            textToInsert = replaceParents(requirements, req, 'identifier')
             replaceAttributesWithId('children', requirementsList, requirements, req, 'identifier')
-            subTableRow.push(textToInsert)
           }
           // Replacing Files Names
           else if (cellValue.includes('$files')) {
             reqId = requirements[req]['id']
             textToInsert = getFilesInRequirement(filesList, reqId)
-            subTableRow.push(textToInsert)
           }
           // Replacing Images
           else if (cellValue.includes('$images')) {
             reqId = requirements[req]['id']
-            imgBlob = getImagesinFilesInRequirement(filesList, reqId)
-            subTableRow.push(imgBlob)
+            textToInsert = getImagesinFilesInRequirement(filesList, reqId)
           }
           // Replacing Other Attributes
           else if (cellValue.includes('$')) {
             attribute = cellValue.replace('$', '')
-            subTableRow.push(requirements[req][attribute].toString())
+            textToInsert = requirements[req][attribute].toString()
           } else {
-            subTableRow.push(cellValue)
+            textToInsert = cellValue
           }
+          subTableRow.push(textToInsert)
+          subUrlMapping.push(urlTranslator(requirements[req], types['requirements'])+`?from=valispace&name=requirements_${requirements[req].id}__${cellValue.replace('$', '')}`);
           subTableStyleRow.push([[rowIndex], [cellIndex]])
         }
         table.push(subTableRow)
         styleTableMapping.push(subTableStyleRow)
+        urlMapping.push(subUrlMapping)
       }
     }
   }
@@ -285,7 +283,7 @@ function insertRequirementsInSpec_asTable_fromTemplate(projectId, parentId, pare
     // Logger.log('Child Text: ' + docTable.getText())
 
     // Logger.log('Formating Table')
-    rowIndex = formatingTable3(docTable, styleTableMapping, templateTableCellAttributes, rowIndex, cellLimit)
+    rowIndex = formatingTable3(docTable, styleTableMapping, urlMapping, templateTableCellAttributes, rowIndex, cellLimit)
     // Logger.log('Table Formated')
     doc.saveAndClose()
     // Logger.log('Saved and Closed')
@@ -380,7 +378,6 @@ function replaceImagesURLToFile(element) {
       // var element = body.findText(searchText);
       // Logger.log(element)
 
-      
       var img = element.getParent().asParagraph().insertInlineImage(0, imgBlob);
       element.replaceText(searchText, '');
       // img.setLinkUrl(element_url)
@@ -389,25 +386,29 @@ function replaceImagesURLToFile(element) {
 }
 
 function findAndReplaceImages(origin) {
-  if(origin == undefined || origin == null){
-    origin = DocumentApp.getActiveDocument().getBody();
-  }
-  element = origin.findText('$START_IMG_URL=')
-  while(element != null){
-    replaceImagesURLToFile(element.getElement())
-    element = origin.findText('$START_IMG_URL=')
-  }
-  // for (let rowIndex = 0; rowIndex < table.getNumRows(); rowIndex++) {
-  //   for (let columnIndex = 0; columnIndex < numColumns; columnIndex++) {
-  //     cellContent = table.getCell(rowIndex, columnIndex).getText()
-  //     if (cellContent.includes('$START_IMG_URL=')) {
-  //       replaceImagesURLToFile(body, cellContent)
-  //     }
-  //   }
+  // if(origin == undefined || origin == null){
+  //   origin = DocumentApp.getActiveDocument().getBody();
   // }
+  // element = origin.findText('$START_IMG_URL=')
+  // while(element != null){
+  //   replaceImagesURLToFile(element.getElement())
+  //   element = origin.findText('$START_IMG_URL=')
+  // }
+  table=origin
+  body = DocumentApp.getActiveDocument().getBody();
+  for (let rowIndex = 0; rowIndex < table.getNumRows(); rowIndex++) {
+    for (let columnIndex = 0; columnIndex < numColumns; columnIndex++) {
+      cellContent = table.getCell(rowIndex, columnIndex).getText()
+      if (cellContent.includes('$START_IMG_URL=')) {
+
+        replaceImagesURLToFile(table.getCell(rowIndex, columnIndex).getChild(0).getChild(0))
+      }
+    }
+  }
 }
 
-function formatingTable3(table, styleTableMapping, templateTableCellAttributes, startingRow, cellLimit) {
+
+function formatingTable3(table, styleTableMapping, urlMapping, templateTableCellAttributes, startingRow, cellLimit) {
   counter = 0
 
   //  Logger.log(startingRow)
@@ -420,14 +421,9 @@ function formatingTable3(table, styleTableMapping, templateTableCellAttributes, 
       styleCellAttributes = templateTableCellAttributes[cellStyleLocation[0]][cellStyleLocation[1]]
       //      styleTextAttributes = templateTableTextAttributes[cellStyleLocation[0]][cellStyleLocation[1]]
 
-      styleCell = {};
-      for (attributeName in styleCellAttributes) {
-        if (styleCellAttributes[attributeName] != null && styleCellAttributes[attributeName] != "") {
-          styleCell[DocumentApp.Attribute[attributeName]] = styleCellAttributes[attributeName]
-        }
-      }
-
-      table.getCell(rowIndex, columnIndex).setAttributes(styleCell)
+      delete styleCellAttributes[DocumentApp.Attribute.LINK_URL]
+      table.getCell(rowIndex, columnIndex).setLinkUrl(urlMapping[rowIndex][columnIndex])
+      table.getCell(rowIndex, columnIndex).setAttributes(styleCellAttributes)
 
 
     }
