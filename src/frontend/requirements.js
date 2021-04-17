@@ -57,7 +57,7 @@ function insertRequirements_asTable(requirements, parent) {
   // Logger.log(parentType)
   // parentId = parseInt(parentId[parentId.length - 1])
 
-  if (parentType === 'specification') {
+  if (parentType === "specs") {
     parentType = 'specification'
     var reqsToInsert = requirements.filter(x => x[parentType] === parentId)
   } else if (parentType === "groups") {
@@ -101,33 +101,37 @@ function getCursorIndex(body, cursor) {
 }
 
 
+function direct_insert(objectList, parent, property) {
+  var parent = parent.split("_");
+  var parentType = parent[0].toString();
+  var parentId = parseInt(parent[1]);
 
-function direct_insert(objectList, objectName, property, filesList) {
-  var id = objectName.split("_");
-  var parentType = id[0].toString();
-  var parentId = parseInt(id[1]);
+  // if (parentType === "specs"){
+  //   parentType = 'specification'
+  //   var reqsToInsert = requirements.filter(x => x[parentType] === parentId)
+  // } else if (parentType === "groups") {
+  //   parentType = 'group'
+  //   var reqsToInsert = requirements.filter(x => x[parentType] === parentId)
+  // }
+
+  // Logger.log(objectList)
+  // Logger.log(parentId)
+  // Logger.log(parentType)
+
+  var object = objectList.find(x => x['id'] === parentId)
+
+  // Logger.log(object)
+  var text = ''
+  text += object['name'] + '\n'
+  // Logger.log(text)
 
 
+  var doc = DocumentApp.getActiveDocument();
+  var body = doc.getBody();
+  var cursor = doc.getCursor();
+  var indexCursor = getCursorIndex(body, cursor)
 
-  var object = objectList.find(x => x['id'] === parentId);
-  var url_meta = urlTranslator(object, types[parentType]);
-  var insertion_type = 'text';
-  text_to_insert = '-';
-  if(object[property]){
-    text_to_insert = object[property];
-  }
-  if(property == 'images'){
-    text_to_insert = getImagesinFilesInRequirement(filesList, parentId);
-    insertion_type = 'image';
-  }
-
-  var insertion_data = new InsertionData(
-    text_to_insert,
-    url_meta,
-    objectName,
-    property
-  );
-  Inserter.insert(insertion_data, insertion_type);
+  var docTable = body.insertParagraph(indexCursor, text)
 }
 
 function getTemplateTable2(documentId) {
@@ -158,7 +162,7 @@ function getTemplateTable2(documentId) {
   return [templateTableData, templateTableCellAttributes]
 }
 
-function insertRequirementsInSpec_asTable_fromTemplate(projectId, parentId, parentType, requirements, requirementsList, tagsList, groupsList, filesList, previousTableIndex = null) {
+function insertRequirementsInSpec_asTable_fromTemplate(projectId, parentId, requirements, requirementsList, tagsList, groupsList, filesList, previousTableIndex = null) {
 
   // var parent = parent.split("_");
   // var parentType = parent[0].toString();
@@ -177,58 +181,60 @@ function insertRequirementsInSpec_asTable_fromTemplate(projectId, parentId, pare
 
   var table = []
   var styleTableMapping = []
-  var urlMapping = []
+
 
   for (req in requirements) {
-    if (requirements[req][types[parentType].filter] === parentId) {
+    if (requirements[req]['specification'] === parentId) {
       for (let rowIndex = 1; rowIndex < templateTableData.length; rowIndex++) {
         subTableRow = []
         subTableStyleRow = []
-        subUrlMapping = []
         for (let cellIndex = 0; cellIndex < templateTableData[rowIndex].length; cellIndex++) {
           cellValue = templateTableData[rowIndex][cellIndex]
           // Replacing Tags (folder) Name
           if (cellValue.includes('$tags')) {
             textToInsert = replaceAttributesWithId('tags', tagsList, requirements, req, 'name')
+            subTableRow.push(textToInsert)
           }
           // Replacing Group (Section) Name
           else if (cellValue.includes('$section')) {
             textToInsert = replaceAttributesWithId('group', groupsList, requirements, req, 'name')
+            subTableRow.push(textToInsert)
           }
           // Replacing Parent Name
           else if (cellValue.includes('$parents')) {
             //            textToInsert = replaceParents(requirements, req, 'identifier')
             replaceAttributesWithId('parents', requirementsList, requirements, req, 'identifier')
+            subTableRow.push(textToInsert)
           }
           // Replacing Children Name
           else if (cellValue.includes('$children')) {
             //            textToInsert = replaceParents(requirements, req, 'identifier')
             replaceAttributesWithId('children', requirementsList, requirements, req, 'identifier')
+            subTableRow.push(textToInsert)
           }
           // Replacing Files Names
           else if (cellValue.includes('$files')) {
             reqId = requirements[req]['id']
             textToInsert = getFilesInRequirement(filesList, reqId)
+            subTableRow.push(textToInsert)
           }
           // Replacing Images
           else if (cellValue.includes('$images')) {
             reqId = requirements[req]['id']
-            textToInsert = getImagesinFilesInRequirement(filesList, reqId)
+            imgBlob = getImagesinFilesInRequirement(filesList, reqId)
+            subTableRow.push(imgBlob)
           }
           // Replacing Other Attributes
           else if (cellValue.includes('$')) {
             attribute = cellValue.replace('$', '')
-            textToInsert = requirements[req][attribute].toString()
+            subTableRow.push(requirements[req][attribute].toString())
           } else {
-            textToInsert = cellValue
+            subTableRow.push(cellValue)
           }
-          subTableRow.push(textToInsert)
-          subUrlMapping.push(urlTranslator(requirements[req], types['requirements'])+`?from=valispace&name=requirements_${requirements[req].id}__${cellValue.replace('$', '')}`);
           subTableStyleRow.push([[rowIndex], [cellIndex]])
         }
         table.push(subTableRow)
         styleTableMapping.push(subTableStyleRow)
-        urlMapping.push(subUrlMapping)
       }
     }
   }
@@ -283,7 +289,7 @@ function insertRequirementsInSpec_asTable_fromTemplate(projectId, parentId, pare
     // Logger.log('Child Text: ' + docTable.getText())
 
     // Logger.log('Formating Table')
-    rowIndex = formatingTable3(docTable, styleTableMapping, urlMapping, templateTableCellAttributes, rowIndex, cellLimit)
+    rowIndex = formatingTable3(docTable, styleTableMapping, templateTableCellAttributes, rowIndex, cellLimit)
     // Logger.log('Table Formated')
     doc.saveAndClose()
     // Logger.log('Saved and Closed')
@@ -297,7 +303,7 @@ function insertRequirementsInSpec_asTable_fromTemplate(projectId, parentId, pare
   Logger.log('Table Index: ' + tableIndex)
   Logger.log('Child Type: ' + docTable.getType())
   Logger.log('Child Text: ' + docTable.getText())
-  findAndReplaceImages(docTable)
+  findAndReplaceImages(body, docTable)
   doc.saveAndClose()
 
   return tableIndex
@@ -340,15 +346,16 @@ function getFilesInRequirement(filesList, reqId) {
 }
 
 function getImagesinFilesInRequirement(filesList, reqId) {
+
   textToInsert = ''
   var filesOnReq = filesList.filter(x => x['object_id'] === reqId & x['mimetype'] === "image/jpeg")
 
-  Logger.log('Files on Req:', filesOnReq)
+  // Logger.log('Files on Req:', filesOnReq)
 
   for (fileIndex in filesOnReq) {
     var imageURL = filesOnReq[fileIndex]['download_url']
-    textToInsert += '$START_IMG_URL=' + imageURL + '$ENG_IMG_URL'
-    //
+    textToInsert += '$START_IMG_URL=' + imageURL + '$ENG_IMG_URL '
+    //     
   }
   return textToInsert
 }
@@ -357,9 +364,9 @@ function escapeRegExp(text) {
   return text.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&');
 }
 
-function replaceImagesURLToFile(element) {
+function replaceImagesURLToFile(body, text) {
 
-  var text = element.getText()
+
   var image_urls = text.split('$ENG_IMG_URL')
 
   for (index in image_urls) {
@@ -375,40 +382,31 @@ function replaceImagesURLToFile(element) {
       searchText = escapeRegExp(searchText)
       // Logger.log(searchText)
 
-      // var element = body.findText(searchText);
+      var element = body.findText(searchText);
       // Logger.log(element)
 
-      var img = element.getParent().asParagraph().insertInlineImage(0, imgBlob);
-      element.replaceText(searchText, '');
-      // img.setLinkUrl(element_url)
-    }
-  }
-}
-
-function findAndReplaceImages(origin) {
-  // if(origin == undefined || origin == null){
-  //   origin = DocumentApp.getActiveDocument().getBody();
-  // }
-  // element = origin.findText('$START_IMG_URL=')
-  // while(element != null){
-  //   replaceImagesURLToFile(element.getElement())
-  //   element = origin.findText('$START_IMG_URL=')
-  // }
-  table=origin
-  body = DocumentApp.getActiveDocument().getBody();
-  for (let rowIndex = 0; rowIndex < table.getNumRows(); rowIndex++) {
-    for (let columnIndex = 0; columnIndex < numColumns; columnIndex++) {
-      cellContent = table.getCell(rowIndex, columnIndex).getText()
-      if (cellContent.includes('$START_IMG_URL=')) {
-
-        replaceImagesURLToFile(table.getCell(rowIndex, columnIndex).getChild(0).getChild(0))
+      if (element != null) {
+        var textElement = element.getElement();
+        var img = textElement.getParent().asParagraph().insertInlineImage(0, imgBlob);
+        body.replaceText(searchText, '');
       }
     }
   }
 }
 
+function findAndReplaceImages(body, table) {
 
-function formatingTable3(table, styleTableMapping, urlMapping, templateTableCellAttributes, startingRow, cellLimit) {
+  for (let rowIndex = 0; rowIndex < table.getNumRows(); rowIndex++) {
+    for (let columnIndex = 0; columnIndex < numColumns; columnIndex++) {
+      cellContent = table.getCell(rowIndex, columnIndex).getText()
+      if (cellContent.includes('$START_IMG_URL=')) {
+        replaceImagesURLToFile(body, cellContent)
+      }
+    }
+  }
+}
+
+function formatingTable3(table, styleTableMapping, templateTableCellAttributes, startingRow, cellLimit) {
   counter = 0
 
   //  Logger.log(startingRow)
@@ -421,9 +419,14 @@ function formatingTable3(table, styleTableMapping, urlMapping, templateTableCell
       styleCellAttributes = templateTableCellAttributes[cellStyleLocation[0]][cellStyleLocation[1]]
       //      styleTextAttributes = templateTableTextAttributes[cellStyleLocation[0]][cellStyleLocation[1]]
 
-      delete styleCellAttributes[DocumentApp.Attribute.LINK_URL]
-      table.getCell(rowIndex, columnIndex).setLinkUrl(urlMapping[rowIndex][columnIndex])
-      table.getCell(rowIndex, columnIndex).setAttributes(styleCellAttributes)
+      styleCell = {};
+      for (attributeName in styleCellAttributes) {
+        if (styleCellAttributes[attributeName] != null && styleCellAttributes[attributeName] != "") {
+          styleCell[DocumentApp.Attribute[attributeName]] = styleCellAttributes[attributeName]
+        }
+      }
+
+      table.getCell(rowIndex, columnIndex).setAttributes(styleCell)
 
 
     }
@@ -432,8 +435,6 @@ function formatingTable3(table, styleTableMapping, urlMapping, templateTableCell
     }
   }
 }
-
-
 
 
 
