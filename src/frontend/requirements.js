@@ -102,19 +102,47 @@ function getCursorIndex(body, cursor) {
 
 
 
-function direct_insert(objectList, objectName, property, filesList) {
+function direct_insert(objectList, objectName, property) {
+  specificationsList = objectList['specifications']
+  labelsList = objectList['labels']
+  requirementsList = objectList['requirements']
+  groupsList = objectList['groups']
+  tagsList = objectList['tags']
+  filesList = objectList['files']
   var id = objectName.split("_");
   var parentType = id[0].toString();
   var parentId = parseInt(id[1]);
 
+  requirements = requirementsList
 
-
-  var object = objectList.find(x => x['id'] === parentId);
+  var object = requirementsList.find(x => x['id'] === parentId);
   var url_meta = urlTranslator(object, types[parentType]);
   var insertion_type = 'text';
   text_to_insert = '-';
   if(object[property]){
     text_to_insert = object[property];
+  }
+  if (property=='tags') {
+    text_to_insert = replaceAttributesWithId('tags', tagsList, requirements, parentId, 'name')
+  }
+  // Replacing Group (Section) Name
+  else if (property=='section') {
+    text_to_insert = replaceAttributesWithId('group', groupsList, requirements, parentId, 'name')
+  }
+  // Replacing Parent Name
+  else if (property=='parents') {
+    //            textToInsert = replaceParents(requirements, req, 'identifier')
+    text_to_insert = replaceAttributesWithId('parents', requirementsList, requirements, parentId, 'identifier')
+  }
+  // Replacing Children Name
+  else if (property=='children') {
+    //            textToInsert = replaceParents(requirements, req, 'identifier')
+    text_to_insert = replaceAttributesWithId('children', requirementsList, requirements, parentId, 'identifier')
+  }
+  // Replacing Files Names
+  else if (property=='files') {
+    reqId = parentId
+    text_to_insert = getFilesInRequirement(filesList, reqId)
   }
   if(property == 'images'){
     text_to_insert = getImagesinFilesInRequirement(filesList, parentId);
@@ -189,21 +217,21 @@ function insertRequirementsInSpec_asTable_fromTemplate(projectId, parentId, pare
           cellValue = templateTableData[rowIndex][cellIndex]
           // Replacing Tags (folder) Name
           if (cellValue.includes('$tags')) {
-            textToInsert = replaceAttributesWithId('tags', tagsList, requirements, req, 'name')
+            textToInsert = replaceAttributesWithId('tags', tagsList, requirements, requirements[req].id, 'name')
           }
           // Replacing Group (Section) Name
           else if (cellValue.includes('$section')) {
-            textToInsert = replaceAttributesWithId('group', groupsList, requirements, req, 'name')
+            textToInsert = replaceAttributesWithId('group', groupsList, requirements,  requirements[req].id, 'name')
           }
           // Replacing Parent Name
           else if (cellValue.includes('$parents')) {
             //            textToInsert = replaceParents(requirements, req, 'identifier')
-            replaceAttributesWithId('parents', requirementsList, requirements, req, 'identifier')
+            textToInsert = replaceAttributesWithId('parents', requirementsList, requirements,  requirements[req].id, 'identifier')
           }
           // Replacing Children Name
           else if (cellValue.includes('$children')) {
             //            textToInsert = replaceParents(requirements, req, 'identifier')
-            replaceAttributesWithId('children', requirementsList, requirements, req, 'identifier')
+            textToInsert = replaceAttributesWithId('children', requirementsList, requirements,  requirements[req].id, 'identifier')
           }
           // Replacing Files Names
           else if (cellValue.includes('$files')) {
@@ -306,7 +334,7 @@ function insertRequirementsInSpec_asTable_fromTemplate(projectId, parentId, pare
 
 
 function replaceAttributesWithId(attribute, objectsList, requirementsList, req, attributeToInsert) {
-  objectsIds = requirementsList[req][attribute]
+  objectsIds = requirementsList.find(x => x['id'] === req)[attribute];
   textToInsert = ''
   for (index in objectsIds) {
     objectId = objectsIds[index]

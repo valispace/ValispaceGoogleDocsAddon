@@ -138,9 +138,22 @@ toggle between hiding and showing the dropdown content */
 					var reqId = parseInt(parent[1]);
 					propertyName = htmlElementId[1];
 					console.log(reqId, propertyName);
-					var data = JSON.parse(document.getElementById(types[reqType].data).getAttribute('data'));
+					// TODO: Try checking INput to download only the necessary data; Maybe do it on google script
+					var specifications = JSON.parse(document.getElementById(types.specifications.data).getAttribute('data'));
+					var labels = JSON.parse(document.getElementById(types.labels.data).getAttribute('data'));
+					var requirements = JSON.parse(document.getElementById(types.requirements.data).getAttribute('data'));
+					var groups = JSON.parse(document.getElementById(types.groups.data).getAttribute('data'));
+					var tags = JSON.parse(document.getElementById(types.tags.data).getAttribute('data'));
 					var files = JSON.parse(document.getElementById(types.files.data).getAttribute('data'));
-					google.script.run.withFailureHandler(errorMessage).direct_insert(data, reqName, propertyName, files);
+					var all_data = {
+						'specifications': specifications,
+						'labels': labels,
+						'requirements': requirements,
+						'groups': groups,
+						'tags': tags,
+						'files': files
+					}
+					google.script.run.withFailureHandler(errorMessage).direct_insert(all_data, reqName, propertyName);
 					// if(propertyName==='images'){
 					// 	google.script.run.withFailureHandler(errorMessage).findAndReplaceImages();
 					// }
@@ -236,7 +249,7 @@ toggle between hiding and showing the dropdown content */
 		}
 
 		// Listener to Text Area
-		var objects = document.querySelectorAll(".show-properties");
+		var objects = document.querySelectorAll(".show-properties, .requirement-text");
 		for (i = 0; i < objects.length; i++) {
 			objects[i].addEventListener("click", function () {
 				// console.log("Clicked button");
@@ -525,14 +538,14 @@ toggle between hiding and showing the dropdown content */
 				var parentId = 'children_'+types.specifications.name + '_' + requirement['specification'].toString()
 				// console.log(parentId)
 				var htmlToWrite = document.getElementById(parentId).innerHTML
-				htmlToWrite = htmlToWrite.concat('<li class="reqSearcheableObj requirement" id="', reqName, '">', reqIcon, '<div class="truncated-text">', displayName, '</div>', plusIcon, propertiesIcon);
+				htmlToWrite = htmlToWrite.concat('<li class="reqSearcheableObj requirement" id="', reqName, '">', reqIcon, '<div class="requirement-text">', displayName, '</div>', plusIcon, propertiesIcon);
 
 				document.getElementById(parentId).innerHTML = htmlToWrite
 			} else {
 				var parentId = 'children_'+types.groups.name + '_' + requirement['group'].toString()
 				// console.log(parentId)
 				var htmlToWrite = document.getElementById(parentId).innerHTML
-				htmlToWrite = htmlToWrite.concat('<li class="reqSearcheableObj requirement" id="', reqName, '">', reqIcon, '<div class="truncated-text">', displayName, '</div>', plusIcon, propertiesIcon);
+				htmlToWrite = htmlToWrite.concat('<li class="reqSearcheableObj requirement" id="', reqName, '">', reqIcon, '<div class="requirement-text">', displayName, '</div>', plusIcon, propertiesIcon);
 
 				document.getElementById(parentId).innerHTML = htmlToWrite
 			}
