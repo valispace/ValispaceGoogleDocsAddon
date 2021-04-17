@@ -195,17 +195,11 @@ toggle between hiding and showing the dropdown content */
 		}
 
 		input = document.getElementById("myInput");
-		filter = input.value.toUpperCase();
-		div = document.getElementsByClassName('reqSearcheableObj');
-		for (i = 0; i < div.length; i++) {
-			txtValue = div[i].textContent || div[i].innerText;
-			if (txtValue.toUpperCase().indexOf(filter) > -1) {
-				div[i].style.display = "";
-				// document.getElementById(divAll[i].id).classList.toggle("show")
-			} else {
-				div[i].style.display = "none";
-			}
+		filter = [input.value.toUpperCase()];
+		if(filter[0].includes(':')){
+			filter = getSpecificFilter(filter[0]);
 		}
+		filterHTMLtree(filter)
 
 		// If Filter Empty, close all
 		if (filter == "") {
@@ -218,7 +212,43 @@ toggle between hiding and showing the dropdown content */
 			}
 		}
 	}
+	function filterHTMLtree(filters){
+		div = document.getElementsByClassName('reqSearcheableObj');
+		for (filter of filters){
+			for (i = 0; i < div.length; i++) {
+				txtValue = div[i].textContent || div[i].innerText;
+				if (txtValue.toUpperCase().indexOf(filter) > -1) {
+					div[i].style.display = "";
+					// document.getElementById(divAll[i].id).classList.toggle("show")
+				} else {
+					div[i].style.display = "none";
+				}
+			}
+		}
+	}
 
+	function getSpecificFilter(filter){
+		var filter = filter.split(':')
+		var property = filter[0].toLowerCase()
+		var value = filter[1]
+		console.log(property, value)
+		var specifications = JSON.parse(document.getElementById(types.specifications.data).getAttribute('data'));
+		var labels = JSON.parse(document.getElementById(types.labels.data).getAttribute('data'));
+		var requirements = JSON.parse(document.getElementById(types.requirements.data).getAttribute('data'));
+		var groups = JSON.parse(document.getElementById(types.groups.data).getAttribute('data'));
+		var all_data =[specifications,labels,requirements, groups]
+		var identifiers = []
+		for (data of all_data){
+			data.filter(x => {
+				if(x[property]){
+					return x[property].toUpperCase().includes(value.toUpperCase())
+				}
+				return false
+			}).forEach(x => identifiers.push(x['identifier']))
+		}
+		console.log(identifiers)
+		return identifiers
+}
 	// TODO: The listeners should be for the div, not for the LI
 	// Once I separate the div and the Icont, they need to ahve different listeners, sicne they will have different actions
 
