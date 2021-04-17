@@ -12,10 +12,10 @@
     
     <div class="requirementInputContainer">
     <div class="input-label">
-      <label for="ReqTableID">Requirement Table Template ID: </label>
+      <label for="TemplateDocumentId">Requirement Table Template ID: </label>
     </div> 
     <div>
-      <input type="text" class="input-field" id="ReqTableID" name="ReqTableID">      
+      <input type="text" class="input-field" id="TemplateDocumentId" name="TemplateDocumentId">      
     </div>
     </div>
     
@@ -43,8 +43,8 @@
     };
     
     function changeReqTable(){
-    var ReqTableID = $('#ReqTableID').val();
-    google.script.run.withSuccessHandler().changeReqTableTemplate(ReqTableID);
+    var TemplateDocumentId = $('#TemplateDocumentId').val();
+    google.script.run.withSuccessHandler().changeReqTableTemplate(TemplateDocumentId);
     };
     
     function createNewTemp(){

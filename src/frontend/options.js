@@ -20,19 +20,20 @@ function openOptionDialog() {
 }
 
 
-function changeReqTableTemplate(ReqTableID){
+function changeReqTableTemplate(TemplateDocumentId){
   try{
-    PropertiesService.getDocumentProperties().setProperty('TemplateDocumentId', ReqTableID);
-//    var templatedoc = DocumentApp.openById(ReqTableID);
+    PropertiesService.getDocumentProperties().setProperty('TemplateDocumentId', TemplateDocumentId);
+    Logger.log('Changed template document to ID: ', TemplateDocumentId)
+//    var templatedoc = DocumentApp.openById(TemplateDocumentId);
   } catch (error) {
     DocumentApp.getUi().alert("Could not find the document. Confirm it was not deleted and that anyone have read access with the link.");
-    //Logger.log("Document not accessible", ReqTableID)
+    //Logger.log("Document not accessible", TemplateDocumentId)
   } 
 }
 
 function resetReqTableTemplate(){
-  var ReqTableID_original = '1bDQClCWVcvzPARYl5ohGvBgZlQ519NGGCStqizzK-bU';
-  PropertiesService.getDocumentProperties().setProperty('TemplateDocumentId', ReqTableID_original);
+  var TemplateDocumentId_original = '1bDQClCWVcvzPARYl5ohGvBgZlQ519NGGCStqizzK-bU';
+  PropertiesService.getDocumentProperties().setProperty('TemplateDocumentId', TemplateDocumentId_original);
 }
 
 function changeOptions(highlightVali){
@@ -57,3 +58,8 @@ function clearDocumentProperties(){
   documentProperties.deleteAllProperties();
   console.log("cleared user properties");
 } 
+
+function printCurrentTemplateID(){
+  currentTemplateId = PropertiesService.getDocumentProperties().getProperty('TemplateDocumentId')
+  Logger.log(currentTemplateId)
+}
