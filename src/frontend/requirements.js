@@ -375,7 +375,10 @@ function getImagesinFilesInRequirement(filesList, reqId) {
 
   for (fileIndex in filesOnReq) {
     var imageURL = filesOnReq[fileIndex]['download_url']
-    textToInsert += '$START_IMG_URL=' + imageURL + '$ENG_IMG_URL'
+    textToInsert += '$START_IMG_META=' +
+                    '$START_IMG_ID=files_' +filesOnReq[fileIndex]['id'] +'$END_IMG_ID'+
+                    '$START_IMG_URL=' +imageURL +'$END_IMG_URL'+
+                    '$END_IMG_META'
     //
   }
   return textToInsert
@@ -388,18 +391,20 @@ function escapeRegExp(text) {
 function replaceImagesURLToFile(element) {
 
   var text = element.getText()
-  var image_urls = text.split('$ENG_IMG_URL')
+  var meta_url = element.getLinkUrl().split('name=requirements')[0]
+  var image_metas = text.split('$END_IMG_META')
 
-  for (index in image_urls) {
-    var url = image_urls[index]
-    if (url.includes('$START_IMG_URL')) {
+  for (index in image_metas) {
+    var meta = image_metas[index]
+    if (meta.includes('$START_IMG_URL')) {
 
-      url = url.split('$START_IMG_URL=')[1]
+      url = meta.split('$START_IMG_URL=')[1].split('$END_IMG_URL')[0]
+      meta_url += 'name=' + meta.split('$START_IMG_ID=')[1].split('$END_IMG_ID')[0]
       //      Logger.log(url)
 
       var imgBlob = UrlFetchApp.fetch(url).getBlob();
 
-      var searchText = '$START_IMG_URL=' + url + '$ENG_IMG_URL'
+      var searchText = image_metas[index] + '$END_IMG_META'
       searchText = escapeRegExp(searchText)
       // Logger.log(searchText)
 
@@ -408,7 +413,7 @@ function replaceImagesURLToFile(element) {
 
       var img = element.getParent().asParagraph().insertInlineImage(0, imgBlob);
       element.replaceText(searchText, '');
-      // img.setLinkUrl(element_url)
+      img.setLinkUrl(meta_url)
     }
   }
 }
@@ -427,7 +432,7 @@ function findAndReplaceImages(origin) {
   for (let rowIndex = 0; rowIndex < table.getNumRows(); rowIndex++) {
     for (let columnIndex = 0; columnIndex < numColumns; columnIndex++) {
       cellContent = table.getCell(rowIndex, columnIndex).getText()
-      if (cellContent.includes('$START_IMG_URL=')) {
+      if (cellContent.includes('$START_IMG_META=')) {
 
         replaceImagesURLToFile(table.getCell(rowIndex, columnIndex).getChild(0).getChild(0))
       }
