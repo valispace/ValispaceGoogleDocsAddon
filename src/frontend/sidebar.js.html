@@ -83,14 +83,16 @@
     var projectName = $("#options-projects option:selected").text();
 
 
-    // Save All Data in the HTML 
+    // Save All Data in the HTML
     console.log('Saving Project Data...')
     saveData(projectId, 'labelsData') // Folders
     saveData(projectId, 'specificationsData')
     saveData(projectId, 'requirementsData')
     saveData(projectId, 'groupsData') // Sections
     saveData(projectId, 'tagsData')
-    saveData(projectId, 'filesData', 1)
+    saveData(projectId, 'filesData')
+    saveData(projectId, 'usersData')
+    saveData(projectId, 'user_groupsData', 1)
     // IMPORTANT: Last Save data must have a flag 1
 
     console.log('Done')

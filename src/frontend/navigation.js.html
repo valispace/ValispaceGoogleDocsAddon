@@ -15,7 +15,7 @@
 		specifications:{name:'specifications',
 								url: 'project/%<project>%/specifications/%<id>%/requirements',
 							  data:'specificationsData',
-							  properties:["Name", "Description", "Owner"],
+							  properties:["name", "description", "owner"],
 								filter: 'specification'},
 		labels:{name:'labels',
 								url: 'project/%<project>%/specifications/groups/%<id>%/requirements',
@@ -23,7 +23,7 @@
 		groups:{name:'groups',
 								url: 'project/%<project>%/specifications/requirements/groups/%<id>%/requirements',
 							  data:'groupsData',
-							  properties:["Name", "Description", "Owner"],
+							  properties:["name", "description", "owner"],
 								filter: 'group'},
 		users:{name:'users',
 								url: '',
@@ -62,13 +62,17 @@
 		var groups = JSON.parse(document.getElementById(types.groups.data).getAttribute('data'));
 		var tags = JSON.parse(document.getElementById(types.tags.data).getAttribute('data'));
 		var files = JSON.parse(document.getElementById(types.files.data).getAttribute('data'));
+		var users = JSON.parse(document.getElementById(types.users.data).getAttribute('data'));
+		var user_groups = JSON.parse(document.getElementById(types.user_groups.data).getAttribute('data'));
 		var all_data = {
-			specifications,
-			labels,
-			requirements,
-			groups,
-			tags,
-			files
+			'specifications': specifications,
+			'labels': labels,
+			'requirements': requirements,
+			'groups': groups,
+			'tags': tags,
+			'files': files,
+			'users': users,
+			'user_groups': user_groups
 		}
 		google.script.run
 			.withSuccessHandler(document.getElementById("updating-status").innerHTML = '')
@@ -145,13 +149,15 @@ toggle between hiding and showing the dropdown content */
 					var groups = JSON.parse(document.getElementById(types.groups.data).getAttribute('data'));
 					var tags = JSON.parse(document.getElementById(types.tags.data).getAttribute('data'));
 					var files = JSON.parse(document.getElementById(types.files.data).getAttribute('data'));
+					var users = JSON.parse(document.getElementById(types.users.data).getAttribute('data'));
 					var all_data = {
 						'specifications': specifications,
 						'labels': labels,
 						'requirements': requirements,
 						'groups': groups,
 						'tags': tags,
-						'files': files
+						'files': files,
+						'users': users
 					}
 					google.script.run.withFailureHandler(errorMessage).direct_insert(all_data, reqName, propertyName);
 					// if(propertyName==='images'){
