@@ -205,10 +205,27 @@ function insertRequirementsInSpec_asTable_fromTemplate(projectId, parentId, pare
   templateTableData = values[0]
   templateTableCellAttributes = values[1]
 
-
   var table = []
   var styleTableMapping = []
   var urlMapping = []
+
+  // Header
+  if (previousTableIndex == null) {
+    header = []
+    headerStyle = []
+    headerUrl = []
+
+    rowIndex = 0
+    for (let cellIndex = 0; cellIndex < templateTableData[rowIndex].length; cellIndex++) {
+      header.push(templateTableData[rowIndex][cellIndex])
+      headerStyle.push([[rowIndex], [cellIndex]])
+      headerUrl.push([])
+    }
+    table.push(header)
+    styleTableMapping.push(headerStyle)
+    urlMapping.push(headerUrl)
+  }
+
 
   for (req in requirements) {
     if (requirements[req][types[parentType].filter] === parentId) {
@@ -455,6 +472,8 @@ function formatingTable3(table, styleTableMapping, urlMapping, templateTableCell
       cellStyleLocation = styleTableMapping[rowIndex][columnIndex]
       styleCellAttributes = templateTableCellAttributes[cellStyleLocation[0]][cellStyleLocation[1]]
       //      styleTextAttributes = templateTableTextAttributes[cellStyleLocation[0]][cellStyleLocation[1]]
+
+      Logger.log([rowIndex, columnIndex])
 
       delete styleCellAttributes[DocumentApp.Attribute.LINK_URL]
       table.getCell(rowIndex, columnIndex).setLinkUrl(urlMapping[rowIndex][columnIndex])
