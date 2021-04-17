@@ -1,42 +1,67 @@
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
 <script>
 	var types = {
-		workspaces:{name:'workspaces',
-								url: '',
-							  data:'workspacesData'},
-		projects:{name:'projects',
-								url: '',
-							  data:'projectsData'},
-		requirements:{name:'requirements',
-								url: 'project/%<project>%/specifications/%<specification>%/requirements/%<id>%',
-							  data:'requirementsData',
-							  properties:["identifier","title","text","parents","children","section","images","files"],
-								filter: 'id'},
-		specifications:{name:'specifications',
-								url: 'project/%<project>%/specifications/%<id>%/requirements',
-							  data:'specificationsData',
-							  properties:["name", "description", "owner"],
-								filter: 'specification'},
-		labels:{name:'labels',
-								url: 'project/%<project>%/specifications/groups/%<id>%/requirements',
-							  data:'labelsData'},
-		groups:{name:'groups',
-								url: 'project/%<project>%/specifications/requirements/groups/%<id>%/requirements',
-							  data:'groupsData',
-							  properties:["name", "description", "owner"],
-								filter: 'group'},
-		users:{name:'users',
-								url: '',
-							  data:'usersData'},
-		user_groups:{name:'user_groups',
-								url: '',
-							  data:'user_groupsData'},
-		tags:{name:'tags',
-								url: '',
-							  data:'tagsData'},
-		files:{name:'files',
-								url: '',
-							  data:'filesData'}
+		workspaces: {
+			name: 'workspaces',
+			url: '',
+			data: 'workspacesData'
+		},
+		projects: {
+			name: 'projects',
+			url: '',
+			data: 'projectsData'
+		},
+		requirements: {
+			name: 'requirements',
+			url: 'project/%<project>%/specifications/%<specification>%/requirements/%<id>%',
+			data: 'requirementsData',
+			properties: ["identifier", "title", "text", "parents", "children", "section", "images", "files"],
+			filter: 'id'
+		},
+		specifications: {
+			name: 'specifications',
+			url: 'project/%<project>%/specifications/%<id>%/requirements',
+			data: 'specificationsData',
+			properties: ["name", "description", "owner"],
+			filter: 'specification'
+		},
+		labels: {
+			name: 'labels',
+			url: 'project/%<project>%/specifications/groups/%<id>%/requirements',
+			data: 'labelsData'
+		},
+		groups: {
+			name: 'groups',
+			url: 'project/%<project>%/specifications/requirements/groups/%<id>%/requirements',
+			data: 'groupsData',
+			properties: ["name", "description", "owner"],
+			filter: 'group'
+		},
+		states: {
+			name: 'states',
+			url: '',
+			data: 'statesData',
+		},
+		users: {
+			name: 'users',
+			url: '',
+			data: 'usersData'
+		},
+		user_groups: {
+			name: 'user_groups',
+			url: '',
+			data: 'user_groupsData'
+		},
+		tags: {
+			name: 'tags',
+			url: '',
+			data: 'tagsData'
+		},
+		files: {
+			name: 'files',
+			url: '',
+			data: 'filesData'
+		}
 	}
 	var expandIcon = '<i class="expand_icon fas fa-caret-right"></i>'
 	var folderIcon = '<i class="tree_icon fas fa-folder"></i>'
@@ -142,6 +167,7 @@ toggle between hiding and showing the dropdown content */
 					var labels = JSON.parse(document.getElementById(types.labels.data).getAttribute('data'));
 					var requirements = JSON.parse(document.getElementById(types.requirements.data).getAttribute('data'));
 					var groups = JSON.parse(document.getElementById(types.groups.data).getAttribute('data'));
+					var states = JSON.parse(document.getElementById(types.states.data).getAttribute('data'));
 					var tags = JSON.parse(document.getElementById(types.tags.data).getAttribute('data'));
 					var files = JSON.parse(document.getElementById(types.files.data).getAttribute('data'));
 					var users = JSON.parse(document.getElementById(types.users.data).getAttribute('data'));
@@ -150,6 +176,7 @@ toggle between hiding and showing the dropdown content */
 						'labels': labels,
 						'requirements': requirements,
 						'groups': groups,
+						'states': states,
 						'tags': tags,
 						'files': files,
 						'users': users
@@ -191,7 +218,7 @@ toggle between hiding and showing the dropdown content */
 
 		input = document.getElementById("myInput");
 		filter = [input.value.toUpperCase()];
-		if(filter[0].includes(':')){
+		if (filter[0].includes(':')) {
 			filter = getSpecificFilter(filter[0]);
 		}
 		console.log(filter)
@@ -209,9 +236,9 @@ toggle between hiding and showing the dropdown content */
 		}
 	}
 
-	function filterHTMLtree(filters){
+	function filterHTMLtree(filters) {
 		div = document.querySelectorAll('.reqSearcheableObj, .dropdown-content');;
-		for (filter of filters){
+		for (filter of filters) {
 			for (i = 0; i < div.length; i++) {
 				txtValue = div[i].textContent || div[i].innerText;
 				if (txtValue.toUpperCase().indexOf(filter) > -1) {
@@ -224,11 +251,11 @@ toggle between hiding and showing the dropdown content */
 		}
 	}
 
-	function advancedSearch(filter){
+	function advancedSearch(filter) {
 
 	}
 
-	function getSpecificFilter(filter){
+	function getSpecificFilter(filter) {
 		var filter = filter.split(':')
 		var property = filter[0].toLowerCase()
 		var value = filter[1]
@@ -237,11 +264,11 @@ toggle between hiding and showing the dropdown content */
 		var labels = JSON.parse(document.getElementById(types.labels.data).getAttribute('data'));
 		var requirements = JSON.parse(document.getElementById(types.requirements.data).getAttribute('data'));
 		var groups = JSON.parse(document.getElementById(types.groups.data).getAttribute('data'));
-		var all_data =[specifications,labels,requirements, groups]
+		var all_data = [specifications, labels, requirements, groups]
 		var identifiers = []
-		for (data of all_data){
+		for (data of all_data) {
 			data.filter(x => {
-				if(x[property]){
+				if (x[property]) {
 					return x[property].toUpperCase().includes(value.toUpperCase())
 				}
 				return false
@@ -249,7 +276,7 @@ toggle between hiding and showing the dropdown content */
 		}
 		// console.log(identifiers)
 		return identifiers
-}
+	}
 	// TODO: The listeners should be for the div, not for the LI
 	// Once I separate the div and the Icont, they need to ahve different listeners, sicne they will have different actions
 
@@ -279,13 +306,27 @@ toggle between hiding and showing the dropdown content */
 
 				var projectId = $("#options-projects").val();
 
-				// TODO: Try checking INput to download only the necessary data; Maybe do it on google script
+				// TODO: Try checking Input to download only the necessary data; Maybe do it on google script
+
 				var specifications = JSON.parse(document.getElementById(types.specifications.data).getAttribute('data'));
 				var labels = JSON.parse(document.getElementById(types.labels.data).getAttribute('data'));
 				var requirements = JSON.parse(document.getElementById(types.requirements.data).getAttribute('data'));
 				var groups = JSON.parse(document.getElementById(types.groups.data).getAttribute('data'));
+				var states = JSON.parse(document.getElementById(types.states.data).getAttribute('data'));
 				var tags = JSON.parse(document.getElementById(types.tags.data).getAttribute('data'));
 				var files = JSON.parse(document.getElementById(types.files.data).getAttribute('data'));
+				var users = JSON.parse(document.getElementById(types.users.data).getAttribute('data'));
+				var all_data = {
+						'specifications': specifications,
+						'labels': labels,
+						'requirements': requirements,
+						'groups': groups,
+						'states': states,
+						'tags': tags,
+						'files': files,
+						'users': users
+					}
+
 
 				// Order Requirements by Identifier - TODO: Function to Select what to order by
 
@@ -325,7 +366,7 @@ toggle between hiding and showing the dropdown content */
 									callInsertRequirement(projectId, parentId, parentType, requirementsToInsert, requirements, tags, groups, files, previousTableIndex);
 								}
 							})
-							.insertRequirementsInSpec_asTable_fromTemplate(projectId, parentId, parentType, subset, requirements, tags, groups, files, previousTableIndex);
+							.insertRequirementsInSpec_asTable_fromTemplate(projectId, parentId, parentType, subset, all_data, previousTableIndex);
 					} else {
 						document.getElementById("updating-status").innerHTML = '';
 					}

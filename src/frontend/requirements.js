@@ -6,6 +6,8 @@ function get_data(projectId, dataType) {
       return JSON.parse(getAuthenticatedValispaceUrl('requirements/specifications/full_list/?project=' + projectId + '&clean_text=description'));
     case 'requirementsData':
       return JSON.parse(getAuthenticatedValispaceUrl('requirements/full_list/?project=' + projectId + '&clean_text=text,comment'));
+    case 'statesData':
+      return JSON.parse(getAuthenticatedValispaceUrl('requirements/states/?project=' + projectId));
     case 'tagsData':
       return JSON.parse(getAuthenticatedValispaceUrl('tag/'));
     case 'filesData':
@@ -16,7 +18,6 @@ function get_data(projectId, dataType) {
       return JSON.parse(getAuthenticatedValispaceUrl('user'));
     case 'user_groupsData':
       return JSON.parse(getAuthenticatedValispaceUrl('group'));
-
   }
 }
 
@@ -107,6 +108,7 @@ function direct_insert(objectList, objectName, property) {
   labelsData = objectList['labels']
   requirementsData = objectList['requirements']
   groupsData = objectList['groups']
+  statesData = objectList['states']
   tagsData = objectList['tags']
   filesData = objectList['files']
   usersData = objectList['users']
@@ -124,32 +126,32 @@ function direct_insert(objectList, objectName, property) {
   if (object[property]) {
     text_to_insert = object[property];
   }
-  if(property=='owner'){
-    text_to_insert = getUserFrom(object[property] ,usersData, user_groupsData);
+  if (property == 'owner') {
+    text_to_insert = getUserFrom(object[property], usersData, user_groupsData);
   }
-  if (property=='tags') {
+  if (property == 'tags') {
     text_to_insert = replaceAttributesWithId('tags', tagsData, requirements, parentId, 'name')
   }
   // Replacing Group (Section) Name
-  else if (property=='section') {
+  else if (property == 'section') {
     text_to_insert = replaceAttributesWithId('group', groupsData, requirements, parentId, 'name')
   }
   // Replacing Parent Name
-  else if (property=='parents') {
+  else if (property == 'parents') {
     //            textToInsert = replaceParents(requirements, req, 'identifier')
     text_to_insert = replaceAttributesWithId('parents', requirementsData, requirements, parentId, 'identifier')
   }
   // Replacing Children Name
-  else if (property=='children') {
+  else if (property == 'children') {
     //            textToInsert = replaceParents(requirements, req, 'identifier')
     text_to_insert = replaceAttributesWithId('children', requirementsData, requirements, parentId, 'identifier')
   }
   // Replacing Files Names
-  else if (property=='files') {
+  else if (property == 'files') {
     reqId = parentId
     text_to_insert = getFilesInRequirement(filesData, reqId)
   }
-  if(property == 'images'){
+  if (property == 'images') {
     text_to_insert = getImagesinFilesInRequirement(filesData, parentId);
     insertion_type = 'image';
   }
@@ -191,14 +193,18 @@ function getTemplateTable2(documentId) {
   return [templateTableData, templateTableCellAttributes]
 }
 
-function insertRequirementsInSpec_asTable_fromTemplate(projectId, parentId, parentType, requirements, requirementsList, tagsList, groupsList, filesList, previousTableIndex = null) {
+function insertRequirementsInSpec_asTable_fromTemplate(projectId, parentId, parentType, requirements, objectList, previousTableIndex = null) {
 
-  // var parent = parent.split("_");
-  // var parentType = parent[0].toString();
-  // var parentId = parseInt(parent[1]);
-  // TODO: Fix the Parent ID, I am using only for specification bellow.
+  specificationsData = objectList['specifications']
+  labelsData = objectList['labels']
+  requirementsData = objectList['requirements']
+  groupsData = objectList['groups']
+  statesData = objectList['states']
+  tagsData = objectList['tags']
+  filesData = objectList['files']
+  usersData = objectList['users']
+  user_groupsData = objectList['user_groups']
 
-  // TODO: Missing other objects list
 
   documentId = PropertiesService.getDocumentProperties().getProperty('TemplateDocumentId')
   values = getTemplateTable2(documentId)
@@ -237,36 +243,68 @@ function insertRequirementsInSpec_asTable_fromTemplate(projectId, parentId, pare
           cellValue = templateTableData[rowIndex][cellIndex]
           // Replacing Tags (folder) Name
           if (cellValue.includes('$tags')) {
-            textToInsert = replaceAttributesWithId('tags', tagsList, requirements, requirements[req].id, 'name')
+            textToInsert = replaceAttributesWithId('tags', tagsData, requirements, requirements[req].id, 'name')
           }
           // Replacing Group (Section) Name
           else if (cellValue.includes('$section')) {
-            textToInsert = replaceAttributesWithId('group', groupsList, requirements,  requirements[req].id, 'name')
+            textToInsert = replaceAttributesWithId('group', groupsData, requirements, requirements[req].id, 'name')
           }
           // Replacing Parent Name
           else if (cellValue.includes('$parents')) {
             //            textToInsert = replaceParents(requirements, req, 'identifier')
-            textToInsert = replaceAttributesWithId('parents', requirementsList, requirements,  requirements[req].id, 'identifier')
+            textToInsert = replaceAttributesWithId('parents', requirementsData, requirements, requirements[req].id, 'identifier')
           }
           // Replacing Children Name
           else if (cellValue.includes('$children')) {
             //            textToInsert = replaceParents(requirements, req, 'identifier')
-            textToInsert = replaceAttributesWithId('children', requirementsList, requirements,  requirements[req].id, 'identifier')
+            textToInsert = replaceAttributesWithId('children', requirementsData, requirements, requirements[req].id, 'identifier')
+          }
+          // Replacing States
+          else if (cellValue.includes('$state')) {
+            textToInsert = replaceAttributesWithId('state', statesData, requirements, requirements[req].id, 'name')
           }
           // Replacing Files Names
           else if (cellValue.includes('$files')) {
             reqId = requirements[req]['id']
-            textToInsert = getFilesInRequirement(filesList, reqId)
+            textToInsert = getFilesInRequirement(filesData, reqId)
+          }
+          // Replacing Rationale/Comment
+          else if (cellValue.includes('$rationale') || cellValue.includes('$comment')) {
+            comment = requirements[req]['comment']
+            textToInsert = (comment != null) ? comment : '';
+          }
+          // Replacing Rationale/Comment
+          else if (cellValue.includes('$verification_methods')) {
+            vmIds = requirements[req].verification_methods
+            textToInsert = ''
+            for (index in vmIds) {
+              vmId = vmIds[index]
+              if (vmId != null) {
+                vm = JSON.parse(getAuthenticatedValispaceUrl('requirements/requirement-vms/' + vmId + '/'));
+                methodId = vm.method
+              }
+              if (methodId != null) {
+                method = JSON.parse(getAuthenticatedValispaceUrl('requirements/verification-methods/' + methodId + '/'));
+                textToInsert += method['name'] + ', '
+              }
+            }
+            // requirements[req].verification_methods
           }
           // Replacing Images
           else if (cellValue.includes('$images')) {
             reqId = requirements[req]['id']
-            textToInsert = getImagesinFilesInRequirement(filesList, reqId)
+            textToInsert = getImagesinFilesInRequirement(filesData, reqId)
           }
           // Replacing Other Attributes
           else if (cellValue.includes('$')) {
             attribute = cellValue.replace('$', '')
-            textToInsert = requirements[req][attribute].toString()
+
+            if (requirements[req][attribute] != null) {
+              textToInsert = requirements[req][attribute].toString()
+            } else {
+              textToInsert = cellValue
+            }
+
           } else {
             textToInsert = cellValue
           }
@@ -340,18 +378,18 @@ function insertRequirementsInSpec_asTable_fromTemplate(projectId, parentId, pare
   // return [table, styleTableMapping]
 }
 
-function getUserFrom(origin, usersData, user_groupsData){
+function getUserFrom(origin, usersData, user_groupsData) {
   console.log(origin)
   text = '-'
-  if (origin.contenttype==5){
+  if (origin.contenttype == 5) {
     user = usersData.find(x => x['id'] === origin.id)
-    if(user.first_name || user.last_name){
+    if (user.first_name || user.last_name) {
       text = user.first_name + ' ' + user.last_name
     }
   }
-  else if (origin.contenttype==4){
+  else if (origin.contenttype == 4) {
     group = user_groupsData.find(x => x['id'] === origin.id)
-    if (group.name){
+    if (group.name) {
       text = group.name
     }
   }
@@ -360,11 +398,14 @@ function getUserFrom(origin, usersData, user_groupsData){
 
 function replaceAttributesWithId(attribute, objectsList, requirementsList, req, attributeToInsert) {
   objectsIds = requirementsList.find(x => x['id'] === req)[attribute];
+  if ((typeof objectsIds) == 'number') { objectsIds = [objectsIds] }
   textToInsert = ''
+
   for (index in objectsIds) {
     objectId = objectsIds[index]
     var object = objectsList.find(x => x['id'] === objectId)
-    textToInsert += object[attributeToInsert] + ', '
+    if (index > 0) { textToInsert += ', ' }
+    textToInsert += object[attributeToInsert]
   }
   return textToInsert
 }
@@ -398,9 +439,9 @@ function getImagesinFilesInRequirement(filesList, reqId) {
   for (fileIndex in filesOnReq) {
     var imageURL = filesOnReq[fileIndex]['download_url']
     textToInsert += '$START_IMG_META=' +
-                    '$START_IMG_ID=files_' +filesOnReq[fileIndex]['id'] +'$END_IMG_ID'+
-                    '$START_IMG_URL=' +imageURL +'$END_IMG_URL'+
-                    '$END_IMG_META'
+      '$START_IMG_ID=files_' + filesOnReq[fileIndex]['id'] + '$END_IMG_ID' +
+      '$START_IMG_URL=' + imageURL + '$END_IMG_URL' +
+      '$END_IMG_META'
     //
   }
   return textToInsert
@@ -473,7 +514,6 @@ function formatingTable3(table, styleTableMapping, urlMapping, templateTableCell
       styleCellAttributes = templateTableCellAttributes[cellStyleLocation[0]][cellStyleLocation[1]]
       //      styleTextAttributes = templateTableTextAttributes[cellStyleLocation[0]][cellStyleLocation[1]]
 
-      Logger.log([rowIndex, columnIndex])
 
       delete styleCellAttributes[DocumentApp.Attribute.LINK_URL]
       table.getCell(rowIndex, columnIndex).setLinkUrl(urlMapping[rowIndex][columnIndex])
