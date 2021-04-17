@@ -41,7 +41,6 @@ function insertRequirementsInSpec_asText(requirements, spec_id) {
 
   var text = ''
   for (req in reqsInSpec) {
-    // Logger.log(reqsInSpec[req])
     text += reqsInSpec[req]['identifier'] + ': ' + reqsInSpec[req]['text'] + '\n'
   }
   body.appendParagraph(text)
@@ -52,9 +51,6 @@ function insertRequirements_asTable(requirements, parent) {
   var parent = parent.split("_");
   var parentType = parent[0].toString();
   var parentId = parseInt(parent[1]);
-  // Logger.log(parent)
-  // Logger.log(parentId)
-  // Logger.log(parentType)
   // parentId = parseInt(parentId[parentId.length - 1])
 
   if (parentType === 'specification') {
@@ -200,7 +196,6 @@ function insertRequirementsInSpec_asTable_fromTemplate(projectId, parentId, pare
   templateTableData = values[0]
   templateTableCellAttributes = values[1]
 
-  // Logger.log('Got Template')
 
   var table = []
   var styleTableMapping = []
@@ -265,8 +260,6 @@ function insertRequirementsInSpec_asTable_fromTemplate(projectId, parentId, pare
   var body = doc.getBody();
   var cursor = doc.getCursor();
 
-  Logger.log(previousTableIndex)
-
   if (previousTableIndex == null) {
     var indexCursor = getCursorIndex(body, cursor);
     if (indexCursor == 0) {
@@ -279,12 +272,9 @@ function insertRequirementsInSpec_asTable_fromTemplate(projectId, parentId, pare
   var docTable = body.insertTable(indexCursor, table)
   var tableIndex = body.getChildIndex(docTable)
 
-  Logger.log(tableIndex)
 
-  // Logger.log('Table Inserted')
   // var tableIndex = body.getChildIndex(docTable)
   doc.saveAndClose()
-  // Logger.log('Saved and Closed')
 
 
 
@@ -305,15 +295,10 @@ function insertRequirementsInSpec_asTable_fromTemplate(projectId, parentId, pare
       tableIndex = tableIndex + 1;
       docTable = body.getChild(tableIndex);
     }
-    // Logger.log('Table Index: ' + tableIndex)
-    // Logger.log('Child Type: ' + docTable.getType())
-    // Logger.log('Child Text: ' + docTable.getText())
 
-    // Logger.log('Formating Table')
+
     rowIndex = formatingTable3(docTable, styleTableMapping, urlMapping, templateTableCellAttributes, rowIndex, cellLimit)
-    // Logger.log('Table Formated')
     doc.saveAndClose()
-    // Logger.log('Saved and Closed')
 
   }
 
@@ -321,9 +306,7 @@ function insertRequirementsInSpec_asTable_fromTemplate(projectId, parentId, pare
   var doc = DocumentApp.getActiveDocument();
   var body = doc.getBody();
   var docTable = body.getChild(tableIndex)
-  Logger.log('Table Index: ' + tableIndex)
-  Logger.log('Child Type: ' + docTable.getType())
-  Logger.log('Child Text: ' + docTable.getText())
+
   findAndReplaceImages(docTable)
   doc.saveAndClose()
 
@@ -337,7 +320,6 @@ function replaceAttributesWithId(attribute, objectsList, requirementsList, req, 
   textToInsert = ''
   for (index in objectsIds) {
     objectId = objectsIds[index]
-    //    Logger.log(objectId)
     var object = objectsList.find(x => x['id'] === objectId)
     textToInsert += object[attributeToInsert] + ', '
   }
@@ -370,8 +352,6 @@ function getImagesinFilesInRequirement(filesList, reqId) {
   textToInsert = ''
   var filesOnReq = filesList.filter(x => x['object_id'] === reqId & x['mimetype'] === "image/jpeg")
 
-  Logger.log('Files on Req:', filesOnReq)
-
   for (fileIndex in filesOnReq) {
     var imageURL = filesOnReq[fileIndex]['download_url']
     textToInsert += '$START_IMG_URL=' + imageURL + '$ENG_IMG_URL'
@@ -394,16 +374,13 @@ function replaceImagesURLToFile(element) {
     if (url.includes('$START_IMG_URL')) {
 
       url = url.split('$START_IMG_URL=')[1]
-      //      Logger.log(url)
 
       var imgBlob = UrlFetchApp.fetch(url).getBlob();
 
       var searchText = '$START_IMG_URL=' + url + '$ENG_IMG_URL'
       searchText = escapeRegExp(searchText)
-      // Logger.log(searchText)
 
       // var element = body.findText(searchText);
-      // Logger.log(element)
 
       var img = element.getParent().asParagraph().insertInlineImage(0, imgBlob);
       element.replaceText(searchText, '');
@@ -438,7 +415,6 @@ function findAndReplaceImages(origin) {
 function formatingTable3(table, styleTableMapping, urlMapping, templateTableCellAttributes, startingRow, cellLimit) {
   counter = 0
 
-  //  Logger.log(startingRow)
 
   numColumns = table.getRow(0).getNumCells()
   for (let rowIndex = startingRow; rowIndex < table.getNumRows(); rowIndex++) {
@@ -459,113 +435,3 @@ function formatingTable3(table, styleTableMapping, urlMapping, templateTableCell
     }
   }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// function buildRequirementTreeHtml() {
-//   // RequirementsTree = getRequirementsTree()  
-//   RequirementsTree.build(true);
-//   html = '<ul class="reqTreeMain">'
-//   html = html.concat(recursiveFunction(RequirementsTree.root_nodes))
-//   html.concat('</ul>')
-//   return html
-// }
-
-// function recursiveFunction(object, html = '') {
-//   //  Insert HTML text
-//   for (element in object) {
-//     item = object[element]
-
-//     // If label (Folder)
-//     if (item.type.name == 'labels') {
-//       object_id = 'labels_' + String(item.data.id);
-//       html = html.concat(labelHtml(item, object_id))
-//     } else if (item.type.name == 'specifications') {
-//       // If Specification
-//       object_id = 'specs_' + String(item.data.id);
-//       html = html.concat(specificationHtml(item, object_id))
-//     } else if (item.type.name == 'groups') {
-//       // If Group (Section)
-//       object_id = 'groups_' + String(item.data.id);
-//       html = html.concat(groupHtml(item, object_id))
-//     } else if (item.type.name == 'requirements') {
-//       // If Requirement
-//       object_id = 'requirements_' + String(item.data.id);
-//       html = html.concat(requirementHtml(item, object_id))
-//     } else {
-//       // TODO better catch exceptions; Not sure if ids are unique
-//       object_id = String(item.data.id)
-//     }
-
-//     //  If Object.children is not empty
-//     if (item.children != null) {
-//       //  recursiveFunction
-//       html = html.concat('<div class="nested dropdown-content" id="children_', object_id, '">')
-//       html = recursiveFunction(item.children, html)
-//       html = html.concat('</div>')
-//     } else {
-//       Logger.log('no child')
-//     }
-
-//   }
-//   return html
-// }
-
-// function labelHtml(item, label_id) {
-//   var subhtml = ''
-//   subhtml = subhtml.concat('<li class="reqSearcheableObj label" id="', label_id, '">', expandIcon, folderIcon, '<div class="truncated-text">', 'Folder: ', String(item.data.name), '</div>', plusIcon, '</li>');
-
-//   return subhtml
-// }
-
-// function specificationHtml(item, spec_id) {
-//   var subhtml = ''
-//   subhtml = subhtml.concat('<li class="reqSearcheableObj specification" id="', spec_id, '">', expandIcon, specificationIcon, '<div class="truncated-text">', 'Specification: ', String(item.data.name), '</div>', plusIcon, '</li>');
-
-//   return subhtml
-// }
-
-// function groupHtml(item, group_id) {
-//   var subhtml = ''
-//   subhtml = subhtml.concat('<li class="reqSearcheableObj group" id="', group_id, '">', expandIcon, sectionIcon, '<div class="truncated-text">', 'Section: ', String(item.data.name), '</div>', plusIcon, '</li>');
-
-//   return subhtml
-// }
-
-// function requirementHtml(item, requirement_id) {
-//   var subhtml = ''
-//   if (item.data.title == null) {
-//     reqTitle = ''
-//   } else {
-//     reqTitle = ' - '.concat(String(item.data.title))
-//   }
-//   subhtml = subhtml.concat('<li class="reqSearcheableObj requirement" id="', requirement_id, '">', expandIcon, reqIcon, '<div class="truncated-text">', String(item.data.identifier), reqTitle, '</div>');
-//   subhtml = subhtml.concat('<ul id="', requirement_id, '_properties" class="dropdown-content">');
-//   // TODO: Automatically get allowable properties;
-//   subhtml = subhtml.concat('<li class="property" id="requirements_', String(item.data.id), '_property_identifier">Identifier</a>');
-//   subhtml = subhtml.concat('<li class="property" id="requirements_', String(item.data.id), '_property_title">Title</a>');
-//   subhtml = subhtml.concat('<li class="property" id="requirements_', String(item.data.id), '_property_text">Text</a>');
-//   subhtml = subhtml.concat('<li class="property" id="requirements_', String(item.data.id), '_property_parent">Parent</a>');
-//   subhtml = subhtml.concat('<li class="property" id="requirements_', String(item.data.id), '_property_children">Children</a>');
-//   subhtml = subhtml.concat('<li class="property" id="requirements_', String(item.data.id), '_property_section">Section</a>');
-//   subhtml = subhtml.concat('<li class="property" id="requirements_', String(item.data.id), '_property_images">Images</a>');
-//   subhtml = subhtml.concat('<li class="property" id="requirements_', String(item.data.id), '_property_files">Files</a>');
-//   subhtml = subhtml.concat('</ul>');
-//   subhtml = subhtml.concat('</li>');
-
-//   return subhtml
-// }

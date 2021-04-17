@@ -16,6 +16,6 @@ var urlTranslator = function(item_data, type){
     key_str = result.substring(2,result.length-2)
     rel_path = rel_path.replace(result, item_data[key_str])
   }
-  console.log(base_path, rel_path)
+  // console.log(base_path, rel_path)
   return base_path + rel_path
 }
