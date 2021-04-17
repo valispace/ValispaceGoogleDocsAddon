@@ -97,13 +97,14 @@
   }
 
   function saveData(projectId, dataType, lastSaveData=0) {
-    // document.getElementById("updating-status").innerHTML = 'Downloading Data...'
     google.script.run.withSuccessHandler(
       function (data) {
         // console.log(projectId)
         document.getElementById(dataType).setAttribute('data', JSON.stringify(data));
         if (lastSaveData) {
-          document.getElementById("updating-status").innerHTML = '';
+          console.log('Building Tree')
+          buildTreeOnProjectSelect()
+          console.log('Finished Building')
           $('#viewRequirementsTree').click(expandRequirementTree);
         }
       }
