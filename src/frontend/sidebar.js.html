@@ -44,14 +44,10 @@
 
   }
 
-  function updateProjectOptionsScript() {
-    var workspaceID = $("#options-workspaces").val();
-    document.getElementById('options-projects').value= ''
+  function updateProjectOptionsScript(workspaceID) {
     document.getElementById("updating-status").innerHTML = 'Updating Project List'
-    console.log('Updating Project List')
     google.script.run
       .withSuccessHandler(function (options) {
-        console.log('Sucess Updating List from Google Run, writting HTML');
         var insertedHTML = '<option value = "">Select your Project</option>';
         var i;
         for (i = 0; i < options.length; i++) {
@@ -61,20 +57,20 @@
           insertedHTML += "</option>"
         }
         $('#options-projects').html(insertedHTML);
-        document.getElementById("updating-status").innerHTML = '';
-        console.log('Done');
+        document.getElementById("updating-status").innerHTML = ''
       })
       .get_projects(workspaceID);
   }
 
   function updateSelectedWorkspaceScript() {
-    // var workspaceID = $("#options-workspaces").val();
+    var workspaceID = $("#options-workspaces").val();
     var name = $("#options-workspaces option:selected").text();
-    updateProjectOptionsScript();
+    updateProjectOptionsScript(workspaceID);
   }
 
 
   function updateSelectedProjectScript() {
+    clearData()
     // Disable View Requirements Tree Button and Closes DropDown Div
     $('#viewRequirementsTree').off()
     document.getElementById("myDropdown").classList.remove("show");
@@ -114,6 +110,15 @@
         }
       }
     ).get_data(projectId, dataType)
+  }
+
+  function clearData(){
+    document.getElementById('labelsData').removeAttribute('data')
+    document.getElementById('specificationsData').removeAttribute('data')
+    document.getElementById('requirementsData').removeAttribute('data')
+    document.getElementById('groupsData').removeAttribute('data')
+    document.getElementById('tagsData').removeAttribute('data')
+    document.getElementById('filesData').removeAttribute('data')
   }
 
   function clearTreeHtml() {
