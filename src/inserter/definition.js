@@ -24,20 +24,16 @@ var Inserter = {
     id = `${object.name}__${object.property}`
     if (!(id in this.inserted_elements)) {this.inserted_elements[id] = []}
 
-    var index = this.get_position(type=="table"|| type=="image")
+    var index = this.get_position(type=="table")
     var el
-    if (type=='table'){
-      el = index.appendTable(object.data)
-    }
-    if(type=='image'){
-      el = index.appendInlineImage(object.data)
-    }
-    else{
-      el = index.insertText(object.data)
-    }
+
+    el = index.insertText(object.data)
     el.setLinkUrl(object.url + `?from=valispace&name=${id}`)
     if(type=='text'){
       el.setForegroundColor("#000000").setUnderline(false)
+    }
+    if(type=='image'){
+      replaceImagesURLToFile(el);
     }
     // console.log(el)
     this.inserted_elements[id].push(el)
