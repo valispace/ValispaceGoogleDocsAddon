@@ -3,7 +3,7 @@ function get_data(projectId, dataType) {
     case 'labelsData':
       return JSON.parse(getAuthenticatedValispaceUrl('requirements/specifications/labels/?project=' + projectId));
     case 'specificationsData':
-      return JSON.parse(getAuthenticatedValispaceUrl('requirements/specifications/?project=' + projectId));
+      return JSON.parse(getAuthenticatedValispaceUrl('requirements/specifications/full_list/?project=' + projectId + '&clean_text=description'));
     case 'requirementsData':
       return JSON.parse(getAuthenticatedValispaceUrl('requirements/full_list/?project=' + projectId + '&clean_text=text,comment'));
     case 'tagsData':
@@ -12,6 +12,10 @@ function get_data(projectId, dataType) {
       return JSON.parse(getAuthenticatedValispaceUrl('files/?project=' + projectId));
     case 'groupsData':
       return JSON.parse(getAuthenticatedValispaceUrl('requirements/groups/?project=' + projectId));
+    case 'usersData':
+      return JSON.parse(getAuthenticatedValispaceUrl('user'));
+    case 'user_groupsData':
+      return JSON.parse(getAuthenticatedValispaceUrl('group'));
 
   }
 }
@@ -99,49 +103,54 @@ function getCursorIndex(body, cursor) {
 
 
 function direct_insert(objectList, objectName, property) {
-  specificationsList = objectList['specifications']
-  labelsList = objectList['labels']
-  requirementsList = objectList['requirements']
-  groupsList = objectList['groups']
-  tagsList = objectList['tags']
-  filesList = objectList['files']
+  specificationsData = objectList['specifications']
+  labelsData = objectList['labels']
+  requirementsData = objectList['requirements']
+  groupsData = objectList['groups']
+  tagsData = objectList['tags']
+  filesData = objectList['files']
+  usersData = objectList['users']
+  user_groupsData = objectList['user_groups']
   var id = objectName.split("_");
   var parentType = id[0].toString();
   var parentId = parseInt(id[1]);
+  console.log(parentType, parentId)
+  requirements = requirementsData
 
-  requirements = requirementsList
-
-  var object = requirementsList.find(x => x['id'] === parentId);
+  var object = objectList[types[parentType].name].find(x => x['id'] === parentId);
   var url_meta = urlTranslator(object, types[parentType]);
   var insertion_type = 'text';
   text_to_insert = '-';
   if (object[property]) {
     text_to_insert = object[property];
   }
-  if (property == 'tags') {
-    text_to_insert = replaceAttributesWithId('tags', tagsList, requirements, parentId, 'name')
+  if(property=='owner'){
+    text_to_insert = getUserFrom(object[property] ,usersData, user_groupsData);
+  }
+  if (property=='tags') {
+    text_to_insert = replaceAttributesWithId('tags', tagsData, requirements, parentId, 'name')
   }
   // Replacing Group (Section) Name
-  else if (property == 'section') {
-    text_to_insert = replaceAttributesWithId('group', groupsList, requirements, parentId, 'name')
+  else if (property=='section') {
+    text_to_insert = replaceAttributesWithId('group', groupsData, requirements, parentId, 'name')
   }
   // Replacing Parent Name
-  else if (property == 'parents') {
+  else if (property=='parents') {
     //            textToInsert = replaceParents(requirements, req, 'identifier')
-    text_to_insert = replaceAttributesWithId('parents', requirementsList, requirements, parentId, 'identifier')
+    text_to_insert = replaceAttributesWithId('parents', requirementsData, requirements, parentId, 'identifier')
   }
   // Replacing Children Name
-  else if (property == 'children') {
+  else if (property=='children') {
     //            textToInsert = replaceParents(requirements, req, 'identifier')
-    text_to_insert = replaceAttributesWithId('children', requirementsList, requirements, parentId, 'identifier')
+    text_to_insert = replaceAttributesWithId('children', requirementsData, requirements, parentId, 'identifier')
   }
   // Replacing Files Names
-  else if (property == 'files') {
+  else if (property=='files') {
     reqId = parentId
-    text_to_insert = getFilesInRequirement(filesList, reqId)
+    text_to_insert = getFilesInRequirement(filesData, reqId)
   }
-  if (property == 'images') {
-    text_to_insert = getImagesinFilesInRequirement(filesList, parentId);
+  if(property == 'images'){
+    text_to_insert = getImagesinFilesInRequirement(filesData, parentId);
     insertion_type = 'image';
   }
 
@@ -215,17 +224,17 @@ function insertRequirementsInSpec_asTable_fromTemplate(projectId, parentId, pare
           }
           // Replacing Group (Section) Name
           else if (cellValue.includes('$section')) {
-            textToInsert = replaceAttributesWithId('group', groupsList, requirements, requirements[req].id, 'name')
+            textToInsert = replaceAttributesWithId('group', groupsList, requirements,  requirements[req].id, 'name')
           }
           // Replacing Parent Name
           else if (cellValue.includes('$parents')) {
             //            textToInsert = replaceParents(requirements, req, 'identifier')
-            textToInsert = replaceAttributesWithId('parents', requirementsList, requirements, requirements[req].id, 'identifier')
+            textToInsert = replaceAttributesWithId('parents', requirementsList, requirements,  requirements[req].id, 'identifier')
           }
           // Replacing Children Name
           else if (cellValue.includes('$children')) {
             //            textToInsert = replaceParents(requirements, req, 'identifier')
-            textToInsert = replaceAttributesWithId('children', requirementsList, requirements, requirements[req].id, 'identifier')
+            textToInsert = replaceAttributesWithId('children', requirementsList, requirements,  requirements[req].id, 'identifier')
           }
           // Replacing Files Names
           else if (cellValue.includes('$files')) {
@@ -314,6 +323,23 @@ function insertRequirementsInSpec_asTable_fromTemplate(projectId, parentId, pare
   // return [table, styleTableMapping]
 }
 
+function getUserFrom(origin, usersData, user_groupsData){
+  console.log(origin)
+  text = '-'
+  if (origin.contenttype==5){
+    user = usersData.find(x => x['id'] === origin.id)
+    if(user.first_name || user.last_name){
+      text = user.first_name + ' ' + user.last_name
+    }
+  }
+  else if (origin.contenttype==4){
+    group = user_groupsData.find(x => x['id'] === origin.id)
+    if (group.name){
+      text = group.name
+    }
+  }
+  return text
+}
 
 function replaceAttributesWithId(attribute, objectsList, requirementsList, req, attributeToInsert) {
   objectsIds = requirementsList.find(x => x['id'] === req)[attribute];
@@ -354,7 +380,10 @@ function getImagesinFilesInRequirement(filesList, reqId) {
 
   for (fileIndex in filesOnReq) {
     var imageURL = filesOnReq[fileIndex]['download_url']
-    textToInsert += '$START_IMG_URL=' + imageURL + '$ENG_IMG_URL'
+    textToInsert += '$START_IMG_META=' +
+                    '$START_IMG_ID=files_' +filesOnReq[fileIndex]['id'] +'$END_IMG_ID'+
+                    '$START_IMG_URL=' +imageURL +'$END_IMG_URL'+
+                    '$END_IMG_META'
     //
   }
   return textToInsert
@@ -367,24 +396,27 @@ function escapeRegExp(text) {
 function replaceImagesURLToFile(element) {
 
   var text = element.getText()
-  var image_urls = text.split('$ENG_IMG_URL')
+  var meta_url = element.getLinkUrl().split('name=requirements')[0]
+  var image_metas = text.split('$END_IMG_META')
 
-  for (index in image_urls) {
-    var url = image_urls[index]
-    if (url.includes('$START_IMG_URL')) {
+  for (index in image_metas) {
+    var meta = image_metas[index]
+    if (meta.includes('$START_IMG_URL')) {
 
-      url = url.split('$START_IMG_URL=')[1]
+      url = meta.split('$START_IMG_URL=')[1].split('$END_IMG_URL')[0]
+      meta_url += 'name=' + meta.split('$START_IMG_ID=')[1].split('$END_IMG_ID')[0]
+      //      Logger.log(url)
 
       var imgBlob = UrlFetchApp.fetch(url).getBlob();
 
-      var searchText = '$START_IMG_URL=' + url + '$ENG_IMG_URL'
+      var searchText = image_metas[index] + '$END_IMG_META'
       searchText = escapeRegExp(searchText)
 
       // var element = body.findText(searchText);
 
       var img = element.getParent().asParagraph().insertInlineImage(0, imgBlob);
       element.replaceText(searchText, '');
-      // img.setLinkUrl(element_url)
+      img.setLinkUrl(meta_url)
     }
   }
 }
@@ -403,7 +435,7 @@ function findAndReplaceImages(origin) {
   for (let rowIndex = 0; rowIndex < table.getNumRows(); rowIndex++) {
     for (let columnIndex = 0; columnIndex < numColumns; columnIndex++) {
       cellContent = table.getCell(rowIndex, columnIndex).getText()
-      if (cellContent.includes('$START_IMG_URL=')) {
+      if (cellContent.includes('$START_IMG_META=')) {
 
         replaceImagesURLToFile(table.getCell(rowIndex, columnIndex).getChild(0).getChild(0))
       }
