@@ -44,6 +44,8 @@
     
     function changeReqTable(){
     var TemplateDocumentId = $('#TemplateDocumentId').val();
+    console.log("Template Doc ID")
+    console.log(TemplateDocumentId)
     google.script.run.withSuccessHandler().changeReqTableTemplate(TemplateDocumentId);
     };
     

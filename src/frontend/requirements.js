@@ -119,32 +119,32 @@ function direct_insert(objectList, objectName, property) {
   var url_meta = urlTranslator(object, types[parentType]);
   var insertion_type = 'text';
   text_to_insert = '-';
-  if(object[property]){
+  if (object[property]) {
     text_to_insert = object[property];
   }
-  if (property=='tags') {
+  if (property == 'tags') {
     text_to_insert = replaceAttributesWithId('tags', tagsList, requirements, parentId, 'name')
   }
   // Replacing Group (Section) Name
-  else if (property=='section') {
+  else if (property == 'section') {
     text_to_insert = replaceAttributesWithId('group', groupsList, requirements, parentId, 'name')
   }
   // Replacing Parent Name
-  else if (property=='parents') {
+  else if (property == 'parents') {
     //            textToInsert = replaceParents(requirements, req, 'identifier')
     text_to_insert = replaceAttributesWithId('parents', requirementsList, requirements, parentId, 'identifier')
   }
   // Replacing Children Name
-  else if (property=='children') {
+  else if (property == 'children') {
     //            textToInsert = replaceParents(requirements, req, 'identifier')
     text_to_insert = replaceAttributesWithId('children', requirementsList, requirements, parentId, 'identifier')
   }
   // Replacing Files Names
-  else if (property=='files') {
+  else if (property == 'files') {
     reqId = parentId
     text_to_insert = getFilesInRequirement(filesList, reqId)
   }
-  if(property == 'images'){
+  if (property == 'images') {
     text_to_insert = getImagesinFilesInRequirement(filesList, parentId);
     insertion_type = 'image';
   }
@@ -195,8 +195,7 @@ function insertRequirementsInSpec_asTable_fromTemplate(projectId, parentId, pare
 
   // TODO: Missing other objects list
 
-  // TODO: Get From UserProperties
-  documentId = '1bDQClCWVcvzPARYl5ohGvBgZlQ519NGGCStqizzK-bU';
+  documentId = PropertiesService.getDocumentProperties().getProperty('TemplateDocumentId')
   values = getTemplateTable2(documentId)
   templateTableData = values[0]
   templateTableCellAttributes = values[1]
@@ -221,17 +220,17 @@ function insertRequirementsInSpec_asTable_fromTemplate(projectId, parentId, pare
           }
           // Replacing Group (Section) Name
           else if (cellValue.includes('$section')) {
-            textToInsert = replaceAttributesWithId('group', groupsList, requirements,  requirements[req].id, 'name')
+            textToInsert = replaceAttributesWithId('group', groupsList, requirements, requirements[req].id, 'name')
           }
           // Replacing Parent Name
           else if (cellValue.includes('$parents')) {
             //            textToInsert = replaceParents(requirements, req, 'identifier')
-            textToInsert = replaceAttributesWithId('parents', requirementsList, requirements,  requirements[req].id, 'identifier')
+            textToInsert = replaceAttributesWithId('parents', requirementsList, requirements, requirements[req].id, 'identifier')
           }
           // Replacing Children Name
           else if (cellValue.includes('$children')) {
             //            textToInsert = replaceParents(requirements, req, 'identifier')
-            textToInsert = replaceAttributesWithId('children', requirementsList, requirements,  requirements[req].id, 'identifier')
+            textToInsert = replaceAttributesWithId('children', requirementsList, requirements, requirements[req].id, 'identifier')
           }
           // Replacing Files Names
           else if (cellValue.includes('$files')) {
@@ -251,7 +250,7 @@ function insertRequirementsInSpec_asTable_fromTemplate(projectId, parentId, pare
             textToInsert = cellValue
           }
           subTableRow.push(textToInsert)
-          subUrlMapping.push(urlTranslator(requirements[req], types['requirements'])+`?from=valispace&name=requirements_${requirements[req].id}__${cellValue.replace('$', '')}`);
+          subUrlMapping.push(urlTranslator(requirements[req], types['requirements']) + `?from=valispace&name=requirements_${requirements[req].id}__${cellValue.replace('$', '')}`);
           subTableStyleRow.push([[rowIndex], [cellIndex]])
         }
         table.push(subTableRow)
@@ -422,7 +421,7 @@ function findAndReplaceImages(origin) {
   //   replaceImagesURLToFile(element.getElement())
   //   element = origin.findText('$START_IMG_URL=')
   // }
-  table=origin
+  table = origin
   body = DocumentApp.getActiveDocument().getBody();
   for (let rowIndex = 0; rowIndex < table.getNumRows(); rowIndex++) {
     for (let columnIndex = 0; columnIndex < numColumns; columnIndex++) {

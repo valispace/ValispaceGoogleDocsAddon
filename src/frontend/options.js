@@ -23,7 +23,8 @@ function openOptionDialog() {
 function changeReqTableTemplate(TemplateDocumentId){
   try{
     PropertiesService.getDocumentProperties().setProperty('TemplateDocumentId', TemplateDocumentId);
-    Logger.log('Changed template document to ID: ', TemplateDocumentId)
+    Logger.log('Changed template document to ID: ')
+    Logger.log(TemplateDocumentId)
 //    var templatedoc = DocumentApp.openById(TemplateDocumentId);
   } catch (error) {
     DocumentApp.getUi().alert("Could not find the document. Confirm it was not deleted and that anyone have read access with the link.");
