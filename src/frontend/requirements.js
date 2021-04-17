@@ -102,7 +102,6 @@ function getCursorIndex(body, cursor) {
 }
 
 
-
 function direct_insert(objectList, objectName, property) {
   specificationsData = objectList['specifications']
   labelsData = objectList['labels']

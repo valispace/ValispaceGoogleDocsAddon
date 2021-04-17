@@ -6,15 +6,29 @@ function openSearchRequirementDialog() {
 
 }
 
-// TODO - How can I make the google.script.run to call a object function? It would replace functions below.
 function get_workspaces() {
-  var Workspaces = WorkspacesCache.get()
+  Workspaces = JSON.parse(getAuthenticatedValispaceUrl('workspace/'));
+  Workspaces.sort(sortNameAlphabeticaly);
   return Workspaces
 }
 function get_projects(workspaceID) {
-  var Projects = ProjectsCache.get(workspaceID)
+  Projects = JSON.parse(getAuthenticatedValispaceUrl('project/?workspace=' + workspaceID));
+  Projects.sort(sortNameAlphabeticaly);
+
   return Projects
 }
+
+function sortNameAlphabeticaly(a, b) {
+  a_ = a.name.toUpperCase()
+  b_ = b.name.toUpperCase()
+  if (a_ == b_)
+    return 0;
+  if (a_ < b_)
+    return -1;
+  if (a_ > b_)
+    return 1;
+};
+
 
 function set_project(projectID) {
   PropertiesService.getUserProperties().setProperty('projectID', projectID);
