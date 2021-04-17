@@ -1,78 +1,57 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <base target="_top">
-        <?!=HtmlService.createHtmlOutputFromFile('frontend/optionsDialog.css').getContent()?>
-  </head>
-  <body>
-    <!-- <div>
-    <input  type="checkbox" id="highlightValis" value="highlightValis" <?!=highlightOption?> >Highlight Valis on Text<br>
-    </div> -->
-   <br>
-    
-    <div class="requirementInputContainer">
+
+<head>
+  <base target="_top">
+  <?!=HtmlService.createHtmlOutputFromFile('frontend/optionsDialog.css').getContent()?>
+</head>
+
+<body>
+  <br>
+
+  <div class="requirementInputContainer">
     <div class="input-label">
       <label for="TemplateDocumentId">Requirement Table Template ID: </label>
-    </div> 
+    </div>
     <div>
-      <input type="text" class="input-field" id="TemplateDocumentId" name="TemplateDocumentId">      
+      <input type="text" class="input-field" id="TemplateDocumentId" name="TemplateDocumentId">
     </div>
-    </div>
-    
-    
-    <div id="RequirementsTemplate">
-    <input type="submit" value="Update" class="action button" onclick="changeReqTable()">
+  </div>
+
+
+  <div id="RequirementsTemplate">
+    <input type="submit" value="Modify Template Table" class="action button" onclick="changeReqTable()">
     <input type="submit" value="Reset to Default Table" class="action button" onclick="resetTableID()">
-    <input type="submit" value="Create New Template" class="action button" onclick="createNewTemp()">
-    </div>
-    <br>
-     
-    
-    <div id="LastButtons">
-    <input type="button" value="Save" class="button" onclick="changeOptions()" >
-    <input type="button" value="Close" class="button" onclick="google.script.host.close()" >
-    </div>
+  </div>
+  <br>
 
-    
-    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
-    
-    <script>
-    function changeOptions(){
-    var highlightVali =  $("#highlightValis").is(':checked');
-    google.script.run.withSuccessHandler(closeIt).changeOptions(highlightVali);
+
+  <div id="LastButtons">
+    <input type="button" value="Close" class="button" onclick="google.script.host.close()">
+  </div>
+
+
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+
+  <script>
+    function closeIt() {
+      google.script.host.close()
     };
-    
-    function changeReqTable(){
-    var TemplateDocumentId = $('#TemplateDocumentId').val();
-    console.log("Template Doc ID")
-    console.log(TemplateDocumentId)
-    google.script.run.withSuccessHandler().changeReqTableTemplate(TemplateDocumentId);
+
+    function changeReqTable() {
+      var TemplateDocumentId = $('#TemplateDocumentId').val();
+      console.log("Template Doc ID")
+      console.log(TemplateDocumentId)
+      google.script.run.withSuccessHandler(closeIt).changeReqTableTemplate(TemplateDocumentId);
     };
-    
-    function createNewTemp(){
-    google.script.run.createNewTemplate();
-    
+
+    function resetTableID() {
+      google.script.run.withSuccessHandler(closeIt).resetReqTableTemplate();
     };
-    
-//        function clearUserProperties(){
-//    google.script.run.clearUserProperties();
-//    };
-//    function clearDocumentProperties(){
-//    google.script.run.clearDocumentProperties();
-//    };
-    
-    function closeIt(){
-    google.script.host.close()
-    };
-    
-    function resetTableID(){
-    google.script.run.withSuccessHandler(closeIt).resetReqTableTemplate();
-    };
-    
-    
-    </script>
-    
-  </body>
+
+
+  </script>
+
+</body>
+
 </html>
-
-

@@ -1,5 +1,19 @@
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
 <script>
+
+
+  var dataList = [
+    'labelsData',
+    'specificationsData',
+    'requirementsData',
+    'groupsData',
+    'statesData',
+    'tagsData',
+    'filesData',
+    'usersData',
+    'user_groupsData'
+  ]
+
   /**
    * On document load, assign click handlers to each button and try to load the
    * user's origin and destination language preferences if previously set.
@@ -8,16 +22,15 @@
     updateWorkspacesOptionsScript()
     // getPreviousWorkspace()
 
-    // Updates List of Workspaces when Refresh button is pressed
-    $('#update-workspaces').click(updateWorkspacesOptionsScript);
-    // Updates List of Projects when Refresh button is pressed
-    $('#update-projects').click(updateProjectOptionsScript);
-
     // Function Triggered when A workspace is selected
     $('#options-workspaces').change(updateSelectedWorkspaceScript);
+    // Updates List of Workspaces when Refresh button is pressed
+    $('#update-workspaces').click(updateWorkspacesOptionsScript);
 
     // Function Triggered when A Project is selected
     $('#options-projects').change(updateSelectedProjectScript);
+    // Updates List of Projects when Refresh button is pressed
+    $('#update-projects').click(updateProjectOptionsScript);
 
     $('#valispace-disconnect').click(disconnectValispaceScript);
     $('#valispace-options').click(OptionsScript);
@@ -44,6 +57,12 @@
 
   }
 
+  function updateSelectedWorkspaceScript() {
+    var workspaceID = $("#options-workspaces").val();
+    var name = $("#options-workspaces option:selected").text();
+    updateProjectOptionsScript();
+  }
+
   function updateProjectOptionsScript() {
     var workspaceID = $("#options-workspaces").val();
     document.getElementById("updating-status").innerHTML = 'Updating Project List'
@@ -63,20 +82,15 @@
       .get_projects(workspaceID);
   }
 
-  function updateSelectedWorkspaceScript() {
-    var workspaceID = $("#options-workspaces").val();
-    var name = $("#options-workspaces option:selected").text();
-    updateProjectOptionsScript();
-  }
 
 
   function updateSelectedProjectScript() {
+    document.getElementById("updating-status").innerHTML = 'Downloading Data...'
     clearData()
     // Disable View Requirements Tree Button and Closes DropDown Div
     $('#viewRequirementsTree').off()
     document.getElementById("myDropdown").classList.remove("show");
 
-    document.getElementById("updating-status").innerHTML = 'Downloading Data...'
 
     clearTreeHtml();
     var projectId = $("#options-projects").val();
@@ -84,43 +98,52 @@
     google.script.run.set_project(projectId)
     var projectName = $("#options-projects option:selected").text();
 
-
-    // Save All Data in the HTML
-    console.log('Saving Project Data...')
-    saveData(projectId, 'labelsData') // Folders
-    saveData(projectId, 'specificationsData')
-    saveData(projectId, 'requirementsData')
-    saveData(projectId, 'groupsData') // Sections
-    saveData(projectId, 'statesData') // Sections
-    saveData(projectId, 'tagsData')
-    saveData(projectId, 'filesData')
-    saveData(projectId, 'usersData')
-    saveData(projectId, 'user_groupsData', 1)
-    // IMPORTANT: Last Save data must have a flag 1
-
-    console.log('Done Saving Project Data')
+    orchestrateDownload(projectId)
   }
 
-  function saveData(projectId, dataType, lastSaveData = 0) {
-    google.script.run.withSuccessHandler(
-      function (data) {
-        // console.log(projectId)
-        document.getElementById(dataType).setAttribute('data', JSON.stringify(data));
-        if (lastSaveData) {
-          document.getElementById("updating-status").innerHTML = '';
-          $('#viewRequirementsTree').click(expandRequirementTree);
-        }
-      }
-    ).get_data(projectId, dataType)
+
+  function orchestrateDownload(projectId) {
+
+    document.getElementById("updating-status").innerHTML = 'Downloading Data...';
+
+    return Promise.all(dataList.map(function (data, i) {
+      console.log('download started')
+      return promiseRun('get_data', projectId, data)
+        .then(function (result) {
+          document.getElementById(data).setAttribute('data', JSON.stringify(result));
+          console.log('download finished')
+        })
+    })).then(function () {
+      document.getElementById("updating-status").innerHTML = 'Building Tree';
+      buildRequirementsTree_browser();
+      getRequirements();
+      addTreeListener();
+      document.getElementById("updating-status").innerHTML = '';
+      $('#viewRequirementsTree').click(expandRequirementTree);
+    })
+  }
+
+  function promiseRun(func) {
+    // this is a trick to convert the arguments array into an array, and drop the first one
+    var runArgs = Array.prototype.slice.call(arguments).slice(1);
+
+    return new Promise(function (resolve, reject) {
+      google.script.run
+        .withSuccessHandler(function (result) {
+          resolve(result);
+        })
+        .withFailureHandler(function (error) {
+          reject(error);
+        })
+      [func].apply(this, runArgs);
+
+    })
   }
 
   function clearData() {
-    document.getElementById('labelsData').removeAttribute('data')
-    document.getElementById('specificationsData').removeAttribute('data')
-    document.getElementById('requirementsData').removeAttribute('data')
-    document.getElementById('groupsData').removeAttribute('data')
-    document.getElementById('tagsData').removeAttribute('data')
-    document.getElementById('filesData').removeAttribute('data')
+      for (index in dataList){
+        document.getElementById(dataList[index]).removeAttribute('data')
+      }
   }
 
   function clearTreeHtml() {
@@ -143,7 +166,6 @@
   };
 
   function OptionsScript() {
-    google.script.run.withUserObject(this).openOptionDialog();
     google.script.run
       .withUserObject(this)
       .withSuccessHandler()

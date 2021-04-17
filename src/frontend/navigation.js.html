@@ -116,9 +116,9 @@ toggle between hiding and showing the dropdown content */
 	function expandRequirementTree() {
 		if (!document.getElementById("myDropdown").classList.contains('show')) {
 			document.getElementById("updating-status").innerHTML = 'Building Tree';
-			buildRequirementsTree_browser();
-			getRequirements();
-			addTreeListener();
+			// buildRequirementsTree_browser();
+			// getRequirements();
+			// addTreeListener();
 			document.getElementById("myDropdown").classList.add("show");
 			document.getElementById("updating-status").innerHTML = '';
 		} else {
@@ -419,11 +419,14 @@ toggle between hiding and showing the dropdown content */
 
 
 	function buildRequirementsTree_browser() {
+		console.log('Inside  Building Tree')
 		// document.getElementById("updating-status").innerHTML = 'Building Tree...'
 
 		var labels = JSON.parse(document.getElementById(types.labels.data).getAttribute('data'));
 		var specifications = JSON.parse(document.getElementById(types.specifications.data).getAttribute('data'));
 		var groups = JSON.parse(document.getElementById(types.groups.data).getAttribute('data'));
+
+		console.log(specifications)
 
 		// HTML Initial
 		var htmlToWrite = '<ul class="reqTreeMain">'
