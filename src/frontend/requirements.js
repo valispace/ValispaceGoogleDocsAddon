@@ -172,7 +172,7 @@ function insertRequirementsInSpec_asTable_fromTemplate(projectId, parentId, requ
   // TODO: Missing other objects list
 
   // TODO: Get From UserProperties
-  documentId = '1bDQClCWVcvzPARYl5ohGvBgZlQ519NGGCStqizzK-bU';
+  documentId = PropertiesService.getDocumentProperties().getProperty('ReqTableID');
   values = getTemplateTable2(documentId)
   templateTableData = values[0]
   templateTableCellAttributes = values[1]

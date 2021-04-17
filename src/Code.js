@@ -14,10 +14,10 @@ function showSidebar() {
  
   DocumentApp.getUi().showSidebar(page);
   
-  // var ReqTableID_original = '1bDQClCWVcvzPARYl5ohGvBgZlQ519NGGCStqizzK-bU';
-  // if (PropertiesService.getDocumentProperties().getProperty('ReqTableID') === null) {
-  //   PropertiesService.getDocumentProperties().setProperty('ReqTableID', ReqTableID_original);
-  // };  
+  var ReqTableID_original = '1bDQClCWVcvzPARYl5ohGvBgZlQ519NGGCStqizzK-bU';
+  if (PropertiesService.getDocumentProperties().getProperty('ReqTableID') === null) {
+    PropertiesService.getDocumentProperties().setProperty('ReqTableID', ReqTableID_original);
+  };  
   // if (PropertiesService.getDocumentProperties().getProperty('highlightVali') === null) {
   //   PropertiesService.getDocumentProperties().setProperty('highlightVali', false);
   // };
