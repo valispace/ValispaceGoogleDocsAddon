@@ -44,10 +44,14 @@
 
   }
 
-  function updateProjectOptionsScript(workspaceID) {
+  function updateProjectOptionsScript() {
+    var workspaceID = $("#options-workspaces").val();
+    document.getElementById('options-projects').value= ''
     document.getElementById("updating-status").innerHTML = 'Updating Project List'
+    console.log('Updating Project List')
     google.script.run
       .withSuccessHandler(function (options) {
+        console.log('Sucess Updating List from Google Run, writting HTML');
         var insertedHTML = '<option value = "">Select your Project</option>';
         var i;
         for (i = 0; i < options.length; i++) {
@@ -57,15 +61,16 @@
           insertedHTML += "</option>"
         }
         $('#options-projects').html(insertedHTML);
-        document.getElementById("updating-status").innerHTML = ''
+        document.getElementById("updating-status").innerHTML = '';
+        console.log('Done');
       })
       .get_projects(workspaceID);
   }
 
   function updateSelectedWorkspaceScript() {
-    var workspaceID = $("#options-workspaces").val();
+    // var workspaceID = $("#options-workspaces").val();
     var name = $("#options-workspaces option:selected").text();
-    updateProjectOptionsScript(workspaceID);
+    updateProjectOptionsScript();
   }
 
 

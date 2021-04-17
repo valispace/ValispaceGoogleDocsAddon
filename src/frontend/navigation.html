@@ -35,7 +35,9 @@
 <div class="sidebarLine buttonContainer">
 
 
-  <button class="valiButton" id="update-all" onclick="updateAllReferences()">Update everything</button>
+  <button class="valiButton" id="update-all" onclick="updateAllReferences()" title="Update all references in the document.">Update everything</button>
+  <button mat-raised-button class="valiButton refreshButton" title="Re-download Requirement Data." id="redownload-requirements"><i
+    class="fas fa-sync-alt"></i></button>
 
   <div class="dropdown">
     <button id="viewRequirementsTree" class="valiButton">View Requirements Tree</button>

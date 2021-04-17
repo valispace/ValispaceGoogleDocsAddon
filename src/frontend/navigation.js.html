@@ -69,6 +69,9 @@
 
 	$(function () {
 		$('#search-specific-requirement').click(searchSpecificRequirement);
+
+		// ReDownloads Requirement Data when refresh button is pressed
+		$('#redownload-requirements').click(updateSelectedProjectScript);
 	});
 
 	function updateAllReferences() {
