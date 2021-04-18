@@ -115,7 +115,7 @@ function direct_insert(objectList, objectName, property) {
   var id = objectName.split("_");
   var parentType = id[0].toString();
   var parentId = parseInt(id[1]);
-  console.log(parentType, parentId)
+  // console.log(parentType, parentId)
   requirements = requirementsData
 
   var object = objectList[types[parentType].name].find(x => x['id'] === parentId);
@@ -379,7 +379,7 @@ function insertRequirementsInSpec_asTable_fromTemplate(projectId, parentId, pare
 }
 
 function getUserFrom(origin, usersData, user_groupsData) {
-  console.log(origin)
+  // console.log(origin)
   text = '-'
   if (origin.contenttype == 5) {
     user = usersData.find(x => x['id'] === origin.id)
