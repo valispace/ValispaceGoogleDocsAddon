@@ -1,68 +1,48 @@
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
 <script>
 	var types = {
-		workspaces: {
-			name: 'workspaces',
-			url: '',
-			data: 'workspacesData'
-		},
-		projects: {
-			name: 'projects',
-			url: '',
-			data: 'projectsData'
-		},
-		requirements: {
-			name: 'requirements',
-			url: 'project/%<project>%/specifications/%<specification>%/requirements/%<id>%',
-			data: 'requirementsData',
-			properties: ["identifier", "title", "text", "parents", "children", "section", "images", "files"],
-			filter: 'id'
-		},
-		specifications: {
-			name: 'specifications',
-			url: 'project/%<project>%/specifications/%<id>%/requirements',
-			data: 'specificationsData',
-			properties: ["name", "description", "owner"],
-			filter: 'specification'
-		},
-		labels: {
-			name: 'labels',
-			url: 'project/%<project>%/specifications/groups/%<id>%/requirements',
-			data: 'labelsData'
-		},
-		groups: {
-			name: 'groups',
-			url: 'project/%<project>%/specifications/requirements/groups/%<id>%/requirements',
-			data: 'groupsData',
-			properties: ["name", "description", "owner"],
-			filter: 'group'
-		},
+		workspaces:{name:'workspaces',
+								url: '',
+								data:'workspacesData'},
+		projects:{name:'projects',
+								url: '',
+								data:'projectsData'},
+		requirements:{name:'requirements',
+								url: ['project','%project','specifications','%specification','requirements','%id'],
+								data:'requirementsData',
+								properties:["identifier","title","text","parents","children","section","images","files"],
+								filter: 'id'},
+		specifications:{name:'specifications',
+								url: ['project','%project','specifications','%id','requirements'],
+								data:'specificationsData',
+								properties:["name", "description", "owner"],
+								filter: 'specification'},
+		labels:{name:'labels',
+								url: ['project','%project','specifications','groups','%id','requirements'],
+								data:'labelsData'},
+		groups:{name:'groups',
+								url: ['project','%project','specifications','requirements','groups','%id','requirements'],
+								data:'groupsData',
+								properties:["name", "description", "owner"],
+								filter: 'group'},
 		states: {
 			name: 'states',
 			url: '',
 			data: 'statesData',
 		},
-		users: {
-			name: 'users',
-			url: '',
-			data: 'usersData'
-		},
-		user_groups: {
-			name: 'user_groups',
-			url: '',
-			data: 'user_groupsData'
-		},
-		tags: {
-			name: 'tags',
-			url: '',
-			data: 'tagsData'
-		},
-		files: {
-			name: 'files',
-			url: '',
-			data: 'filesData'
-		}
-	}
+		users:{name:'users',
+								url: '',
+								data:'usersData'},
+		user_groups:{name:'user_groups',
+								url: '',
+								data:'user_groupsData'},
+		tags:{name:'tags',
+								url: '',
+								data:'tagsData'},
+		files:{name:'files',
+								url: '',
+								data:'filesData'}
+}
 	var expandIcon = '<i class="expand_icon fas fa-caret-right"></i>'
 	var folderIcon = '<i class="tree_icon fas fa-folder"></i>'
 	var specificationIcon = '<i class="tree_icon fas fa-clipboard-check"></i>'

@@ -5,6 +5,7 @@ function update_all_values(objectList){
   var doc = DocumentApp.getActiveDocument();
   var update_images=true;
 
+  var base_path = PropertiesService.getUserProperties().getProperty('deployment_url')
   iterateSections(doc, function(section, sectionIndex, isFirstPageSection) {
     if (!("getParagraphs" in section)) {
       // as we're using some undocumented API, adding this to avoid cryptic
@@ -32,10 +33,10 @@ function update_all_values(objectList){
           find_links(el);
         }
         if (el.getType() == DocumentApp.ElementType.TEXT) {
-          update_text(el, objectList, mergeAdjacent)
+          update_text(el, objectList, mergeAdjacent, base_path)
         }
         if (el.getType() == DocumentApp.ElementType.INLINE_IMAGE && update_images) {
-          update_image(el, objectList)
+          update_image(el, objectList, base_path)
         }
       }
     };
@@ -44,7 +45,7 @@ function update_all_values(objectList){
   });
 }
 
-function update_text(el, objectList, mergeAdjacent=false){
+function update_text(el, objectList, mergeAdjacent=false, base_path){
   //console.log(el.getText(), el.getLinkUrl())
   // go over all styling segments in text element
   var attributeIndices = el.getTextAttributeIndices();
@@ -75,8 +76,36 @@ function update_text(el, objectList, mergeAdjacent=false){
         var objId = parseInt(objectName[1]);
         var objData = objectList[objType].find(x => x['id'] === objId);
         if(objData){
-          var new_data = objData[objProperty];
-          var new_url =  urlTranslator(objData, types[objType]);
+          if (objData[objProperty]) {
+            text_to_insert = objData[objProperty];
+          }
+          if (objProperty == 'owner') {
+            text_to_insert = getUserFrom(objData[objProperty], usersData, user_groupsData);
+          }
+          else if (objProperty == 'tags') {
+            text_to_insert = replaceAttributesWithId('tags', objectList[types.tags.name], objectList[types.requirements.name], objId, 'name')
+          }
+          // Replacing Group (Section) Name
+          else if (objProperty == 'section') {
+            text_to_insert = replaceAttributesWithId('group', objectList[types.groups.name], objectList[types.requirements.name], objId, 'name')
+          }
+          // Replacing Parent Name
+          else if (objProperty == 'parents') {
+            //            textToInsert = replaceParents(requirements, req, 'identifier')
+            text_to_insert = replaceAttributesWithId('parents', objectList[types.requirements.name], objectList[types.requirements.name], objId, 'identifier')
+          }
+          // Replacing Children Name
+          else if (objProperty == 'children') {
+            //            textToInsert = replaceParents(requirements, req, 'identifier')
+            text_to_insert = replaceAttributesWithId('children', objectList[types.requirements.name], objectList[types.requirements.name], objId, 'identifier')
+          }
+          // Replacing Files Names
+          else if (objProperty == 'files') {
+            reqId = objId
+            text_to_insert = getFilesInRequirement(objectList[types.files.name], reqId)
+          }
+          var new_data = text_to_insert;
+          var new_url =  urlTranslator(objData, types[objType], base_path);
           var attributes = el.getAttributes()
           delete attributes[DocumentApp.Attribute.LINK_URL]
           console.log(`Updated: ${objId} ${new_data}`)
@@ -96,7 +125,7 @@ function update_text(el, objectList, mergeAdjacent=false){
   });
 }
 
-function update_image(image, objectList){
+function update_image(image, objectList, base_path){
   // go over all image elements
   var url = image.getLinkUrl();
 
@@ -117,7 +146,7 @@ function update_image(image, objectList){
         delete attributes[DocumentApp.Attribute.LINK_URL]
         console.log(`Updated: ${objectName} ${new_data}`)
         var new_img = UrlFetchApp.fetch(new_data).getBlob();
-        var new_url =  urlTranslator(objData, types[objType]);
+        var new_url =  urlTranslator(objData, types[objType], base_path);
         var parent = image.getParent();
         var new_image_element = parent.insertInlineImage(parent.getChildIndex(image)+1, new_img).setLinkUrl(url);
         image.removeFromParent();
