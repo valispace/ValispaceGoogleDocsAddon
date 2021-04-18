@@ -5,6 +5,7 @@ function update_all_values(objectList){
   var doc = DocumentApp.getActiveDocument();
   var update_images=true;
 
+  var base_path = PropertiesService.getUserProperties().getProperty('deployment_url')
   iterateSections(doc, function(section, sectionIndex, isFirstPageSection) {
     if (!("getParagraphs" in section)) {
       // as we're using some undocumented API, adding this to avoid cryptic
@@ -32,10 +33,10 @@ function update_all_values(objectList){
           find_links(el);
         }
         if (el.getType() == DocumentApp.ElementType.TEXT) {
-          update_text(el, objectList, mergeAdjacent)
+          update_text(el, objectList, mergeAdjacent, base_path)
         }
         if (el.getType() == DocumentApp.ElementType.INLINE_IMAGE && update_images) {
-          update_image(el, objectList)
+          update_image(el, objectList, base_path)
         }
       }
     };
@@ -44,7 +45,7 @@ function update_all_values(objectList){
   });
 }
 
-function update_text(el, objectList, mergeAdjacent=false){
+function update_text(el, objectList, mergeAdjacent=false, base_path){
   //console.log(el.getText(), el.getLinkUrl())
   // go over all styling segments in text element
   var attributeIndices = el.getTextAttributeIndices();
@@ -77,6 +78,7 @@ function update_text(el, objectList, mergeAdjacent=false){
         if(objData){
           var new_data = objData[objProperty];
           var new_url =  urlTranslator(objData, types[objType]);
+          var new_url =  urlTranslator(objData, types[objType], base_path);
           var attributes = el.getAttributes()
           delete attributes[DocumentApp.Attribute.LINK_URL]
           console.log(`Updated: ${objId} ${new_data}`)
@@ -96,7 +98,7 @@ function update_text(el, objectList, mergeAdjacent=false){
   });
 }
 
-function update_image(image, objectList){
+function update_image(image, objectList, base_path){
   // go over all image elements
   var url = image.getLinkUrl();
 
@@ -117,7 +119,7 @@ function update_image(image, objectList){
         delete attributes[DocumentApp.Attribute.LINK_URL]
         console.log(`Updated: ${objectName} ${new_data}`)
         var new_img = UrlFetchApp.fetch(new_data).getBlob();
-        var new_url =  urlTranslator(objData, types[objType]);
+        var new_url =  urlTranslator(objData, types[objType], base_path);
         var parent = image.getParent();
         var new_image_element = parent.insertInlineImage(parent.getChildIndex(image)+1, new_img).setLinkUrl(url);
         image.removeFromParent();

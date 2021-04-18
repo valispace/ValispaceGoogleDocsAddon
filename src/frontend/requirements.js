@@ -119,7 +119,9 @@ function direct_insert(objectList, objectName, property) {
   requirements = requirementsData
 
   var object = objectList[types[parentType].name].find(x => x['id'] === parentId);
-  var url_meta = urlTranslator(object, types[parentType]);
+
+  var base_path = PropertiesService.getUserProperties().getProperty('deployment_url')
+  var url_meta = urlTranslator(object, types[parentType], base_path);
   var insertion_type = 'text';
   text_to_insert = '-';
   if (object[property]) {
@@ -206,6 +208,7 @@ function insertRequirementsInSpec_asTable_fromTemplate(projectId, parentId, pare
 
 
   documentId = PropertiesService.getDocumentProperties().getProperty('TemplateDocumentId')
+  var base_path = PropertiesService.getUserProperties().getProperty('deployment_url')
   values = getTemplateTable2(documentId)
   templateTableData = values[0]
   templateTableCellAttributes = values[1]
@@ -309,7 +312,7 @@ function insertRequirementsInSpec_asTable_fromTemplate(projectId, parentId, pare
             textToInsert = cellValue
           }
           subTableRow.push(textToInsert)
-          subUrlMapping.push(urlTranslator(requirements[req], types['requirements']) + `?from=valispace&name=requirements_${requirements[req].id}__${cellValue.replace('$', '')}`);
+          subUrlMapping.push(urlTranslator(requirements[req], types['requirements'], base_path) + `?from=valispace&name=requirements_${requirements[req].id}__${cellValue.replace('$', '')}`);
           subTableStyleRow.push([[rowIndex], [cellIndex]])
         }
         table.push(subTableRow)
