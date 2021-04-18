@@ -76,8 +76,35 @@ function update_text(el, objectList, mergeAdjacent=false, base_path){
         var objId = parseInt(objectName[1]);
         var objData = objectList[objType].find(x => x['id'] === objId);
         if(objData){
-          var new_data = objData[objProperty];
-          var new_url =  urlTranslator(objData, types[objType]);
+          if (objData[objProperty]) {
+            text_to_insert = objData[objProperty];
+          }
+          if (objProperty == 'owner') {
+            text_to_insert = getUserFrom(objData[objProperty], usersData, user_groupsData);
+          }
+          else if (objProperty == 'tags') {
+            text_to_insert = replaceAttributesWithId('tags', objectList[types.tags.name], objectList[types.requirements.name], objId, 'name')
+          }
+          // Replacing Group (Section) Name
+          else if (objProperty == 'section') {
+            text_to_insert = replaceAttributesWithId('group', objectList[types.groups.name], objectList[types.requirements.name], objId, 'name')
+          }
+          // Replacing Parent Name
+          else if (objProperty == 'parents') {
+            //            textToInsert = replaceParents(requirements, req, 'identifier')
+            text_to_insert = replaceAttributesWithId('parents', objectList[types.requirements.name], objectList[types.requirements.name], objId, 'identifier')
+          }
+          // Replacing Children Name
+          else if (objProperty == 'children') {
+            //            textToInsert = replaceParents(requirements, req, 'identifier')
+            text_to_insert = replaceAttributesWithId('children', objectList[types.requirements.name], objectList[types.requirements.name], objId, 'identifier')
+          }
+          // Replacing Files Names
+          else if (objProperty == 'files') {
+            reqId = objId
+            text_to_insert = getFilesInRequirement(objectList[types.files.name], reqId)
+          }
+          var new_data = text_to_insert;
           var new_url =  urlTranslator(objData, types[objType], base_path);
           var attributes = el.getAttributes()
           delete attributes[DocumentApp.Attribute.LINK_URL]
