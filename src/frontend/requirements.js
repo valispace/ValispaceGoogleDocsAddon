@@ -6,14 +6,14 @@ function get_data(projectId, dataType) {
       return JSON.parse(getAuthenticatedValispaceUrl('requirements/specifications/full_list/?project=' + projectId + '&clean_text=description'));
     case 'requirementsData':
       return JSON.parse(getAuthenticatedValispaceUrl('requirements/full_list/?project=' + projectId + '&clean_text=text,comment'));
+      case 'groupsData':
+        return JSON.parse(getAuthenticatedValispaceUrl('requirements/groups/?project=' + projectId + '&clean_text=description'));
     case 'statesData':
       return JSON.parse(getAuthenticatedValispaceUrl('requirements/states/?project=' + projectId));
     case 'tagsData':
       return JSON.parse(getAuthenticatedValispaceUrl('tag/'));
     case 'filesData':
       return JSON.parse(getAuthenticatedValispaceUrl('files/?project=' + projectId));
-    case 'groupsData':
-      return JSON.parse(getAuthenticatedValispaceUrl('requirements/groups/?project=' + projectId));
     case 'usersData':
       return JSON.parse(getAuthenticatedValispaceUrl('user'));
     case 'user_groupsData':
