@@ -44,9 +44,10 @@ function valispaceAskToken(deployment_url, username, passwd){
   } else {
     PropertiesService.getUserProperties().setProperty('connectionStatus', 'false');
     PropertiesService.getUserProperties().setProperty('connectionAttemptDone', 'true');
+    throw new Error(`Login Error`)
     //TODO: This dialog fails to show
-    dialog.alert('Wrong Username or Password', 'You inserted a wrong username or password, please try again', dialog.ButtonSet.OK)
   }
+  Logger.log((responseData))
   return responseData
 }
 

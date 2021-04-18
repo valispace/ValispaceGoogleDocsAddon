@@ -166,7 +166,7 @@ toggle between hiding and showing the dropdown content */
 					var reqType = parent[0].toString();
 					var reqId = parseInt(parent[1]);
 					propertyName = htmlElementId[1];
-					console.log(reqId, propertyName);
+					// console.log(reqId, propertyName);
 					// TODO: Try checking INput to download only the necessary data; Maybe do it on google script
 					var specifications = JSON.parse(document.getElementById(types.specifications.data).getAttribute('data'));
 					var labels = JSON.parse(document.getElementById(types.labels.data).getAttribute('data'));
@@ -226,7 +226,7 @@ toggle between hiding and showing the dropdown content */
 		if (filter[0].includes(':')) {
 			filter = getSpecificFilter(filter[0]);
 		}
-		console.log(filter)
+		// console.log(filter)
 		filterHTMLtree(filter)
 
 		// If Filter Empty, close all
@@ -424,14 +424,14 @@ toggle between hiding and showing the dropdown content */
 
 
 	function buildRequirementsTree_browser() {
-		console.log('Inside  Building Tree')
+		// console.log('Inside  Building Tree')
 		// document.getElementById("updating-status").innerHTML = 'Building Tree...'
 
 		var labels = JSON.parse(document.getElementById(types.labels.data).getAttribute('data'));
 		var specifications = JSON.parse(document.getElementById(types.specifications.data).getAttribute('data'));
 		var groups = JSON.parse(document.getElementById(types.groups.data).getAttribute('data'));
 
-		console.log(specifications)
+		// console.log(specifications)
 
 		// HTML Initial
 		var htmlToWrite = '<ul class="reqTreeMain">'
