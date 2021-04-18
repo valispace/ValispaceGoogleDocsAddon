@@ -35,6 +35,9 @@
     $('#valispace-disconnect').click(disconnectValispaceScript);
     $('#valispace-options').click(OptionsScript);
 
+    $('#update-all').click(updateAllReferences);
+    
+
   });
 
 
@@ -62,6 +65,7 @@
     var name = $("#options-workspaces option:selected").text();
     updateProjectOptionsScript();
   }
+
 
   function updateProjectOptionsScript() {
     var workspaceID = $("#options-workspaces").val();

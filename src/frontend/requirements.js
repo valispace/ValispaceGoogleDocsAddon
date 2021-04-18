@@ -272,7 +272,8 @@ function insertRequirementsInSpec_asTable_fromTemplate(projectId, parentId, pare
             comment = requirements[req]['comment']
             textToInsert = (comment != null) ? comment : '';
           }
-          // Replacing Rationale/Comment
+          // Replacing Verification Methods
+          // TODO: Refactor it to a function (Was testing it first)
           else if (cellValue.includes('$verification_methods')) {
             vmIds = requirements[req].verification_methods
             textToInsert = ''

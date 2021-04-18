@@ -80,9 +80,10 @@
 	});
 
 	function updateAllReferences() {
-		// TODO: The function inside update_all_values doesn't return anything, so it is not waiting to finish and the updating-status is modified instantly.
-		document.getElementById("updating-status").innerHTML = 'Updating All References...';
+		// TODO: Update Flag, write as a Promise.
+		// document.getElementById("updating-status").innerHTML = 'Updating All References...';
 		// TODO: Try checking INput to download only the necessary data; Maybe do it on google script
+		// TODO: Use the dataList
 		var specifications = JSON.parse(document.getElementById(types.specifications.data).getAttribute('data'));
 		var labels = JSON.parse(document.getElementById(types.labels.data).getAttribute('data'));
 		var requirements = JSON.parse(document.getElementById(types.requirements.data).getAttribute('data'));
@@ -102,7 +103,7 @@
 			'user_groups': user_groups
 		}
 		google.script.run
-			.withSuccessHandler(document.getElementById("updating-status").innerHTML = '')
+			// .withSuccessHandler(document.getElementById("updating-status").innerHTML = '')
 			.update_all_values(all_data)
 	}
 
