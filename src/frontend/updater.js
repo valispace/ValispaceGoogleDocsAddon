@@ -80,7 +80,7 @@ function update_text(el, objectList, mergeAdjacent=false, base_path){
             text_to_insert = objData[objProperty];
           }
           if (objProperty == 'owner') {
-            text_to_insert = getUserFrom(objData[objProperty], usersData, user_groupsData);
+            text_to_insert = getUserFrom(objData[objProperty], objectList['users'], objectList['user_groups']);
           }
           else if (objProperty == 'tags') {
             text_to_insert = replaceAttributesWithId('tags', objectList[types.tags.name], objectList[types.requirements.name], objId, 'name')
