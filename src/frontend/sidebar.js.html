@@ -35,11 +35,23 @@
     $('#valispace-disconnect').click(disconnectValispaceScript);
     $('#valispace-options').click(OptionsScript);
 
-    $('#update-all').click(updateAllReferences);
-    
+    $('#update-all').click(updateAllPromise);
+
 
   });
 
+  function updateAllPromise() {
+    document.getElementById("updating-status").innerHTML = "Updating References"
+    updateAllReferences().then(function (response) {
+      document.getElementById("updating-status").innerHTML = response
+      setTimeout(function(){
+        document.getElementById("updating-status").innerHTML = ""
+      }, 3000)
+    }, function (error) {
+      document.getElementById("updating-status").innerHTML = error
+    })
+
+  }
 
   function updateWorkspacesOptionsScript() {
     document.getElementById("updating-status").innerHTML = 'Getting Workspaces'
@@ -145,9 +157,9 @@
   }
 
   function clearData() {
-      for (index in dataList){
-        document.getElementById(dataList[index]).removeAttribute('data')
-      }
+    for (index in dataList) {
+      document.getElementById(dataList[index]).removeAttribute('data')
+    }
   }
 
   function clearTreeHtml() {

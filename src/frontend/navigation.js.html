@@ -80,31 +80,35 @@
 	});
 
 	function updateAllReferences() {
-		// TODO: Update Flag, write as a Promise.
-		// document.getElementById("updating-status").innerHTML = 'Updating All References...';
-		// TODO: Try checking INput to download only the necessary data; Maybe do it on google script
-		// TODO: Use the dataList
-		var specifications = JSON.parse(document.getElementById(types.specifications.data).getAttribute('data'));
-		var labels = JSON.parse(document.getElementById(types.labels.data).getAttribute('data'));
-		var requirements = JSON.parse(document.getElementById(types.requirements.data).getAttribute('data'));
-		var groups = JSON.parse(document.getElementById(types.groups.data).getAttribute('data'));
-		var tags = JSON.parse(document.getElementById(types.tags.data).getAttribute('data'));
-		var files = JSON.parse(document.getElementById(types.files.data).getAttribute('data'));
-		var users = JSON.parse(document.getElementById(types.users.data).getAttribute('data'));
-		var user_groups = JSON.parse(document.getElementById(types.user_groups.data).getAttribute('data'));
-		var all_data = {
-			'specifications': specifications,
-			'labels': labels,
-			'requirements': requirements,
-			'groups': groups,
-			'tags': tags,
-			'files': files,
-			'users': users,
-			'user_groups': user_groups
-		}
-		google.script.run
-			// .withSuccessHandler(document.getElementById("updating-status").innerHTML = '')
-			.update_all_values(all_data)
+
+		return new Promise(function (resolve, reject) {
+			// TODO: Update Flag, write as a Promise.
+			// document.getElementById("updating-status").innerHTML = 'Updating All References...';
+			// TODO: Try checking INput to download only the necessary data; Maybe do it on google script
+			// TODO: Use the dataList
+			var specifications = JSON.parse(document.getElementById(types.specifications.data).getAttribute('data'));
+			var labels = JSON.parse(document.getElementById(types.labels.data).getAttribute('data'));
+			var requirements = JSON.parse(document.getElementById(types.requirements.data).getAttribute('data'));
+			var groups = JSON.parse(document.getElementById(types.groups.data).getAttribute('data'));
+			var tags = JSON.parse(document.getElementById(types.tags.data).getAttribute('data'));
+			var files = JSON.parse(document.getElementById(types.files.data).getAttribute('data'));
+			var users = JSON.parse(document.getElementById(types.users.data).getAttribute('data'));
+			var user_groups = JSON.parse(document.getElementById(types.user_groups.data).getAttribute('data'));
+			var all_data = {
+				'specifications': specifications,
+				'labels': labels,
+				'requirements': requirements,
+				'groups': groups,
+				'tags': tags,
+				'files': files,
+				'users': users,
+				'user_groups': user_groups
+			}
+			google.script.run
+				.withFailureHandler(function () { reject("Error Updating References") })
+				.withSuccessHandler(function () { resolve("References Updated")})
+				.update_all_values(all_data)
+		})
 	}
 
 	function searchSpecificRequirement() {
