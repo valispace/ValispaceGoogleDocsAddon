@@ -558,7 +558,9 @@ toggle between hiding and showing the dropdown content */
 		for (index in requirements) {
 			var requirement = requirements[index]
 
-			displayName = requirement['identifier'] + " " + requirement['title']
+			reqTitle = (requirement['title'] != null) ? requirement['title'] : ""; //Returns empty string if Title is null
+
+			displayName = requirement['identifier'] + " " + reqTitle
 			var reqName = types.requirements.name + '_' + requirement['id']
 			// If Not in a Group ['group'] = null, it is in a specificaiton only
 			if (requirement['group'] == null) {

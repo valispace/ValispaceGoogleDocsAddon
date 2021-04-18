@@ -247,6 +247,10 @@ function insertRequirementsInSpec_asTable_fromTemplate(projectId, parentId, pare
           if (cellValue.includes('$tags')) {
             textToInsert = replaceAttributesWithId('tags', tagsData, requirements, requirements[req].id, 'name')
           }
+          // Replacing Specification
+          else if (cellValue.includes('$specification')) {
+            textToInsert = replaceAttributesWithId('specification', specificationsData, requirements, requirements[req].id, 'name')
+          }
           // Replacing Group (Section) Name
           else if (cellValue.includes('$section')) {
             textToInsert = replaceAttributesWithId('group', groupsData, requirements, requirements[req].id, 'name')
