@@ -1,0 +1,35 @@
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+<script>
+
+  function connect_() {
+    var div = document.getElementById('connectionStatus');
+    return new Promise(function (resolve, reject) {
+      google.script.run
+        .withSuccessHandler(function () {
+          goToMainPage()
+          resolve('Connected. Opening Addon...')
+        })
+        .withFailureHandler(function () { reject("Error Connecting. Try Again") })
+        .valispaceAskToken($('#deployment').val(), $('#username').val(), $('#pass').val());
+    })
+  }
+
+  function connect() {
+    document.getElementById("conectionOutput").innerHTML = "Connecting"
+    connect_().then(function (response) {
+      document.getElementById("conectionOutput").innerHTML = response
+    }, function (error) {
+      document.getElementById("conectionOutput").innerHTML = error
+    })
+  }
+
+  function errorMessage(error) {
+    var div = document.getElementById('conectionOutput');
+    div.innerHTML = "Error Connecting.";
+  }
+
+  function goToMainPage() {
+    google.script.run.goToMainPage()
+  };
+
+</script>

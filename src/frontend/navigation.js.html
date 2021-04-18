@@ -1,0 +1,543 @@
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+<script>
+	var types = {
+		workspaces:{name:'workspaces',
+								url: '',
+								data:'workspacesData'},
+		projects:{name:'projects',
+								url: '',
+								data:'projectsData'},
+		requirements:{name:'requirements',
+								url: ['project','%project','specifications','%specification','requirements','%id'],
+								data:'requirementsData',
+								properties:["identifier","title","text","parents","children","section","images","files"],
+								filter: 'id'},
+		specifications:{name:'specifications',
+								url: ['project','%project','specifications','%id','requirements'],
+								data:'specificationsData',
+								properties:["name", "description", "owner"],
+								filter: 'specification'},
+		labels:{name:'labels',
+								url: ['project','%project','specifications','groups','%id','requirements'],
+								data:'labelsData'},
+		groups:{name:'groups',
+								url: ['project','%project','specifications','requirements','groups','%id','requirements'],
+								data:'groupsData',
+								properties:["name", "description", "owner"],
+								filter: 'group'},
+		states: {
+			name: 'states',
+			url: '',
+			data: 'statesData',
+		},
+		users:{name:'users',
+								url: '',
+								data:'usersData'},
+		user_groups:{name:'user_groups',
+								url: '',
+								data:'user_groupsData'},
+		tags:{name:'tags',
+								url: '',
+								data:'tagsData'},
+		files:{name:'files',
+								url: '',
+								data:'filesData'}
+}
+	var expandIcon = '<i class="expand_icon fas fa-caret-right"></i>'
+	var folderIcon = '<i class="tree_icon fas fa-folder"></i>'
+	var specificationIcon = '<i class="tree_icon fas fa-clipboard-check"></i>'
+	var reqIcon = '<i class="tree_icon far fa-file-alt"></i>'
+	var sectionIcon = '<i class="tree_icon fas fa-list-ul"></i>'
+	var plusIcon = '<i class="add-element fas fa-plus-circle"></i>'
+	var propertiesIcon = '<i class="show-properties fas fa-ellipsis-v"></i>'
+	// var childAddIcon = '<i class="add-element fas fa-plus"></i>' // 
+
+	$(function () {
+		$('#search-specific-requirement').click(searchSpecificRequirement);
+
+		// ReDownloads Requirement Data when refresh button is pressed
+		$('#redownload-requirements').click(updateSelectedProjectScript);
+	});
+
+	function updateAllReferences() {
+
+		return new Promise(function (resolve, reject) {
+			// TODO: Update Flag, write as a Promise.
+			// document.getElementById("updating-status").innerHTML = 'Updating All References...';
+			// TODO: Try checking INput to download only the necessary data; Maybe do it on google script
+			// TODO: Use the dataList
+			var specifications = JSON.parse(document.getElementById(types.specifications.data).getAttribute('data'));
+			var labels = JSON.parse(document.getElementById(types.labels.data).getAttribute('data'));
+			var requirements = JSON.parse(document.getElementById(types.requirements.data).getAttribute('data'));
+			var groups = JSON.parse(document.getElementById(types.groups.data).getAttribute('data'));
+			var tags = JSON.parse(document.getElementById(types.tags.data).getAttribute('data'));
+			var files = JSON.parse(document.getElementById(types.files.data).getAttribute('data'));
+			var users = JSON.parse(document.getElementById(types.users.data).getAttribute('data'));
+			var user_groups = JSON.parse(document.getElementById(types.user_groups.data).getAttribute('data'));
+			var all_data = {
+				'specifications': specifications,
+				'labels': labels,
+				'requirements': requirements,
+				'groups': groups,
+				'tags': tags,
+				'files': files,
+				'users': users,
+				'user_groups': user_groups
+			}
+			google.script.run
+				.withFailureHandler(function () { reject("Error Updating References") })
+				.withSuccessHandler(function () { resolve("References Updated")})
+				.update_all_values(all_data)
+		})
+	}
+
+	function searchSpecificRequirement() {
+		google.script.run.openSearchRequirementDialog()
+	}
+
+
+	/* When the user clicks on the button,
+toggle between hiding and showing the dropdown content */
+	function expandRequirementTree() {
+		if (!document.getElementById("myDropdown").classList.contains('show')) {
+			document.getElementById("updating-status").innerHTML = 'Building Tree';
+			// buildRequirementsTree_browser();
+			// getRequirements();
+			// addTreeListener();
+			document.getElementById("myDropdown").classList.add("show");
+			document.getElementById("updating-status").innerHTML = '';
+		} else {
+			document.getElementById("myDropdown").classList.remove("show");
+		}
+	}
+
+
+	function expandObjectChildren(objectId) {
+		document.getElementById(objectId).classList.toggle("show");
+	}
+
+	function toggleObjectProperties(objectId) {
+		if (document.contains(document.getElementById(objectId + '_properties'))) {
+			document.getElementById(objectId + '_properties').remove();
+		} else {
+			var subhtml = ''
+			var parent = objectId.split("_");
+			var parentType = parent[0].toString();
+			var parentId = parseInt(parent[1]);
+			subhtml = subhtml.concat('<ul id="', objectId, '_properties" class="dropdown-content show">');
+
+			function capitalizeFirstLetter(string) {
+				return string.charAt(0).toUpperCase() + string.slice(1);
+			}
+
+			// TODO: Automatically get allowable properties;
+			for (property of types[parentType].properties) {
+				subhtml = subhtml.concat('<li class="property" id="', objectId, '_property_', property, '">', capitalizeFirstLetter(property), '</a>');
+			}
+			subhtml = subhtml.concat('</ul>');
+			document.getElementById(objectId).insertAdjacentHTML('beforeend', subhtml);
+			var properties = document.getElementById(objectId).getElementsByClassName("property");
+			for (i = 0; i < properties.length; i++) {
+				properties[i].addEventListener("click", function () {
+					document.getElementById("updating-status").innerHTML = 'Inserting Element';
+					htmlElementId = this.id.split('_property_');
+					reqName = htmlElementId[0];
+					var req = reqName.split("_");
+					var reqType = parent[0].toString();
+					var reqId = parseInt(parent[1]);
+					propertyName = htmlElementId[1];
+					// console.log(reqId, propertyName);
+					// TODO: Try checking INput to download only the necessary data; Maybe do it on google script
+					var specifications = JSON.parse(document.getElementById(types.specifications.data).getAttribute('data'));
+					var labels = JSON.parse(document.getElementById(types.labels.data).getAttribute('data'));
+					var requirements = JSON.parse(document.getElementById(types.requirements.data).getAttribute('data'));
+					var groups = JSON.parse(document.getElementById(types.groups.data).getAttribute('data'));
+					var states = JSON.parse(document.getElementById(types.states.data).getAttribute('data'));
+					var tags = JSON.parse(document.getElementById(types.tags.data).getAttribute('data'));
+					var files = JSON.parse(document.getElementById(types.files.data).getAttribute('data'));
+					var users = JSON.parse(document.getElementById(types.users.data).getAttribute('data'));
+					var all_data = {
+						'specifications': specifications,
+						'labels': labels,
+						'requirements': requirements,
+						'groups': groups,
+						'states': states,
+						'tags': tags,
+						'files': files,
+						'users': users
+					}
+					google.script.run.withFailureHandler(errorMessage).direct_insert(all_data, reqName, propertyName);
+					// if(propertyName==='images'){
+					// 	google.script.run.withFailureHandler(errorMessage).findAndReplaceImages();
+					// }
+				});
+			}
+		}
+	}
+
+	// Rename and Repurpose
+	// IN this function the real Requirement Tree will be called and html generated
+	// function replaceRequirementsTreeHtml() {
+	// 	document.getElementById("updating-status").innerHTML = 'Updating Tree...';
+	// 	google.script.run.withSuccessHandler(function (htmlToWrite) {
+	// 		document.getElementById('requirementTreeInsertButton').innerHTML = htmlToWrite;
+	// 		addTreeListener()
+	// 		document.getElementById("updating-status").innerHTML = ''
+	// 	}).buildRequirementTreeHtml();
+	// }
+
+	function filterFunction() {
+		var input, filter, ul, li, a, i;
+
+		// TODO: How to revert state after searching?
+		// Make All Visible to Search
+		divAll = document.getElementsByClassName('dropdown-content');
+		for (i = 0; i < divAll.length; i++) {
+			// If it is not showing
+			if (!document.getElementById(divAll[i].id).classList.contains('show')) {
+				// divAll[i].style.display = "block"
+				document.getElementById(divAll[i].id).classList.add("show")
+			}
+
+		}
+
+		input = document.getElementById("myInput");
+		filter = [input.value.toUpperCase()];
+		if (filter[0].includes(':')) {
+			filter = getSpecificFilter(filter[0]);
+		}
+		// console.log(filter)
+		filterHTMLtree(filter)
+
+		// If Filter Empty, close all
+		if (filter == "") {
+			divAll = document.getElementsByClassName('dropdown-content')
+			for (i = 0; i < divAll.length; i++) {
+				if (document.getElementById(divAll[i].id).classList.contains('show')) {
+					// divAll[i].style.display = "block"
+					document.getElementById(divAll[i].id).classList.remove("show")
+				}
+			}
+		}
+	}
+
+	function filterHTMLtree(filters) {
+		div = document.querySelectorAll('.reqSearcheableObj, .dropdown-content');;
+		for (filter of filters) {
+			for (i = 0; i < div.length; i++) {
+				txtValue = div[i].textContent || div[i].innerText;
+				if (txtValue.toUpperCase().indexOf(filter) > -1) {
+					div[i].style.display = "";
+					// document.getElementById(divAll[i].id).classList.toggle("show")
+				} else {
+					div[i].style.display = "none";
+				}
+			}
+		}
+	}
+
+	function advancedSearch(filter) {
+
+	}
+
+	function getSpecificFilter(filter) {
+		var filter = filter.split(':')
+		var property = filter[0].toLowerCase()
+		var value = filter[1]
+		// console.log(property, value)
+		var specifications = JSON.parse(document.getElementById(types.specifications.data).getAttribute('data'));
+		var labels = JSON.parse(document.getElementById(types.labels.data).getAttribute('data'));
+		var requirements = JSON.parse(document.getElementById(types.requirements.data).getAttribute('data'));
+		var groups = JSON.parse(document.getElementById(types.groups.data).getAttribute('data'));
+		var all_data = [specifications, labels, requirements, groups]
+		var identifiers = []
+		for (data of all_data) {
+			data.filter(x => {
+				if (x[property]) {
+					return x[property].toUpperCase().includes(value.toUpperCase())
+				}
+				return false
+			}).forEach(x => identifiers.push(x['identifier'].toUpperCase()))
+		}
+		// console.log(identifiers)
+		return identifiers
+	}
+	// TODO: The listeners should be for the div, not for the LI
+	// Once I separate the div and the Icont, they need to ahve different listeners, sicne they will have different actions
+
+	function addTreeListener() {
+
+		// // Listener to Expand Icon
+		var objects = document.querySelectorAll(".expand_icon, .truncated-text");
+		for (i = 0; i < objects.length; i++) {
+			objects[i].addEventListener("click", function () {
+				expandObjectChildren('children_' + this.parentElement.id)
+			});
+		}
+
+		// Listener to Text Area
+		var objects = document.querySelectorAll(".show-properties, .requirement-text");
+		for (i = 0; i < objects.length; i++) {
+			objects[i].addEventListener("click", function () {
+				toggleObjectProperties(this.parentElement.id)
+			});
+		}
+
+		// Listener to Plus Button - Add Element
+		var objects = document.getElementsByClassName("add-element");
+		for (i = 0; i < objects.length; i++) {
+			objects[i].addEventListener("click", function () {
+				document.getElementById("updating-status").innerHTML = 'Inserting Requirements...'
+
+				var projectId = $("#options-projects").val();
+
+				// TODO: Try checking Input to download only the necessary data; Maybe do it on google script
+
+				var specifications = JSON.parse(document.getElementById(types.specifications.data).getAttribute('data'));
+				var labels = JSON.parse(document.getElementById(types.labels.data).getAttribute('data'));
+				var requirements = JSON.parse(document.getElementById(types.requirements.data).getAttribute('data'));
+				var groups = JSON.parse(document.getElementById(types.groups.data).getAttribute('data'));
+				var states = JSON.parse(document.getElementById(types.states.data).getAttribute('data'));
+				var tags = JSON.parse(document.getElementById(types.tags.data).getAttribute('data'));
+				var files = JSON.parse(document.getElementById(types.files.data).getAttribute('data'));
+				var users = JSON.parse(document.getElementById(types.users.data).getAttribute('data'));
+				var all_data = {
+						'specifications': specifications,
+						'labels': labels,
+						'requirements': requirements,
+						'groups': groups,
+						'states': states,
+						'tags': tags,
+						'files': files,
+						'users': users
+					}
+
+
+				// Order Requirements by Identifier - TODO: Function to Select what to order by
+
+				var parent = this.parentElement.id.split("_");
+				var parentType = parent[0].toString();
+				var parentId = parseInt(parent[1]);
+				var requirementsToInsert = requirements
+					.filter(x => x[types[parentType].filter] === parentId)
+					.sort(function (a, b) {
+						if (a.identifier == b.identifier)
+							return 0;
+						if (a.identifier < b.identifier)
+							return -1;
+						if (a.identifier > b.identifier)
+							return 1;
+					})
+
+				var iteration = 0
+				var maxIterations = 100
+				var limitNumRows = 500
+				// numberofReq = requirementsToInsert.length
+				callInsertRequirement(projectId, parentId, parentType, requirementsToInsert, requirements, tags, groups, files)
+
+
+				// Recursive Function to Insert Requirements
+				function callInsertRequirement(projectId, parentId, parentType, requirementsToInsert, requirements, tags, groups, files, previousTableIndex = null) {
+					// TODO: Avoid sending duplicated requirements; Instead of a Subset, I could pass the index only - requirementsToInsert and rrequirements
+					// THis is needed when we are referencing to a requriement that is not in the subset (e.g. as a parent)
+					subset = requirementsToInsert.slice(iteration * (limitNumRows), iteration * (limitNumRows) + limitNumRows)
+					if (subset.length > 0) {
+						google.script.run
+							.withFailureHandler(function () { document.getElementById("updating-status").innerHTML = 'Error Inserting Part ' + iteration })
+							.withSuccessHandler(function (previousTableIndex) {
+								iteration++;
+								if (iteration < maxIterations) {
+									document.getElementById("updating-status").innerHTML = 'Inserting Requirements - Part: ' + (iteration + 1)
+									callInsertRequirement(projectId, parentId, parentType, requirementsToInsert, requirements, tags, groups, files, previousTableIndex);
+								}
+							})
+							.insertRequirementsInSpec_asTable_fromTemplate(projectId, parentId, parentType, subset, all_data, previousTableIndex);
+					} else {
+						document.getElementById("updating-status").innerHTML = '';
+					}
+				}
+
+			});
+		}
+
+
+		function errorMessage(error) {
+			//Logger.log(error);
+		}
+
+	}
+
+
+
+	function updateTree(id, name) {
+		$('#projectTree').html("Loading tree " + name + "....");
+		google.script.run.withSuccessHandler(
+			function (newHtml) {
+				$('#projectTree').html(newHtml);
+				addTreeListener();
+			}
+		)
+			.withFailureHandler(
+				function (error) {
+					$('#projectTree').html("Failed to load project tree. Please try again, if the problem persist contact support@valispace.com");
+				})
+			.getProjectTree(id);
+	}
+
+
+
+	function updateAllTrees(projectId, projectName) {
+		$('#projectTree').html("Loading components for " + name + "....");
+		$('#requirementTree').html("Loading requirements for " + name + "....");
+		google.script.run
+			.withSuccessHandler()
+			.withFailureHandler(
+				function (error) {
+					$('#requirementTree').html("Failed to load requirements. Please try again, if the problem persist contact support@valispace.com");
+				})
+			.getRequirementTree(projectId);
+
+	}
+
+
+
+
+
+	function buildRequirementsTree_browser() {
+		// console.log('Inside  Building Tree')
+		// document.getElementById("updating-status").innerHTML = 'Building Tree...'
+
+		var labels = JSON.parse(document.getElementById(types.labels.data).getAttribute('data'));
+		var specifications = JSON.parse(document.getElementById(types.specifications.data).getAttribute('data'));
+		var groups = JSON.parse(document.getElementById(types.groups.data).getAttribute('data'));
+
+		// console.log(specifications)
+
+		// HTML Initial
+		var htmlToWrite = '<ul class="reqTreeMain">'
+
+		// Root
+		if (labels != null) {
+			var labelsRoot = labels.filter(x => x['parent'] === null)
+		} else {
+			labelsRoot = []
+		}
+		if (specifications != null) {
+			var specificationsRoot = specifications.filter(x => x['labels'].length === 0)
+		} else {
+			specificationsRoot = []
+		}
+
+		function getSpecificationsAndGroups(parents) {
+
+			for (index in parents) {
+				var parent = parents[index]
+
+				// If Parent is a Specification, it has "requirement_groups"
+				if ("requirement_groups" in parent) {
+					var parentId_html = types.specifications.name + '_' + parent['id']
+
+					htmlToWrite = htmlToWrite.concat('<li class="reqSearcheableObj specification" id="', parentId_html, '">', expandIcon, specificationIcon, '<div class="truncated-text">', String(parent['name']), '</div>', plusIcon, propertiesIcon, '</li>')
+					// subHtml.concat(parent['name'])
+
+					var parentId = parent['id']
+
+					var groupsInside
+					if (groups != null) {
+						groupsInside = groups.filter(x => x['specification'] === parentId & x['parent'] === null)
+						htmlToWrite = htmlToWrite.concat('<div class="nested dropdown-content" id="children_', parentId_html, '">')
+						getSpecificationsAndGroups(groupsInside)
+						htmlToWrite = htmlToWrite.concat('</div>')
+					} else {
+						groupsInside = []
+					}
+
+				}
+				// If Parent is a Another Group, it has "children"
+				if ("children" in parent) {
+					var parentId_html = types.groups.name + '_' + parent['id']
+
+					htmlToWrite = htmlToWrite.concat('<li class="reqSearcheableObj group" id="', parentId_html, '">', expandIcon, sectionIcon, '<div class="truncated-text">', String(parent['name']), '</div>', plusIcon, propertiesIcon, '</li>')
+					// subHtml.concat(parent['name'])
+
+					var parentId = parent['id']
+					var groupsInside2 = groups.filter(x => x['parent'] === parentId)
+
+
+					htmlToWrite = htmlToWrite.concat('<div class="nested dropdown-content" id="children_', parentId_html, '">')
+					if (groupsInside2.length != 0) {
+						getSpecificationsAndGroups(groupsInside2)
+					}
+					htmlToWrite = htmlToWrite.concat('</div>')
+				}
+			}
+		}
+
+
+		function getLabels(parents) {
+			// subHtml = ''
+			for (index in parents) {
+				var parent = parents[index]
+				var parentId_html = types.labels.name + '_' + parent['id']
+
+				// Add to html
+				htmlToWrite = htmlToWrite.concat('<li class="reqSearcheableObj label" id="', parentId_html, '">', expandIcon, folderIcon, '<div class="truncated-text">', String(parent['name']), '</div></li>')
+				// subHtml.concat(parent['name'])
+
+				var labelsInside = labels.filter(x => x['parent'] === parent['id'])
+
+				htmlToWrite = htmlToWrite.concat('<div class="nested dropdown-content" id="children_', parentId_html, '">')
+				getLabels(labelsInside)
+
+				var specsInside = specifications.filter(x => x['labels'][0] === parent['id'])
+
+				for (index in specsInside) {
+					var specification = specsInside[index]
+					// htmlToWrite = htmlToWrite.concat('<div class="nested dropdown-content" id="children_', parentId_html, '">')
+					getSpecificationsAndGroups([specification])
+					// htmlToWrite = htmlToWrite.concat('</div>')
+
+				}
+				htmlToWrite = htmlToWrite.concat('</div>')
+			}
+		}
+
+		getLabels(labelsRoot)
+
+		getSpecificationsAndGroups(specificationsRoot)
+
+		htmlToWrite = htmlToWrite.concat('</ul>')
+
+		document.getElementById('requirementTreeInsertButton').innerHTML = htmlToWrite;
+
+	}
+
+	function getRequirements() {
+		var requirements = JSON.parse(document.getElementById("requirementsData").getAttribute('data'));
+
+
+
+		for (index in requirements) {
+			var requirement = requirements[index]
+
+			displayName = requirement['identifier'] + " " + requirement['title']
+			var reqName = types.requirements.name + '_' + requirement['id']
+			// If Not in a Group ['group'] = null, it is in a specificaiton only
+			if (requirement['group'] == null) {
+				var parentId = 'children_' + types.specifications.name + '_' + requirement['specification'].toString()
+				var htmlToWrite = document.getElementById(parentId).innerHTML
+				htmlToWrite = htmlToWrite.concat('<li class="reqSearcheableObj requirement" id="', reqName, '">', reqIcon, '<div class="requirement-text">', displayName, '</div>', plusIcon, propertiesIcon);
+
+				document.getElementById(parentId).innerHTML = htmlToWrite
+			} else {
+				var parentId = 'children_' + types.groups.name + '_' + requirement['group'].toString()
+				var htmlToWrite = document.getElementById(parentId).innerHTML
+				htmlToWrite = htmlToWrite.concat('<li class="reqSearcheableObj requirement" id="', reqName, '">', reqIcon, '<div class="requirement-text">', displayName, '</div>', plusIcon, propertiesIcon);
+
+				document.getElementById(parentId).innerHTML = htmlToWrite
+			}
+
+		}
+	}
+
+</script>

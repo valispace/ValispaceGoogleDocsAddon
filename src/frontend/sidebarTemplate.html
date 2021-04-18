@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <base target="_top">
+  <!--<link rel="stylesheet" href="https://ssl.gstatic.com/docs/script/css/add-ons1.css"> -->
+  <link href="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.css" rel="stylesheet">
+  <script src="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.js"></script>
+  <script src="https://kit.fontawesome.com/0863e97891.js" crossorigin="anonymous"></script>
+  <!-- The CSS package above applies Google styling to buttons and other elements. -->
+  
+  <?!=HtmlService.createHtmlOutputFromFile('frontend/navigation').getContent()?>
+
+
+  <?!=HtmlService.createHtmlOutputFromFile('frontend/navigation.css').getContent()?>
+
+  
+  <?!=HtmlService.createHtmlOutputFromFile('frontend/sidebar.js').getContent()?>
+  <?!=HtmlService.createHtmlOutputFromFile('frontend/navigation.js').getContent()?>
+
+</head>
+
+<body>
+</body>
+
+</html>

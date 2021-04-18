@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <base target="_top">
+
+  <?!=HtmlService.createHtmlOutputFromFile('frontend/navigation.css').getContent()?>
+  <?!=HtmlService.createHtmlOutputFromFile('frontend/loginPage.js').getContent()?>
+
+
+</head>
+
+<body>
+  <div id='loginForm'>
+    <form>
+      <div class="input-label">
+        <label for="deployment">Deployment Url<br></label>
+      </div>
+      <div class="input-field">
+        <input type="text" id="deployment" name="deployment" value="https://demo.valispace.com">
+      </div>
+
+      <div class="input-label">
+        <label for="username">Username<br></label>
+      </div>
+      <div class="input-field">
+        <input type="text" id="username" name="username">
+      </div>
+
+      <div class="input-label">
+        <label for="pass">Password<br></label>
+      </div>
+      <div class="input-field">
+        <input type="password" id="pass" name="password">
+      </div>
+      <div class="buttons-container">
+        <input type="submit" value="Connect" class="valiButton" onclick="connect()">
+      </div>
+      <div id="conectionOutput"></div>
+    </form>
+  </div>
+
+</body>
+
+</html>
