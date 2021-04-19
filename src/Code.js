@@ -1,22 +1,16 @@
 var TemplateDocumentId_original = '1bDQClCWVcvzPARYl5ohGvBgZlQ519NGGCStqizzK-bU';
 
-
 function onOpen(e) {
+  DocumentApp.getUi().createAddonMenu()
+  .addItem('Show sidebar', 'showSidebar')
+  .addToUi();
+}
 
+function showSidebar() {
   // TODO: Maybe we can start downloading data here to speed up
   if (PropertiesService.getDocumentProperties().getProperty('TemplateDocumentId') === null) {
     PropertiesService.getDocumentProperties().setProperty('TemplateDocumentId', TemplateDocumentId_original);
   };
-
-  DocumentApp.getUi().createAddonMenu()
-    .addItem('Show sidebar', 'showSidebar')
-    .addToUi();
-}
-
-
-
-function showSidebar() {
-
   // Check if Connection is still valid and skip login page if valid.
   if (checkValispaceConnexion()) {
     var template = HtmlService.createTemplateFromFile('frontend/sidebarTemplate');
