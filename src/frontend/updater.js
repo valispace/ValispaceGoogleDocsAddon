@@ -24,7 +24,7 @@ function update_all_values(objectList){
 
       // go over all text elements in paragraph / list-item
       for (var el=par.getChild(0); el!=null; el=el.getNextSibling()) {
-        console.log(el.getType().name())
+        //console.log(el.getType().name())
         if (el.getType() == DocumentApp.ElementType.TABLE ||
         el.getType() == DocumentApp.ElementType.TABLE_ROW ||
         el.getType() == DocumentApp.ElementType.TABLE_CELL ||
@@ -108,12 +108,13 @@ function update_text(el, objectList, mergeAdjacent=false, base_path){
           var new_url =  urlTranslator(objData, types[objType], base_path);
           var attributes = el.getAttributes()
           delete attributes[DocumentApp.Attribute.LINK_URL]
-          console.log(`Updated: ${objId} ${new_data}`)
+          //console.log(`Updated: ${objId} ${new_data}`)
           if(el.getText() !== new_data) {el.replaceText("^.*$", new_data)}
           el.setLinkUrl(new_url + `?from=valispace&name=${urlName}`)
           el.setAttributes(attributes)
         }
-        else{console.log(`Not updated: ${objectName} ${new_data}`)}
+        else{//console.log(`Not updated: ${objectName} ${new_data}`)
+        }
       }
 
       lastLink = {
@@ -144,16 +145,17 @@ function update_image(image, objectList, base_path){
         var new_data = objData['download_url']
         var attributes = image.getAttributes()
         delete attributes[DocumentApp.Attribute.LINK_URL]
-        console.log(`Updated: ${objectName} ${new_data}`)
+        //console.log(`Updated: ${objectName} ${new_data}`)
         var new_img = UrlFetchApp.fetch(new_data).getBlob();
-        var new_url =  urlTranslator(objData, types[objType], base_path);
+        var new_url =  url.split("?from=valispace&name=")[0]//urlTranslator(objData, types[objType], base_path);
         var parent = image.getParent();
         var new_image_element = parent.insertInlineImage(parent.getChildIndex(image)+1, new_img).setLinkUrl(url);
         image.removeFromParent();
         image.setLinkUrl(new_url + `?from=valispace&name=${urlName}`)
         new_image_element.setAttributes(attributes);
       }
-      else{console.log(`Not updated: ${objectName} ${new_data}`)}
+      else{//console.log(`Not updated: ${objectName} ${new_data}`)
+    }
     }
   }
 }
