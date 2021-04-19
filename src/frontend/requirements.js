@@ -156,7 +156,7 @@ function direct_insert(objectList, objectName, property) {
     text_to_insert = getImagesinFilesInRequirement(filesData, parentId);
     insertion_type = 'image';
   }
-
+  if(!text_to_insert || text_to_insert == " "){ text_to_insert = '-'}
   var insertion_data = new InsertionData(
     text_to_insert,
     url_meta,
@@ -315,6 +315,8 @@ function insertRequirementsInSpec_asTable_fromTemplate(projectId, parentId, pare
           } else {
             textToInsert = cellValue
           }
+
+          if(textToInsert == "" || textToInsert == " "){ textToInsert = '-'}
           subTableRow.push(textToInsert)
           subUrlMapping.push(urlTranslator(requirements[req], types['requirements'], base_path) + `?from=valispace&name=requirements_${requirements[req].id}__${cellValue.replace('$', '')}`);
           subTableStyleRow.push([[rowIndex], [cellIndex]])
