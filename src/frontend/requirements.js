@@ -52,38 +52,6 @@ function insertRequirementsInSpec_asText(requirements, spec_id) {
 }
 
 
-function insertRequirements_asTable(requirements, parent) {
-  var parent = parent.split("_");
-  var parentType = parent[0].toString();
-  var parentId = parseInt(parent[1]);
-  // parentId = parseInt(parentId[parentId.length - 1])
-
-  if (parentType === 'specification') {
-    parentType = 'specification'
-    var reqsToInsert = requirements.filter(x => x[parentType] === parentId)
-  } else if (parentType === "groups") {
-    parentType = 'group'
-    var reqsToInsert = requirements.filter(x => x[parentType] === parentId)
-  }
-
-
-
-  var doc = DocumentApp.getActiveDocument();
-  var body = doc.getBody();
-  var cursor = doc.getCursor();
-  var indexCursor = getCursorIndex(body, cursor)
-
-  var cells = []
-  for (req in reqsToInsert) {
-    if (reqsToInsert[req][parentType] === parentId) {
-      cells.push([reqsToInsert[req]['identifier'], reqsToInsert[req]['text']])
-    }
-  }
-
-  var docTable = body.insertTable(indexCursor, cells)
-  //  return cells
-}
-
 function getCursorIndex(body, cursor) {
 
   if (cursor) {
