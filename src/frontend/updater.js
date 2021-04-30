@@ -48,19 +48,22 @@ function update_all_values(objectList){
 function update_text(el, objectList, mergeAdjacent=false, base_path){
   //console.log(el.getText(), el.getLinkUrl())
   // go over all styling segments in text element
-  var attributeIndices = el.getTextAttributeIndices();
+  var attributeIndices_top = el.getTextAttributeIndices();
   var lastLink = null;
-  attributeIndices.forEach(function(startOffset, i, attributeIndices) {
-    var url = el.getLinkUrl(startOffset);
 
+  attributeIndices_top.forEach(function(startOffset, i, attributeIndices) {
+    startOffset=attributeIndices_top[i]
+    var url = el.getLinkUrl(startOffset);
     if (url != null) {
       // we hit a link
       var endOffsetInclusive = (i+1 < attributeIndices.length?
-        attributeIndices[i+1]-1 : null);
-
+        attributeIndices[i+1] : el.getText().length);
+      // console.log(attributeIndices_top)
+      // console.log(startOffset,endOffsetInclusive, el.getText())
+      var text = el.getText().substring(startOffset, endOffsetInclusive)
       // check if this and the last found link are continuous
       if (mergeAdjacent && lastLink != null && lastLink.url == url &&
-      lastLink.endOffsetInclusive == startOffset - 1) {
+      lastLink.endOffsetInclusive == startOffset) {
         // this and the previous style segment are continuous
         lastLink.endOffsetInclusive = endOffsetInclusive;
         return;
@@ -106,12 +109,16 @@ function update_text(el, objectList, mergeAdjacent=false, base_path){
           }
           var new_data = text_to_insert;
           var new_url =  urlTranslator(objData, types[objType], base_path);
-          var attributes = el.getAttributes()
+          var attributes = el.getAttributes(startOffset)
           delete attributes[DocumentApp.Attribute.LINK_URL]
           //console.log(`Updated: ${objId} ${new_data}`)
-          if(el.getText() !== new_data) {el.replaceText("^.*$", new_data)}
-          el.setLinkUrl(new_url + `?from=valispace&name=${urlName}`)
-          el.setAttributes(attributes)
+          //console.log(text, new_data, url)
+          if(text !== new_data) {el.replaceText(text, new_data)}
+          var new_length = new_data.length - text.length
+          el.setLinkUrl(startOffset,endOffsetInclusive-1+new_length,new_url + `?from=valispace&name=${urlName}`)
+
+          el.setAttributes(startOffset,endOffsetInclusive-1+new_length,attributes)
+          attributeIndices_top = el.getTextAttributeIndices();
         }
         else{//console.log(`Not updated: ${objectName} ${new_data}`)
         }
