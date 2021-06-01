@@ -11,8 +11,8 @@ var Inserter = {
   load_inserted: function(){
     const all_links = getAllLinks()
     for(x in all_links){
-      if (all_links[x].url.includes('?from=valispace&name=')){
-        id = all_links[x].url.split("?from=valispace&name=")[1]
+      if (all_links[x].url.includes(VALI_PARAMETER_STR)){
+        id = all_links[x].url.split(VALI_PARAMETER_STR)[1]
         if (!(id in this.inserted_elements)) {this.inserted_elements[id] = []}
         this.inserted_elements[id].push(all_links[x].text)
       }
@@ -28,7 +28,7 @@ var Inserter = {
     var el
 
     el = index.insertText(object.data)
-    el.setLinkUrl(object.url + `?from=valispace&name=${id}`)
+    el.setLinkUrl(object.url + `${VALI_PARAMETER_STR}${id}`)
     if(type=='text'){
       el.setForegroundColor("#000000").setUnderline(false)
     }
@@ -42,8 +42,8 @@ var Inserter = {
   update: function(){
     const all_links = getAllLinks()
     for(x in all_links){
-      if (all_links[x].url.includes('?from=valispace&name=')){
-        id = all_links[x].url.split("?from=valispace&name=")[1]
+      if (all_links[x].url.includes(VALI_PARAMETER_STR)){
+        id = all_links[x].url.split(VALI_PARAMETER_STR)[1]
         all_links[x].text.replaceText("^.*$", new_data)
       }
     }

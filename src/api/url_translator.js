@@ -15,3 +15,21 @@ var urlTranslator = function(item_data, type, base_path){
   })
   return base_path + rel_path.join('/')
 }
+
+var VALI_PARAMETER_STR = "?from=valispace&name="
+
+var parseValiURL = function(url){
+  var urlSplit = url.split(VALI_PARAMETER);
+  var url = urlSplit[0];
+  var objectSplit = urlSplit[1].split('__');
+  var property = objectSplit[1];
+  objectSplit = objectSplit[0].split('_');
+  var type = objectSplit[0].toString();
+  var id = parseInt(objectSplit[1]);
+  return url, type, id, property;
+}
+
+var encodeValiURL = function(type, id, property){
+
+  return
+}

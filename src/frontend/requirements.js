@@ -286,7 +286,7 @@ function insertRequirementsInSpec_asTable_fromTemplate(projectId, parentId, pare
 
           if(cellValue!="" && (textToInsert == "" || textToInsert == " ")){ textToInsert = '-'}
           subTableRow.push(textToInsert)
-          subUrlMapping.push(urlTranslator(requirements[req], types['requirements'], base_path) + `?from=valispace&name=requirements_${requirements[req].id}__${cellValue.replace('$', '')}`);
+          subUrlMapping.push(urlTranslator(requirements[req], types['requirements'], base_path) + `${VALI_PARAMETER_STR}requirements_${requirements[req].id}__${cellValue.replace('$', '')}`);
           subTableStyleRow.push([[rowIndex], [cellIndex]])
         }
         table.push(subTableRow)

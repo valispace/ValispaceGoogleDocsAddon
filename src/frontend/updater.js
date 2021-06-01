@@ -1,5 +1,3 @@
-
-
 function update_all_values(objectList){
   var mergeAdjacent=false;
   var doc = DocumentApp.getActiveDocument();
@@ -68,8 +66,8 @@ function update_text(el, objectList, mergeAdjacent=false, base_path){
         lastLink.endOffsetInclusive = endOffsetInclusive;
         return;
       }
-      if (url.includes('?from=valispace&name=')){
-        urlName = url.split("?from=valispace&name=")[1]
+      if (url.includes(VALI_PARAMETER_STR)){
+        urlName = url.split(VALI_PARAMETER_STR)[1]
         //TODO: Figure out a better way to define names. This is not general and is split between files.
         //Smth like a translator in the inserter
         var objectName = urlName.split('__')
@@ -115,7 +113,7 @@ function update_text(el, objectList, mergeAdjacent=false, base_path){
           //console.log(text, new_data, url)
           if(text !== new_data) {el.replaceText(text, new_data)}
           var new_length = new_data.length - text.length
-          el.setLinkUrl(startOffset,endOffsetInclusive-1+new_length,new_url + `?from=valispace&name=${urlName}`)
+          el.setLinkUrl(startOffset,endOffsetInclusive-1+new_length,new_url + `${VALI_PARAMETER_STR}${urlName}`)
 
           el.setAttributes(startOffset,endOffsetInclusive-1+new_length,attributes)
           attributeIndices_top = el.getTextAttributeIndices();
@@ -138,8 +136,8 @@ function update_image(image, objectList, base_path){
   var url = image.getLinkUrl();
 
   if (url != null) {
-    if (url.includes('?from=valispace&name=')){
-      objectName = url.split("?from=valispace&name=")[1]
+    if (url.includes(VALI_PARAMETER_STR)){
+      objectName = url.split(VALI_PARAMETER_STR)[1]
       //TODO: Figure out a better way to define names. This is not general and is split between files.
       //Smth like a translator in the inserter
       //id = id.split('__')
@@ -154,11 +152,11 @@ function update_image(image, objectList, base_path){
         delete attributes[DocumentApp.Attribute.LINK_URL]
         //console.log(`Updated: ${objectName} ${new_data}`)
         var new_img = UrlFetchApp.fetch(new_data).getBlob();
-        var new_url =  url.split("?from=valispace&name=")[0]//urlTranslator(objData, types[objType], base_path);
+        var new_url =  url.split(VALI_PARAMETER_STR)[0]//urlTranslator(objData, types[objType], base_path);
         var parent = image.getParent();
         var new_image_element = parent.insertInlineImage(parent.getChildIndex(image)+1, new_img).setLinkUrl(url);
         image.removeFromParent();
-        image.setLinkUrl(new_url + `?from=valispace&name=${urlName}`)
+        image.setLinkUrl(new_url + `${VALI_PARAMETER_STR}${urlName}`)
         new_image_element.setAttributes(attributes);
       }
       else{//console.log(`Not updated: ${objectName} ${new_data}`)

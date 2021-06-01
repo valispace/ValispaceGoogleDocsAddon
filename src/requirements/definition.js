@@ -210,8 +210,8 @@ var RequirementsTree = {
                   lastLink.endOffsetInclusive = endOffsetInclusive;
                   return;
                 }
-                if (url.includes('?from=valispace&name=')){
-                  id = url.split("?from=valispace&name=")[1]
+                if (url.includes(VALI_PARAMETER_STR)){
+                  id = url.split(VALI_PARAMETER_STR)[1]
                   //TODO: Figure out a better way to define names. This is not general and is split between files.
                   //Smth like a translator in the inserter
                   id = id.split('__')
@@ -222,7 +222,7 @@ var RequirementsTree = {
                     delete attributes[DocumentApp.Attribute.LINK_URL]
                     console.log(`Updated: ${id[0]} ${attributes}`)
                     if(el.getText() !== new_data) {el.replaceText("^.*$", new_data)}
-                    el.setLinkUrl(new_url + `?from=valispace&name=${id.join('__')}`)
+                    el.setLinkUrl(new_url + `${VALI_PARAMETER_STR}${id.join('__')}`)
                     el.setAttributes(attributes)
                   }
                   else{console.log(`Not updated: ${id[0]} ${new_data}`)}
@@ -266,8 +266,8 @@ var RequirementsTree = {
         var url = image.getLinkUrl();
 
         if (url != null) {
-          if (url.includes('?from=valispace&name=')){
-            id = url.split("?from=valispace&name=")[1]
+          if (url.includes(VALI_PARAMETER_STR)){
+            id = url.split(VALI_PARAMETER_STR)[1]
             //TODO: Figure out a better way to define names. This is not general and is split between files.
             //Smth like a translator in the inserter
             id = id.split('__')
@@ -281,7 +281,7 @@ var RequirementsTree = {
               var parent = image.getParent();
               var new_image_element = parent.insertInlineImage(parent.getChildIndex(image)+1, new_img).setLinkUrl(url);
               image.removeFromParent();
-              image.setLinkUrl(new_url + `?from=valispace&name=${id.join('__')}`)
+              image.setLinkUrl(new_url + `${VALI_PARAMETER_STR}${id.join('__')}`)
               new_image_element.setAttributes(attributes);
             }
             else{console.log(`Not updated: ${id[0]} ${new_data}`)}
