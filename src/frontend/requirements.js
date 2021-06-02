@@ -216,7 +216,7 @@ function getTemplateTable2(documentId) {
   return [templateTableData, templateTableCellAttributes]
 }
 
-function insertRequirementsInSpec_asTable_fromTemplate(projectId, parentId, parentType, requirements, all_data, previousTableIndex = null) {
+function insertRequirementsInSpec_asTable_fromTemplate(projectId, parentId, parentType, requirements, all_data, previousTableIndex = null, individual_tables=false) {
 
   specificationsData = all_data['specifications']
   labelsData = all_data['labels']
@@ -236,106 +236,128 @@ function insertRequirementsInSpec_asTable_fromTemplate(projectId, parentId, pare
   templateTableCellAttributes = values[1]
 
   var table = []
+  var tables = []
   var styleTableMapping = []
+  var tables_styleTableMapping=[]
   var urlMapping = []
-
-  // Header
-  if (previousTableIndex == null) {
-    header = []
-    headerStyle = []
-    headerUrl = []
-
-    rowIndex = 0
-    for (let cellIndex = 0; cellIndex < templateTableData[rowIndex].length; cellIndex++) {
-      header.push(templateTableData[rowIndex][cellIndex])
-      headerStyle.push([[rowIndex], [cellIndex]])
-      headerUrl.push([])
-    }
-    table.push(header)
-    styleTableMapping.push(headerStyle)
-    urlMapping.push(headerUrl)
-  }
+  var tables_urlMapping = []
 
 
   for (req in requirements) {
     if (requirements[req][types[parentType].filter] === parentId) {
-      for (let rowIndex = 1; rowIndex < templateTableData.length; rowIndex++) {
-        subTableRow = []
-        subTableStyleRow = []
-        subUrlMapping = []
-        for (let cellIndex = 0; cellIndex < templateTableData[rowIndex].length; cellIndex++) {
-          // cellValue = templateTableData[rowIndex][cellIndex]
-          cellText = templateTableData[rowIndex][cellIndex]
-          //NEW MATCHING VIA REGEX SUBSTITUTION
-          const prop_regex = /\$\w+/gm;
-          text_to_insert = cellText
-          text_to_insert = cellText.replace(prop_regex, match => getTextToInsert(all_data, requirements[req], match.substring(1)));
+      for (let rowIndex = 0; rowIndex < templateTableData.length; rowIndex++) {
+        //Header
+        if(rowIndex==0 && ((previousTableIndex == null && req==0) || individual_tables==true)){
+          header = []
+          headerStyle = []
+          headerUrl = []
 
-          subTableRow.push(text_to_insert)
-          subUrlMapping.push(urlTranslator(requirements[req], types['requirements'], base_path) + `${VALI_PARAMETER_STR}requirements_${requirements[req].id}__${cellText.replace('$', '')}`);
-          subTableStyleRow.push([[rowIndex], [cellIndex]])
+          for (let cellIndex = 0; cellIndex < templateTableData[rowIndex].length; cellIndex++) {
+            header.push(templateTableData[rowIndex][cellIndex])
+            headerStyle.push([[rowIndex], [cellIndex]])
+            headerUrl.push([])
+          }
+          table.push(header)
+          styleTableMapping.push(headerStyle)
+          urlMapping.push(headerUrl)
         }
-        table.push(subTableRow)
-        styleTableMapping.push(subTableStyleRow)
-        urlMapping.push(subUrlMapping)
+        else if(rowIndex>0){
+          subTableRow = []
+          subTableStyleRow = []
+          subUrlMapping = []
+          for (let cellIndex = 0; cellIndex < templateTableData[rowIndex].length; cellIndex++) {
+            // cellValue = templateTableData[rowIndex][cellIndex]
+            cellText = templateTableData[rowIndex][cellIndex]
+            //NEW MATCHING VIA REGEX SUBSTITUTION
+            const prop_regex = /\$\w+/gm;
+            text_to_insert = cellText
+            text_to_insert = cellText.replace(prop_regex, match => getTextToInsert(all_data, requirements[req], match.substring(1)));
+
+            subTableRow.push(text_to_insert)
+            subUrlMapping.push(urlTranslator(requirements[req], types['requirements'], base_path) + `${VALI_PARAMETER_STR}requirements_${requirements[req].id}__${cellText.replace('$', '')}`);
+            subTableStyleRow.push([[rowIndex], [cellIndex]])
+          }
+          table.push(subTableRow)
+          styleTableMapping.push(subTableStyleRow)
+          urlMapping.push(subUrlMapping)
+        }
       }
     }
+    if(individual_tables){
+      tables.push(table)
+      tables_styleTableMapping.push(styleTableMapping)
+      tables_urlMapping.push(urlMapping)
+      table = []
+      styleTableMapping=[]
+      urlMapping = []
+    }
+  }
+  if (!individual_tables){
+      tables.push(table)
+      tables_styleTableMapping.push(styleTableMapping)
+      tables_urlMapping.push(urlMapping)
   }
 
-  // Inserting Table
-  var doc = DocumentApp.getActiveDocument();
-  var body = doc.getBody();
-  var cursor = doc.getCursor();
-
-  if (previousTableIndex == null) {
-    var indexCursor = getCursorIndex(body, cursor);
-    if (indexCursor == 0) {
-      indexCursor = 1;
-    };
-  } else {
-    var indexCursor = previousTableIndex + 1;
-  };
-
-  var docTable = body.insertTable(indexCursor, table)
-  var tableIndex = body.getChildIndex(docTable)
-
-
-  // var tableIndex = body.getChildIndex(docTable)
-  doc.saveAndClose()
-
-
-
-  // Formating Table
-  tableLength = docTable.getNumRows()
-  cellLimit = 4000
-  rowIndex = 0
-  while (rowIndex < tableLength) {
-
+  // Inserting Tables
+  for(i in tables){
+    table = tables[i];
+    styleTableMapping = tables_styleTableMapping[i];
+    urlMapping = tables_urlMapping[i];
     var doc = DocumentApp.getActiveDocument();
     var body = doc.getBody();
+    var cursor = doc.getCursor();
 
-    //TODO Chck if child is not a table
-    var docTable = body.getChild(tableIndex)
+    if (previousTableIndex == null) {
+      var indexCursor = getCursorIndex(body, cursor);
+      if (indexCursor == 0) {
+        indexCursor = 1;
+      };
+    } else {
+      var indexCursor = previousTableIndex + 1;
+    };
 
-    if (docTable.getType() == DocumentApp.ElementType.PARAGRAPH) {
-      tableIndex = tableIndex + 1;
-      docTable = body.getChild(tableIndex);
-    }
+    var docTable = body.insertTable(indexCursor, table)
+    var tableIndex = body.getChildIndex(docTable)
 
 
-    rowIndex = formatingTable3(docTable, styleTableMapping, urlMapping, templateTableCellAttributes, rowIndex, cellLimit)
+    // var tableIndex = body.getChildIndex(docTable)
     doc.saveAndClose()
 
+
+
+    // Formating Table
+    tableLength = docTable.getNumRows()
+    cellLimit = 4000
+    rowIndex = 0
+    while (rowIndex < tableLength) {
+
+      var doc = DocumentApp.getActiveDocument();
+      var body = doc.getBody();
+
+      //TODO Chck if child is not a table
+      var docTable = body.getChild(tableIndex)
+
+      if (docTable.getType() == DocumentApp.ElementType.PARAGRAPH) {
+        tableIndex = tableIndex + 1;
+        docTable = body.getChild(tableIndex);
+      }
+
+
+      rowIndex = formatingTable3(docTable, styleTableMapping, urlMapping, templateTableCellAttributes, rowIndex, cellLimit)
+      doc.saveAndClose()
+
+      previousTableIndex = tableIndex;
+
+    }
+
+    // TODO: Put this Function inside the Loop and work with cell, instead of entire table
+    var doc = DocumentApp.getActiveDocument();
+    var body = doc.getBody();
+    var docTable = body.getChild(tableIndex)
+
+    findAndReplaceImages(docTable)
+    doc.saveAndClose()
   }
-
-  // TODO: Put this Function inside the Loop and work with cell, instead of entire table
-  var doc = DocumentApp.getActiveDocument();
-  var body = doc.getBody();
-  var docTable = body.getChild(tableIndex)
-
-  findAndReplaceImages(docTable)
-  doc.saveAndClose()
-
   return tableIndex
   // return [table, styleTableMapping]
 }
