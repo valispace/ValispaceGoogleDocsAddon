@@ -340,7 +340,7 @@ toggle between hiding and showing the dropdown content */
 		console.log(insertion)
 		google.script.run
 		.withFailureHandler(function () { document.getElementById("updating-status").innerHTML = 'Error Inserting '})
-		.withSuccessHandler(console.log(insertion))
+		//.withSuccessHandler(console.log(insertion))
 		.insertRequirementsWithSpecGroups_asTable_fromTemplate(insertion, all_data, null);
 		document.getElementById("updating-status").innerHTML = '';
 	}
@@ -364,15 +364,17 @@ toggle between hiding and showing the dropdown content */
 			return requirementsToInsert[0];
 		}
 		else{
-			var children = document.getElementById("children_"+node.id).getElementsByTagName("LI")
+			var children = document.getElementById("children_"+node.id).childNodes
 			var reqs = []
 			if(node.classList.contains('specification') || node.classList.contains('group')){
 				// directInsertPromise(all_data, node.id, 'name');
 				reqs.push([node.id, 'name'])
 			}
 			for (var i = 0; i < children.length; i++) {
-				var result = recursive_insertion(all_data, children.item(i));
-				if(result){reqs = reqs.concat(result)}
+				if (children.item(i).tagName == "LI"){
+					var result = recursive_insertion(all_data, children.item(i));
+					if(result){reqs = reqs.concat(result)}
+				}
 			}
 
 			return reqs;
