@@ -26,6 +26,13 @@ var Inserter = {
 
     var doc = DocumentApp.getActiveDocument();
     var index = doc.getCursor();
+    var element = doc.getCursor().getElement();
+    path = []
+    while(element.getType() != DocumentApp.ElementType.DOCUMENT){
+      path.unshift(element.getType().name())
+      element = element.getParent();
+    }
+    Logger.log(path.join('.'))
     var el
     if (new_line){
       var text_to_insert = object.data +'\n'
@@ -34,7 +41,6 @@ var Inserter = {
       var text_to_insert = object.data
     }
     el = index.insertText(text_to_insert)
-    console.log(index.getElement().getType().name())
 
 
     el.setLinkUrl(object.url + `${VALI_PARAMETER_STR}${id}`)

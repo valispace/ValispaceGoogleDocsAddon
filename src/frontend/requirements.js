@@ -222,6 +222,10 @@ function insertRequirementsWithSpecGroups_asTable_fromTemplate(insertion_array, 
   var reqs = []
   insertion_array.reverse();
 
+  var par = doc.getBody().appendParagraph('');
+  var pos=doc.newPosition(par, 0);
+  doc.setCursor(pos);
+
   for(line of insertion_array ){
     doc=DocumentApp.getActiveDocument();
     if(Array.isArray(line)){
