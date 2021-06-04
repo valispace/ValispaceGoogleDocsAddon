@@ -24,23 +24,21 @@ var Inserter = {
     id = `${object.name}__${object.property}`
     if (!(id in this.inserted_elements)) {this.inserted_elements[id] = []}
 
-    var doc = DocumentApp.getActiveDocument();
-    var index = doc.getCursor();
-    var element = doc.getCursor().getElement();
-    path = []
-    while(element.getType() != DocumentApp.ElementType.DOCUMENT){
-      path.unshift(element.getType().name())
-      element = element.getParent();
-    }
-    Logger.log(path.join('.'))
+
+    var doc=DocumentApp.getActiveDocument();
+    var body = doc.getBody()
+    var cursor = doc.getCursor()
+    index = getCursorIndex(body, cursor)
+    console.log(index)
+
     var el
     if (new_line){
-      var text_to_insert = object.data +'\n'
+      var text_to_insert = '\n' + object.data
     }
     else{
       var text_to_insert = object.data
     }
-    el = index.insertText(text_to_insert)
+    el = body.insertParagraph(index, text_to_insert)
 
 
     el.setLinkUrl(object.url + `${VALI_PARAMETER_STR}${id}`)

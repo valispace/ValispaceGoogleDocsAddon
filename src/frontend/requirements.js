@@ -217,29 +217,25 @@ function getTemplateTable2(documentId) {
   return [templateTableData, templateTableCellAttributes]
 }
 
+
 function insertRequirementsWithSpecGroups_asTable_fromTemplate(insertion_array, all_data){
-  var doc=DocumentApp.getActiveDocument();
+
   var reqs = []
   insertion_array.reverse();
 
-  var par = doc.getBody().appendParagraph('');
-  var pos=doc.newPosition(par, 0);
-  doc.setCursor(pos);
+  console.log(insertion_array)
 
   for(line of insertion_array ){
-    doc=DocumentApp.getActiveDocument();
     if(Array.isArray(line)){
       if(reqs.length>0){
         reqs.reverse();
         index_and_element = insertRequirementsInSpec_asTable_fromTemplate(reqs, all_data, null, true);
-        doc=DocumentApp.getActiveDocument();
+        // console.log(index_and_element)
         // var txtOff=doc.getCursor().getOffset();
         reqs = []
       }
-      console.log(line[0])
+      // console.log(line[0])
       last_index = direct_insert(all_data, line[0], line[1], true);
-      doc.saveAndClose();
-
       // var txtEl=doc.getCursor().getElement();
       // var txtOff=doc.getCursor().getOffset();
       // console.log
@@ -247,11 +243,12 @@ function insertRequirementsWithSpecGroups_asTable_fromTemplate(insertion_array, 
       // doc.setCursor(pos);
     }
     else{
-      console.log(line.identifier);
+      // console.log(line.identifier);
       reqs.push(line);
     }
   }
   if(reqs.length>0){
+    console.log(line)
     insertRequirementsInSpec_asTable_fromTemplate(reqs, all_data, null, true);
     reqs = []
   }
@@ -360,6 +357,7 @@ function insertRequirementsInSpec_asTable_fromTemplate(requirements, all_data, p
     };
 
     var docTable = body.insertTable(indexCursor, table)
+    var paragraph = body.insertParagraph(indexCursor, "")
     var tableIndex = body.getChildIndex(docTable)
 
     // findAndReplaceImages(docTable)
