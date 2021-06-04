@@ -302,6 +302,83 @@ toggle between hiding and showing the dropdown content */
 		// console.log(identifiers)
 		return identifiers
 	}
+
+	function insertAll(){
+		document.getElementById("updating-status").innerHTML = 'Inserting Requirements...'
+
+
+		// TODO: Try checking Input to download only the necessary data; Maybe do it on google script
+
+		var specifications = JSON.parse(document.getElementById(types.specifications.data).getAttribute('data'));
+		var labels = JSON.parse(document.getElementById(types.labels.data).getAttribute('data'));
+		var requirements = JSON.parse(document.getElementById(types.requirements.data).getAttribute('data'));
+		var groups = JSON.parse(document.getElementById(types.groups.data).getAttribute('data'));
+		var states = JSON.parse(document.getElementById(types.states.data).getAttribute('data'));
+		var tags = JSON.parse(document.getElementById(types.tags.data).getAttribute('data'));
+		var files = JSON.parse(document.getElementById(types.files.data).getAttribute('data'));
+		var users = JSON.parse(document.getElementById(types.users.data).getAttribute('data'));
+		var all_data = {
+			'specifications': specifications,
+			'labels': labels,
+			'requirements': requirements,
+			'groups': groups,
+			'states': states,
+			'tags': tags,
+			'files': files,
+			'users': users
+		}
+
+
+		// Order Requirements by Identifier - TODO: Function to Select what to order by
+		var root = document.getElementById("reqTreeMain")
+		var children = root.getElementsByClassName("specification");
+		console.log(children.length);
+		var insertion = []
+		for (var i = 0; i < children.length; i++) {
+			insertion = insertion.concat(recursive_insertion(all_data, children.item(i)));
+		}
+		console.log(insertion)
+		google.script.run
+		.withFailureHandler(function () { document.getElementById("updating-status").innerHTML = 'Error Inserting '})
+		.withSuccessHandler(console.log(insertion))
+		.insertRequirementsWithSpecGroups_asTable_fromTemplate(insertion, all_data, null);
+		document.getElementById("updating-status").innerHTML = '';
+	}
+
+	function recursive_insertion(all_data, node){
+		if(node.classList.contains('requirement')){
+			var projectId = $("#options-projects").val();
+			var parent = node.id.split("_");
+			var parentType = parent[0].toString();
+			var parentId = parseInt(parent[1]);
+			var requirementsToInsert = all_data['requirements']
+					.filter(x => x[types[parentType].filter] === parentId)
+					.sort(function (a, b) {
+						if (a.identifier == b.identifier)
+							return 0;
+						if (a.identifier < b.identifier)
+							return -1;
+						if (a.identifier > b.identifier)
+							return 1;
+					})
+			return requirementsToInsert[0];
+		}
+		else{
+			var children = document.getElementById("children_"+node.id).getElementsByTagName("LI")
+			var reqs = []
+			if(node.classList.contains('specification') || node.classList.contains('group')){
+				// directInsertPromise(all_data, node.id, 'name');
+				reqs.push([node.id, 'name'])
+			}
+			for (var i = 0; i < children.length; i++) {
+				var result = recursive_insertion(all_data, children.item(i));
+				if(result){reqs = reqs.concat(result)}
+			}
+
+			return reqs;
+		}
+	}
+
 	// TODO: The listeners should be for the div, not for the LI
 	// Once I separate the div and the Icont, they need to ahve different listeners, sicne they will have different actions
 
@@ -388,10 +465,10 @@ toggle between hiding and showing the dropdown content */
 								iteration++;
 								if (iteration < maxIterations) {
 									document.getElementById("updating-status").innerHTML = 'Inserting Requirements - Part: ' + (iteration + 1)
-									callInsertRequirement(projectId, parentId, parentType, requirementsToInsert, requirements, tags, groups, files, previousTableIndex);
+									callInsertRequirement(projectId, parentId, parentType, requirementsToInsert, requirements, tags, groups, files, previousTableIndex[0]);
 								}
 							})
-							.insertRequirementsInSpec_asTable_fromTemplate(projectId, parentId, parentType, subset, all_data, previousTableIndex);
+							.insertRequirementsInSpec_asTable_fromTemplate(subset, all_data, previousTableIndex);
 					} else {
 						document.getElementById("updating-status").innerHTML = '';
 					}
@@ -454,7 +531,7 @@ toggle between hiding and showing the dropdown content */
 		// console.log(specifications)
 
 		// HTML Initial
-		var htmlToWrite = '<ul class="reqTreeMain">'
+		var htmlToWrite = '<ul class="reqTreeMain" id="reqTreeMain">'
 
 		// Root
 		if (labels != null) {
