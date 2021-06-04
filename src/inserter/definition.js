@@ -46,10 +46,10 @@ var Inserter = {
     }
     // console.log(el)
     this.inserted_elements[id].push(el)
-    var txtEl=doc.getCursor().getElement();
-    var txtOff=doc.getCursor().getOffset();
-    var pos=doc.newPosition(txtEl, txtOff + 1);
-    doc.setCursor(pos);
+    // var txtEl=doc.getCursor().getElement();
+    // var txtOff=doc.getCursor().getOffset();
+    // var pos=doc.newPosition(txtEl, txtOff + 1);
+    // doc.setCursor(pos);
     // console.log(this.inserted_elements)
     return index
   },

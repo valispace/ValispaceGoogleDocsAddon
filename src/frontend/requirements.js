@@ -220,10 +220,13 @@ function getTemplateTable2(documentId) {
 function insertRequirementsWithSpecGroups_asTable_fromTemplate(insertion_array, all_data){
   var doc=DocumentApp.getActiveDocument();
   var reqs = []
+  insertion_array.reverse();
+
   for(line of insertion_array ){
     doc=DocumentApp.getActiveDocument();
     if(Array.isArray(line)){
       if(reqs.length>0){
+        reqs.reverse();
         index_and_element = insertRequirementsInSpec_asTable_fromTemplate(reqs, all_data, null, true);
         doc=DocumentApp.getActiveDocument();
         // var txtOff=doc.getCursor().getOffset();
@@ -355,7 +358,7 @@ function insertRequirementsInSpec_asTable_fromTemplate(requirements, all_data, p
     var docTable = body.insertTable(indexCursor, table)
     var tableIndex = body.getChildIndex(docTable)
 
-    findAndReplaceImages(docTable)
+    // findAndReplaceImages(docTable)
 
 
     // var tableIndex = body.getChildIndex(docTable)
@@ -392,9 +395,9 @@ function insertRequirementsInSpec_asTable_fromTemplate(requirements, all_data, p
     var doc = DocumentApp.getActiveDocument();
     var body = doc.getBody();
     var docTable = body.getChild(tableIndex)
-    findAndReplaceImages(docTable)
-    var pos=doc.newPosition(docTable.getNextSibling(), 1);
-    doc.setCursor(pos);
+    // findAndReplaceImages(docTable)
+    // var pos=doc.newPosition(docTable.getNextSibling(), 1);
+    // doc.setCursor(pos);
     doc.saveAndClose()
 
   }
