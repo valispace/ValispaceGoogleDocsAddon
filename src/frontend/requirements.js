@@ -360,20 +360,14 @@ function insertRequirementsInSpec_asTable_fromTemplate(requirements, all_data, p
     var paragraph = body.insertParagraph(indexCursor, "")
     var tableIndex = body.getChildIndex(docTable)
 
-    // findAndReplaceImages(docTable)
-
-
     // var tableIndex = body.getChildIndex(docTable)
     doc.saveAndClose()
-
-
 
     // Formating Table
     tableLength = docTable.getNumRows()
     cellLimit = 4000
     rowIndex = 0
     while (rowIndex < tableLength) {
-
       var doc = DocumentApp.getActiveDocument();
       var body = doc.getBody();
 
@@ -387,6 +381,7 @@ function insertRequirementsInSpec_asTable_fromTemplate(requirements, all_data, p
 
 
       rowIndex = formatingTable3(docTable, styleTableMapping, urlMapping, templateTableCellAttributes, rowIndex, cellLimit)
+      findAndReplaceImages(docTable)
       doc.saveAndClose()
 
       previousTableIndex = tableIndex;
@@ -397,11 +392,11 @@ function insertRequirementsInSpec_asTable_fromTemplate(requirements, all_data, p
     var doc = DocumentApp.getActiveDocument();
     var body = doc.getBody();
     var docTable = body.getChild(tableIndex)
-    // findAndReplaceImages(docTable)
+    findAndReplaceImages(docTable)
     // var pos=doc.newPosition(docTable.getNextSibling(), 1);
     // doc.setCursor(pos);
     doc.saveAndClose()
-
+    
   }
   return [tableIndex, DocumentApp.getActiveDocument().getChild(tableIndex)]
   // return [table, styleTableMapping]

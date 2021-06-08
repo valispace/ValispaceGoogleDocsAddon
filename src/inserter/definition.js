@@ -39,6 +39,7 @@ var Inserter = {
       var text_to_insert = object.data
     }
     el = body.insertParagraph(index, text_to_insert)
+    el = el.getChild(0);
 
 
     el.setLinkUrl(object.url + `${VALI_PARAMETER_STR}${id}`)
