@@ -452,8 +452,17 @@ toggle between hiding and showing the dropdown content */
 				var maxIterations = 100
 				var limitNumRows = 500
 				// numberofReq = requirementsToInsert.length
-				callInsertRequirement(projectId, parentId, parentType, requirementsToInsert, requirements, tags, groups, files)
-
+				//callInsertRequirement(projectId, parentId, parentType, requirementsToInsert, requirements, tags, groups, files)
+				var insertion = recursive_insertion(all_data, this.parentElement)
+				if(!Array.isArray(insertion)){
+					insertion = [insertion];
+				}
+				// console.log(insertion)
+				google.script.run
+				.withFailureHandler(function () { document.getElementById("updating-status").innerHTML = 'Error Inserting '})
+				//.withSuccessHandler(console.log(insertion))
+				.insertRequirementsWithSpecGroups_asTable_fromTemplate(insertion, all_data, null);
+				document.getElementById("updating-status").innerHTML = '';
 
 				// Recursive Function to Insert Requirements
 				function callInsertRequirement(projectId, parentId, parentType, requirementsToInsert, requirements, tags, groups, files, previousTableIndex = null) {
