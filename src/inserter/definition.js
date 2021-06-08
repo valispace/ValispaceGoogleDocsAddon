@@ -32,12 +32,8 @@ var Inserter = {
     console.log(index)
 
     var el
-    if (new_line){
-      var text_to_insert = '\n' + object.data
-    }
-    else{
-      var text_to_insert = object.data
-    }
+    
+    var text_to_insert = object.data
     el = body.insertParagraph(index, text_to_insert)
     el = el.getChild(0);
 
@@ -46,6 +42,10 @@ var Inserter = {
     if(type=='text'){
       el.setForegroundColor("#000000").setUnderline(false)
     }
+    if (new_line){
+      el.insertText(0,'\n')
+    }
+    
     if(type=='image'){
       replaceImagesURLToFile(el)
     }
