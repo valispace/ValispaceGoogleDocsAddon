@@ -315,7 +315,12 @@ function insertRequirementsInSpec_asTable_fromTemplate(requirements, all_data, p
             text_to_insert = cellText.replace(prop_regex, match => getTextToInsert(all_data, requirements[req], match.substring(1)));
 
             subTableRow.push(text_to_insert)
-            subUrlMapping.push(urlTranslator(requirements[req], types['requirements'], base_path) + `${VALI_PARAMETER_STR}requirements_${requirements[req].id}__${cellText.replace('$', '')}`);
+            if (text_to_insert!= cellText){
+              subUrlMapping.push(urlTranslator(requirements[req], types['requirements'], base_path) + `${VALI_PARAMETER_STR}requirements_${requirements[req].id}__${cellText.replace('$', '')}`);
+            }
+            else{
+              subUrlMapping.push([])
+            }
             subTableStyleRow.push([[rowIndex], [cellIndex]])
           }
           table.push(subTableRow)
