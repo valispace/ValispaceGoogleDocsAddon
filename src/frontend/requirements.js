@@ -223,7 +223,7 @@ function insertRequirementsWithSpecGroups_asTable_fromTemplate(insertion_array, 
   var reqs = []
   insertion_array.reverse();
 
-  console.log(insertion_array)
+  // console.log(insertion_array)
 
   for(line of insertion_array ){
     if(Array.isArray(line)){
@@ -248,7 +248,7 @@ function insertRequirementsWithSpecGroups_asTable_fromTemplate(insertion_array, 
     }
   }
   if(reqs.length>0){
-    console.log(line)
+    // console.log(line)
     insertRequirementsInSpec_asTable_fromTemplate(reqs, all_data, null, true);
     reqs = []
   }
@@ -343,6 +343,9 @@ function insertRequirementsInSpec_asTable_fromTemplate(requirements, all_data, p
       tables_urlMapping.push(urlMapping)
   }
 
+  cellLimit = 4000
+  numOfCells = 0
+
   // Inserting Tables
   for(i in tables){
     table = tables[i];
@@ -366,7 +369,9 @@ function insertRequirementsInSpec_asTable_fromTemplate(requirements, all_data, p
     var tableIndex = body.getChildIndex(docTable)
 
     // var tableIndex = body.getChildIndex(docTable)
-    doc.saveAndClose()
+    // doc.saveAndClose()
+    
+
 
     // Formating Table
     tableLength = docTable.getNumRows()
@@ -387,7 +392,18 @@ function insertRequirementsInSpec_asTable_fromTemplate(requirements, all_data, p
 
       rowIndex = formatingTable3(docTable, styleTableMapping, urlMapping, templateTableCellAttributes, rowIndex, cellLimit)
       findAndReplaceImages(docTable)
-      doc.saveAndClose()
+
+      for (row = 0; row < docTable.getNumRows(); row++) {
+        numOfCells += docTable.getRow(row).getNumCells();
+      }
+    // console.log(docTable.getNumRows())
+    // console.log(numOfCells)
+
+      Logger.log(numOfCells)
+      if (numOfCells > cellLimit){
+        Logger.log('Inside check')
+        doc.saveAndClose()
+      }
 
       previousTableIndex = tableIndex;
 
@@ -400,9 +416,10 @@ function insertRequirementsInSpec_asTable_fromTemplate(requirements, all_data, p
     findAndReplaceImages(docTable)
     // var pos=doc.newPosition(docTable.getNextSibling(), 1);
     // doc.setCursor(pos);
-    doc.saveAndClose()
     
   }
+
+  doc.saveAndClose()
   return [tableIndex, DocumentApp.getActiveDocument().getChild(tableIndex)]
   // return [table, styleTableMapping]
 }
