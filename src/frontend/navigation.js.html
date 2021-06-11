@@ -370,8 +370,16 @@ toggle between hiding and showing the dropdown content */
 				// directInsertPromise(all_data, node.id, 'name');
 				reqs.push([node.id, 'name'])
 			}
+
+			// TODO: THis can definately be optimized. I'm currently going through the requirements first just to have them at the top of the tree, and greoups would be below.
 			for (var i = 0; i < children.length; i++) {
-				if (children.item(i).tagName == "LI"){
+				if (children.item(i).tagName == "LI" && children.item(i).classList.contains('requirement')){
+					var result = recursive_insertion(all_data, children.item(i));
+					if(result){reqs = reqs.concat(result)}
+				}
+			}
+			for (var i = 0; i < children.length; i++) {
+				if (children.item(i).tagName == "LI" && !children.item(i).classList.contains('requirement')){
 					var result = recursive_insertion(all_data, children.item(i));
 					if(result){reqs = reqs.concat(result)}
 				}
@@ -465,25 +473,25 @@ toggle between hiding and showing the dropdown content */
 				//document.getElementById("updating-status").innerHTML = '';
 
 				// Recursive Function to Insert Requirements
-				function callInsertRequirement(projectId, parentId, parentType, requirementsToInsert, requirements, tags, groups, files, previousTableIndex = null) {
-					// TODO: Avoid sending duplicated requirements; Instead of a Subset, I could pass the index only - requirementsToInsert and rrequirements
-					// THis is needed when we are referencing to a requriement that is not in the subset (e.g. as a parent)
-					subset = requirementsToInsert.slice(iteration * (limitNumRows), iteration * (limitNumRows) + limitNumRows)
-					if (subset.length > 0) {
-						google.script.run
-							.withFailureHandler(function () { document.getElementById("updating-status").innerHTML = 'Error Inserting Part ' + iteration })
-							.withSuccessHandler(function (previousTableIndex) {
-								iteration++;
-								if (iteration < maxIterations) {
-									document.getElementById("updating-status").innerHTML = 'Inserting Requirements - Part: ' + (iteration + 1)
-									callInsertRequirement(projectId, parentId, parentType, requirementsToInsert, requirements, tags, groups, files, previousTableIndex[0]);
-								}
-							})
-							.insertRequirementsInSpec_asTable_fromTemplate(subset, all_data, previousTableIndex);
-					} else {
-						document.getElementById("updating-status").innerHTML = '';
-					}
-				}
+	//			function callInsertRequirement(projectId, parentId, parentType, requirementsToInsert, requirements, tags, groups, files, previousTableIndex = null) {
+	//				// TODO: Avoid sending duplicated requirements; Instead of a Subset, I could pass the index only - requirementsToInsert and rrequirements
+	//				// THis is needed when we are referencing to a requriement that is not in the subset (e.g. as a parent)
+	//				subset = requirementsToInsert.slice(iteration * (limitNumRows), iteration * (limitNumRows) + limitNumRows)
+	//				if (subset.length > 0) {
+	//					google.script.run
+	//						.withFailureHandler(function () { document.getElementById("updating-status").innerHTML = 'Error Inserting Part ' + iteration })
+	//						.withSuccessHandler(function (previousTableIndex) {
+	//							iteration++;
+	//							if (iteration < maxIterations) {
+	//								document.getElementById("updating-status").innerHTML = 'Inserting Requirements - Part: ' + (iteration + 1)
+	//								callInsertRequirement(projectId, parentId, parentType, requirementsToInsert, requirements, tags, groups, files, previousTableIndex[0]);
+	//							}
+	//						})
+	//						.insertRequirementsInSpec_asTable_fromTemplate(subset, all_data, previousTableIndex);
+	//				} else {
+	//					document.getElementById("updating-status").innerHTML = '';
+	//				}
+	//			}
 
 			});
 		}
