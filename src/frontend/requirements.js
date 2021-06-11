@@ -219,7 +219,7 @@ function getTemplateTable2(documentId) {
 
 
 function insertRequirementsWithSpecGroups_asTable_fromTemplate(insertion_array, all_data){
-
+  numOfCells = 0
   var reqs = []
   insertion_array.reverse();
 
@@ -229,7 +229,7 @@ function insertRequirementsWithSpecGroups_asTable_fromTemplate(insertion_array, 
     if(Array.isArray(line)){
       if(reqs.length>0){
         reqs.reverse();
-        index_and_element = insertRequirementsInSpec_asTable_fromTemplate(reqs, all_data, null, true);
+        [tableIndex, tableIndex_, numOfCells] = insertRequirementsInSpec_asTable_fromTemplate(reqs, all_data, null, true, numOfCells);
         // console.log(index_and_element)
         // var txtOff=doc.getCursor().getOffset();
         reqs = []
@@ -255,7 +255,7 @@ function insertRequirementsWithSpecGroups_asTable_fromTemplate(insertion_array, 
 }
 
 
-function insertRequirementsInSpec_asTable_fromTemplate(requirements, all_data, previousTableIndex = null, individual_tables=false) {
+function insertRequirementsInSpec_asTable_fromTemplate(requirements, all_data, previousTableIndex = null, individual_tables=false, numOfCells = 0) {
   individual_tables_setting = PropertiesService.getDocumentProperties().getProperty('IndividualInsertion');
   if(individual_tables==false){
     individual_tables = individual_tables_setting;
@@ -344,7 +344,7 @@ function insertRequirementsInSpec_asTable_fromTemplate(requirements, all_data, p
   }
 
   cellLimit = 4000
-  numOfCells = 0
+  
 
   // Inserting Tables
   for(i in tables){
@@ -375,7 +375,6 @@ function insertRequirementsInSpec_asTable_fromTemplate(requirements, all_data, p
 
     // Formating Table
     tableLength = docTable.getNumRows()
-    cellLimit = 4000
     rowIndex = 0
     while (rowIndex < tableLength) {
       var doc = DocumentApp.getActiveDocument();
@@ -399,10 +398,11 @@ function insertRequirementsInSpec_asTable_fromTemplate(requirements, all_data, p
     // console.log(docTable.getNumRows())
     // console.log(numOfCells)
 
-      Logger.log(numOfCells)
+      // Logger.log(numOfCells)
       if (numOfCells > cellLimit){
-        Logger.log('Inside check')
+        // Logger.log('Inside check')
         doc.saveAndClose()
+        numOfCells = 0
       }
 
       previousTableIndex = tableIndex;
@@ -419,8 +419,8 @@ function insertRequirementsInSpec_asTable_fromTemplate(requirements, all_data, p
     
   }
 
-  doc.saveAndClose()
-  return [tableIndex, DocumentApp.getActiveDocument().getChild(tableIndex)]
+  // doc.saveAndClose()
+  return [tableIndex, DocumentApp.getActiveDocument().getChild(tableIndex), numOfCells]
   // return [table, styleTableMapping]
 }
 
