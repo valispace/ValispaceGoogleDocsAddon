@@ -332,12 +332,12 @@ toggle between hiding and showing the dropdown content */
 		// Order Requirements by Identifier - TODO: Function to Select what to order by
 		var root = document.getElementById("reqTreeMain")
 		var children = root.getElementsByClassName("specification");
-		console.log(children.length);
+		// console.log(children.length);
 		var insertion = []
 		for (var i = 0; i < children.length; i++) {
 			insertion = insertion.concat(recursive_insertion(all_data, children.item(i)));
 		}
-		console.log(insertion)
+		// console.log(insertion)
 		google.script.run
 		.withFailureHandler(function () { document.getElementById("updating-status").innerHTML = 'Error Inserting '})
 		//.withSuccessHandler(console.log(insertion))
@@ -420,8 +420,9 @@ toggle between hiding and showing the dropdown content */
 
 				var projectId = $("#options-projects").val();
 
+				// var t01 = performance.now();
+
 				// TODO: Try checking Input to download only the necessary data; Maybe do it on google script
-				var t01 = performance.now();
 				var specifications = JSON.parse(document.getElementById(types.specifications.data).getAttribute('data'));
 				var labels = JSON.parse(document.getElementById(types.labels.data).getAttribute('data'));
 				var requirements = JSON.parse(document.getElementById(types.requirements.data).getAttribute('data'));
@@ -442,13 +443,13 @@ toggle between hiding and showing the dropdown content */
 					'users': users,
 					'user_groups': user_groups
 				}	
-				var t02 = performance.now();
-				console.log("Parsing all Data: " + (t02-t01).toString() + "milliseconds")
+				// var t02 = performance.now();
+				// console.log("Parsing all Data: " + (t02-t01).toString() + "milliseconds")
 
 
 				// Order Requirements by Identifier - TODO: Function to Select what to order by
 
-				var t03 = performance.now();
+				//var t03 = performance.now();
 
 				var parent = this.parentElement.id.split("_");
 				var parentType = parent[0].toString();
@@ -463,30 +464,30 @@ toggle between hiding and showing the dropdown content */
 						if (a.identifier > b.identifier)
 							return 1;
 					})
-				var t04 = performance.now();
-				console.log("Filtering and Ordering Requirements: " + (t04-t03).toString() + "milliseconds")
+				//var t04 = performance.now();
+				//console.log("Filtering and Ordering Requirements: " + (t04-t03).toString() + "milliseconds")
 
 	//			var iteration = 0
 	//			var maxIterations = 100
 	//			var limitNumRows = 500
 				// numberofReq = requirementsToInsert.length
 				//callInsertRequirement(projectId, parentId, parentType, requirementsToInsert, requirements, tags, groups, files)
-				var t05 = performance.now();
+				//var t05 = performance.now();
 				var insertion = recursive_insertion(all_data, this.parentElement)
 				if(!Array.isArray(insertion)){
 					insertion = [insertion];
 				}
-				var t06 = performance.now();
-				console.log("Recursive Function Build Insertion list: " + (t06-t05).toString() + "milliseconds")
+				//var t06 = performance.now();
+				//console.log("Recursive Function Build Insertion list: " + (t06-t05).toString() + "milliseconds")
 
 				// console.log(insertion)
-				var t07 = performance.now();
+				//var t07 = performance.now();
 				google.script.run
 				.withFailureHandler(function () { document.getElementById("updating-status").innerHTML = 'Error Inserting '})
 				.withSuccessHandler(function () { document.getElementById("updating-status").innerHTML = ''})
 				.insertRequirementsWithSpecGroups_asTable_fromTemplate(insertion, all_data, null);
-				var t08 = performance.now();
-				console.log("Google Call: " + (t08-t07).toString() + "milliseconds")
+				//var t08 = performance.now();
+				//console.log("Google Call: " + (t08-t07).toString() + "milliseconds")
 				//document.getElementById("updating-status").innerHTML = '';
 
 				// Recursive Function to Insert Requirements
@@ -509,8 +510,8 @@ toggle between hiding and showing the dropdown content */
 	//					document.getElementById("updating-status").innerHTML = '';
 	//				}
 	//			}
-			var t1 = performance.now();
-			console.log("Insert Function Call Time: " + (t1-t0).toString() + "milliseconds")
+			//var t1 = performance.now();
+			//console.log("Insert Function Call Time: " + (t1-t0).toString() + "milliseconds")
 			});
 		}
 

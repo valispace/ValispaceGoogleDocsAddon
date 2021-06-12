@@ -3,17 +3,35 @@ function get_data(projectId, dataType) {
     case 'labelsData':
       return JSON.parse(getAuthenticatedValispaceUrl('requirements/specifications/labels/?project=' + projectId));
     case 'specificationsData':
-      return JSON.parse(getAuthenticatedValispaceUrl('requirements/specifications/full_list/?project=' + projectId + '&clean_text=description'));
+      specificationData = getAuthenticatedValispaceUrl('requirements/specifications/full_list/?project=' + projectId + '&clean_text=description')
+      delete specificationData['vpermission']
+      delete specificationData['Contenttype']
+      return JSON.parse(specificationData);
     case 'requirementsData':
-      return JSON.parse(getAuthenticatedValispaceUrl('requirements/full_list/?project=' + projectId + '&clean_text=text,comment'));
-      case 'groupsData':
-        return JSON.parse(getAuthenticatedValispaceUrl('requirements/groups/?project=' + projectId + '&clean_text=description'));
+      requirementsData = getAuthenticatedValispaceUrl('requirements/full_list/?project=' + projectId + '&clean_text=text,comment')
+      delete requirementsData['Contenttype']
+      delete requirementsData['vpermission']
+      delete requirementsData['Image_1024']
+      delete requirementsData['Image_512']
+      delete requirementsData['Image_256']
+      delete requirementsData['Image_128']
+      delete requirementsData['Image_64']
+      return JSON.parse(requirementsData);
+    case 'groupsData':
+      groupData = getAuthenticatedValispaceUrl('requirements/groups/?project=' + projectId + '&clean_text=description')
+      delete groupData['vpermission']
+      delete groupData['Contenttype']
+      return JSON.parse(groupData);
     case 'statesData':
       return JSON.parse(getAuthenticatedValispaceUrl('requirements/states/?project=' + projectId));
     case 'tagsData':
-      return JSON.parse(getAuthenticatedValispaceUrl('tag/'));
+      tagsData = getAuthenticatedValispaceUrl('tag/')
+      delete tagsData['temporary']
+      return JSON.parse(tagsData);
     case 'filesData':
-      return JSON.parse(getAuthenticatedValispaceUrl('files/?project=' + projectId));
+      filesData = getAuthenticatedValispaceUrl('files/?project=' + projectId)
+      delete filesData['preview_ready']
+      return JSON.parse(filesData);
     case 'usersData':
       return JSON.parse(getAuthenticatedValispaceUrl('user'));
     case 'user_groupsData':
@@ -321,7 +339,7 @@ function insertRequirementsInSpec_asTable_fromTemplate(projectId, requirements, 
   var urlMapping = []
   var tables_urlMapping = []
 
-  // TODO: insertHeader property as UserProperty and add option on Options Page
+  // TODO: insertHeader property as UserProperty and add option on Options
   var insertHeader = true
 
    
