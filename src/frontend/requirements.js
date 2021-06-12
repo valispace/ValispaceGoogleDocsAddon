@@ -74,7 +74,7 @@ function getCursorIndex(body, cursor) {
 function getTextToInsert(all_data, object, property, projectId){
   
   property = property=='rationale'?'comment':property;
-  
+
   //Special patch to get vm_methods
   vm_methods = null
   if(property=='vm-methods'){
@@ -226,11 +226,11 @@ function getTemplateTable2(documentId) {
 
 
 function insertRequirementsWithSpecGroups_asTable_fromTemplate(insertion_array, all_data){
-  projectId = PropertiesService.getUserProperties().getProperty('projectID');
+  CacheService.getScriptCache().remove('templateTableData')
+  CacheService.getScriptCache().remove('templateTableCellAttributes')
+  now = new Date().getTime();
+  var projectId = PropertiesCache('User', 'projectID')
 
-  var cache = CacheService.getScriptCache();
-  cache.remove('templateTableData')
-  cache.remove('templateTableCellAttributes')
   numOfCells = 0
   var reqs = []
   insertion_array.reverse();
@@ -266,17 +266,23 @@ function insertRequirementsWithSpecGroups_asTable_fromTemplate(insertion_array, 
     reqs = []
   }
 
-  cache.remove('templateTableData')
-  cache.remove('templateTableCellAttributes')
+  CacheService.getScriptCache().remove('templateTableData')
+  CacheService.getScriptCache().remove('templateTableCellAttributes')
+
+  console.log('Function Run')
+  console.log(new Date().getTime()-now);
 }
 
 
 function insertRequirementsInSpec_asTable_fromTemplate(projectId, requirements, all_data, previousTableIndex = null, individual_tables=false, numOfCells = 0) {
-    
-  individual_tables_setting = PropertiesService.getDocumentProperties().getProperty('IndividualInsertion');
+  
+  var individual_tables_setting = PropertiesCache('Document', 'IndividualInsertion')
+  var base_path = PropertiesCache('User', 'deployment_url')
+
   if(individual_tables==false){
     individual_tables = individual_tables_setting;
   }
+
   specificationsData = all_data['specifications']
   labelsData = all_data['labels']
   requirementsData = all_data['requirements']
@@ -287,32 +293,25 @@ function insertRequirementsInSpec_asTable_fromTemplate(projectId, requirements, 
   usersData = all_data['users']
   user_groupsData = all_data['user_groups']
 
-  var base_path = PropertiesService.getUserProperties().getProperty('deployment_url')
-  var cache = CacheService.getScriptCache();
 
+
+  var cache = CacheService.getScriptCache();
   if (cache.get('templateTableCellAttributes') == null || cache.get('templateTableData') == null) {
-    //TODO: THis might need to go outside, no need to call it multiple times. Perhaps Cache this.
     documentId = PropertiesService.getDocumentProperties().getProperty('TemplateDocumentId')
     values = getTemplateTable2(documentId)
     templateTableData = values[0]
     templateTableCellAttributes = values[1]
-    // console.log(JSON.stringify(templateTableCellAttributes))
     cache.put('templateTableData', JSON.stringify(templateTableData))
     cache.put('templateTableCellAttributes', JSON.stringify(templateTableCellAttributes))
-    // Logger.log('Not Cached')
   } else {
     templateTableData = JSON.parse(cache.get('templateTableData'))
     templateTableCellAttributes = JSON.parse(cache.get('templateTableCellAttributes'))
-    // Logger.log('Cached')
-    // Logger.log(templateTableCellAttributes)
-    // Logger.log(templateTableData)
   }
 
+  // This number limits the amount of cells that will be created and formated before closing and saving the requirement.
+  // Smaller numbers saves more often but makes execution slower; Higher numbers stack too many changes before saving and returns and error
+  // This number was "found empirically" and it needs to scale with the number of cells on the template table.
   cellLimit = 12000/(templateTableData.length*templateTableData[0].length)
-  // Logger.log(cellLimit)
-  
-  // Logger.log(templateTableData.length)
-  // Logger.log(templateTableData[0].length)
 
 
   var table = []
@@ -322,25 +321,29 @@ function insertRequirementsInSpec_asTable_fromTemplate(projectId, requirements, 
   var urlMapping = []
   var tables_urlMapping = []
 
+  // TODO: insertHeader property as UserProperty and add option on Options Page
+  var insertHeader = true
+
+   
   for (req in requirements) {
-      for (let rowIndex = 0; rowIndex < templateTableData.length; rowIndex++) {
-        //Header
+    for (let rowIndex = 0; rowIndex < templateTableData.length; rowIndex++) {
+      // Header
 
-        if(rowIndex==0 && ((previousTableIndex == null && req==0) || individual_tables==true)){
-          header = []
-          headerStyle = []
-          headerUrl = []
+      if(insertHeader==true && rowIndex==0 && ((previousTableIndex == null && req==0) || individual_tables==true)){
+        header = []
+        headerStyle = []
+        headerUrl = []
 
-          for (let cellIndex = 0; cellIndex < templateTableData[rowIndex].length; cellIndex++) {
-            header.push(templateTableData[rowIndex][cellIndex])
-            headerStyle.push([[rowIndex], [cellIndex]])
-            headerUrl.push([])
-          }
-          table.push(header)
-          styleTableMapping.push(headerStyle)
-          urlMapping.push(headerUrl)
+        for (let cellIndex = 0; cellIndex < templateTableData[0].length; cellIndex++) {
+          header.push(templateTableData[rowIndex][cellIndex])
+          headerStyle.push([[rowIndex], [cellIndex]])
+          headerUrl.push([])
         }
-        else if(rowIndex>0){
+        table.push(header)
+        styleTableMapping.push(headerStyle)
+        urlMapping.push(headerUrl)
+      }
+        if(rowIndex>0){
           subTableRow = []
           subTableStyleRow = []
           subUrlMapping = []
@@ -353,7 +356,6 @@ function insertRequirementsInSpec_asTable_fromTemplate(projectId, requirements, 
             text_to_insert = cellText
             text_to_insert = cellText.replace(prop_regex, match => getTextToInsert(all_data, requirements[req], match.substring(1), projectId));
             
-            var start = new Date().getTime();
 
             subTableRow.push(text_to_insert)
             if (text_to_insert!= cellText){
@@ -380,6 +382,8 @@ function insertRequirementsInSpec_asTable_fromTemplate(projectId, requirements, 
       urlMapping = []
     }
   }
+
+
   if (!individual_tables){
       tables.push(table)
       tables_styleTableMapping.push(styleTableMapping)
@@ -466,13 +470,42 @@ function insertRequirementsInSpec_asTable_fromTemplate(projectId, requirements, 
   // return [table, styleTableMapping]
 }
 
+function PropertiesCache(local, propertyName){
+  cache = CacheService.getScriptCache()
+
+  if (cache.get(propertyName) == null){
+    if (local == "Document"){
+      property = PropertiesService.getDocumentProperties().getProperty(propertyName)
+      cache.put(propertyName, property)
+    } else if (local == "User"){
+      property = PropertiesService.getUserProperties().getProperty(propertyName)
+      cache.put(propertyName, property)
+    } else {
+      console.log('Error: Use either Document or User Properties')
+    }
+  } else {
+    if (local == "Document"){
+      property = cache.get(propertyName)
+    } else if (local == "User"){
+      property = cache.get(propertyName)
+    } else {
+      console.log('Error: Use either Document or User Properties')
+    }
+  }
+  return property
+}
+
 function getUserFrom(origin, usersData, user_groupsData) {
-  // console.log(origin)
+  if (origin == null){
+    return ""
+  }
   text = '-'
   if (origin.contenttype == 5) {
     user = usersData.find(x => x['id'] === origin.id)
     if (user.first_name || user.last_name) {
       text = user.first_name + ' ' + user.last_name
+    } else {
+      text = user.username
     }
   }
   else if (origin.contenttype == 4) {
@@ -485,7 +518,12 @@ function getUserFrom(origin, usersData, user_groupsData) {
 }
 
 function replaceAttributesWithId(attribute, objectsList, objectToSearch, attributeToInsert) {
-    objectsIds = objectToSearch[attribute];
+
+  if (objectToSearch[attribute] == null) {
+    return ""
+  }
+
+  objectsIds = objectToSearch[attribute];
     objectsIds = Array.isArray(objectsIds) ? objectsIds : [objectsIds];
     objectAttributes = objectsIds.map(objectId=>objectsList.find(x => x['id'] === objectId)[attributeToInsert]);
     if (objectAttributes){

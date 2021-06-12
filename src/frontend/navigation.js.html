@@ -414,12 +414,14 @@ toggle between hiding and showing the dropdown content */
 		var objects = document.getElementsByClassName("add-element");
 		for (i = 0; i < objects.length; i++) {
 			objects[i].addEventListener("click", function () {
+				var t0 = performance.now();
+
 				document.getElementById("updating-status").innerHTML = 'Inserting Requirements...'
 
 				var projectId = $("#options-projects").val();
 
 				// TODO: Try checking Input to download only the necessary data; Maybe do it on google script
-
+				var t01 = performance.now();
 				var specifications = JSON.parse(document.getElementById(types.specifications.data).getAttribute('data'));
 				var labels = JSON.parse(document.getElementById(types.labels.data).getAttribute('data'));
 				var requirements = JSON.parse(document.getElementById(types.requirements.data).getAttribute('data'));
@@ -428,6 +430,7 @@ toggle between hiding and showing the dropdown content */
 				var tags = JSON.parse(document.getElementById(types.tags.data).getAttribute('data'));
 				var files = JSON.parse(document.getElementById(types.files.data).getAttribute('data'));
 				var users = JSON.parse(document.getElementById(types.users.data).getAttribute('data'));
+				var user_groups = JSON.parse(document.getElementById(types.user_groups.data).getAttribute('data'));
 				var all_data = {
 					'specifications': specifications,
 					'labels': labels,
@@ -436,11 +439,16 @@ toggle between hiding and showing the dropdown content */
 					'states': states,
 					'tags': tags,
 					'files': files,
-					'users': users
-				}
+					'users': users,
+					'user_groups': user_groups
+				}	
+				var t02 = performance.now();
+				console.log("Parsing all Data: " + (t02-t01).toString() + "milliseconds")
 
 
 				// Order Requirements by Identifier - TODO: Function to Select what to order by
+
+				var t03 = performance.now();
 
 				var parent = this.parentElement.id.split("_");
 				var parentType = parent[0].toString();
@@ -455,21 +463,30 @@ toggle between hiding and showing the dropdown content */
 						if (a.identifier > b.identifier)
 							return 1;
 					})
+				var t04 = performance.now();
+				console.log("Filtering and Ordering Requirements: " + (t04-t03).toString() + "milliseconds")
 
-				var iteration = 0
-				var maxIterations = 100
-				var limitNumRows = 500
+	//			var iteration = 0
+	//			var maxIterations = 100
+	//			var limitNumRows = 500
 				// numberofReq = requirementsToInsert.length
 				//callInsertRequirement(projectId, parentId, parentType, requirementsToInsert, requirements, tags, groups, files)
+				var t05 = performance.now();
 				var insertion = recursive_insertion(all_data, this.parentElement)
 				if(!Array.isArray(insertion)){
 					insertion = [insertion];
 				}
+				var t06 = performance.now();
+				console.log("Recursive Function Build Insertion list: " + (t06-t05).toString() + "milliseconds")
+
 				// console.log(insertion)
+				var t07 = performance.now();
 				google.script.run
 				.withFailureHandler(function () { document.getElementById("updating-status").innerHTML = 'Error Inserting '})
 				.withSuccessHandler(function () { document.getElementById("updating-status").innerHTML = ''})
 				.insertRequirementsWithSpecGroups_asTable_fromTemplate(insertion, all_data, null);
+				var t08 = performance.now();
+				console.log("Google Call: " + (t08-t07).toString() + "milliseconds")
 				//document.getElementById("updating-status").innerHTML = '';
 
 				// Recursive Function to Insert Requirements
@@ -492,7 +509,8 @@ toggle between hiding and showing the dropdown content */
 	//					document.getElementById("updating-status").innerHTML = '';
 	//				}
 	//			}
-
+			var t1 = performance.now();
+			console.log("Insert Function Call Time: " + (t1-t0).toString() + "milliseconds")
 			});
 		}
 
@@ -512,6 +530,7 @@ toggle between hiding and showing the dropdown content */
 				$('#projectTree').html(newHtml);
 				addTreeListener();
 			}
+
 		)
 			.withFailureHandler(
 				function (error) {
@@ -650,9 +669,14 @@ toggle between hiding and showing the dropdown content */
 
 	function getRequirements() {
 		var requirements = JSON.parse(document.getElementById("requirementsData").getAttribute('data'));
-
-
-
+		requirements.sort(function (a, b) {
+						if (a.identifier == b.identifier)
+							return 0;
+						if (a.identifier < b.identifier)
+							return -1;
+						if (a.identifier > b.identifier)
+							return 1;
+					})
 		for (index in requirements) {
 			var requirement = requirements[index]
 
