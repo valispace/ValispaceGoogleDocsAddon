@@ -697,27 +697,20 @@ toggle between hiding and showing the dropdown content */
 				var parentId = 'children_' + types.specifications.name + '_' + requirement['specification'].toString()
 				// var htmlToWrite = document.getElementById(parentId).innerHTML
 
-				var liNode = document.createElement("li");
-				liNode.innerHTML = reqIcon+ '<div class="requirement-text">'+ displayName+ '</div>'+ plusIcon+ propertiesIcon;
-				liNode.classList.add("reqSearcheableObj");
-				liNode.classList.add("requirement");
-
 				// liNode.innerHTML = reqIcon+ '<div class="requirement-text">'+ displayName+ '</div>'+ plusIcon+ propertiesIcon
 				// liNode.class
 				// htmlToWrite = '<li class="reqSearcheableObj requirement" id="'+ reqName+ '">'+ ;
-				document.getElementById(parentId).appendChild(liNode)
 				//document.getElementById(parentId).innerHTML = htmlToWrite
 			} else {
 				var parentId = 'children_' + types.groups.name + '_' + requirement['group'].toString()
-				
-				var liNode = document.createElement("li");
-				liNode.innerHTML = reqIcon, '<div class="requirement-text">', displayName, '</div>', plusIcon, propertiesIcon
-				liNode.classList.add("reqSearcheableObj");
-				liNode.classList.add("requirement");
-
-				document.getElementById(parentId).appendChild(liNode)
 			}
 
+			var liNode = document.createElement("li");
+			liNode.innerHTML = reqIcon+ '<div class="requirement-text">'+ displayName+ '</div>'+ plusIcon+ propertiesIcon
+			liNode.classList.add("reqSearcheableObj");
+			liNode.classList.add("requirement");
+
+			document.getElementById(parentId).appendChild(liNode)
 		}
 	}
 
