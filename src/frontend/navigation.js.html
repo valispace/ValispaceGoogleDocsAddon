@@ -567,7 +567,13 @@ toggle between hiding and showing the dropdown content */
 		var specifications = JSON.parse(document.getElementById(types.specifications.data).getAttribute('data'));
 		var groups = JSON.parse(document.getElementById(types.groups.data).getAttribute('data'));
 
+		// Order groups
+
+
 		// console.log(specifications)
+		//groups.sort(function (a, b) {
+			//return a.toString().localeCompare(b, 'en', { numeric: true });
+					//})
 
 		// HTML Initial
 		var htmlToWrite = '<ul class="reqTreeMain" id="reqTreeMain">'
@@ -678,6 +684,7 @@ toggle between hiding and showing the dropdown content */
 						if (a.identifier > b.identifier)
 							return 1;
 					})
+
 		for (index in requirements) {
 			var requirement = requirements[index]
 
@@ -688,16 +695,27 @@ toggle between hiding and showing the dropdown content */
 			// If Not in a Group ['group'] = null, it is in a specificaiton only
 			if (requirement['group'] == null) {
 				var parentId = 'children_' + types.specifications.name + '_' + requirement['specification'].toString()
-				var htmlToWrite = document.getElementById(parentId).innerHTML
-				htmlToWrite = htmlToWrite.concat('<li class="reqSearcheableObj requirement" id="', reqName, '">', reqIcon, '<div class="requirement-text">', displayName, '</div>', plusIcon, propertiesIcon);
+				// var htmlToWrite = document.getElementById(parentId).innerHTML
 
-				document.getElementById(parentId).innerHTML = htmlToWrite
+				var liNode = document.createElement("li");
+				liNode.innerHTML = reqIcon+ '<div class="requirement-text">'+ displayName+ '</div>'+ plusIcon+ propertiesIcon;
+				liNode.classList.add("reqSearcheableObj");
+				liNode.classList.add("requirement");
+
+				// liNode.innerHTML = reqIcon+ '<div class="requirement-text">'+ displayName+ '</div>'+ plusIcon+ propertiesIcon
+				// liNode.class
+				// htmlToWrite = '<li class="reqSearcheableObj requirement" id="'+ reqName+ '">'+ ;
+				document.getElementById(parentId).appendChild(liNode)
+				//document.getElementById(parentId).innerHTML = htmlToWrite
 			} else {
 				var parentId = 'children_' + types.groups.name + '_' + requirement['group'].toString()
-				var htmlToWrite = document.getElementById(parentId).innerHTML
-				htmlToWrite = htmlToWrite.concat('<li class="reqSearcheableObj requirement" id="', reqName, '">', reqIcon, '<div class="requirement-text">', displayName, '</div>', plusIcon, propertiesIcon);
+				
+				var liNode = document.createElement("li");
+				liNode.innerHTML = reqIcon, '<div class="requirement-text">', displayName, '</div>', plusIcon, propertiesIcon
+				liNode.classList.add("reqSearcheableObj");
+				liNode.classList.add("requirement");
 
-				document.getElementById(parentId).innerHTML = htmlToWrite
+				document.getElementById(parentId).appendChild(liNode)
 			}
 
 		}
