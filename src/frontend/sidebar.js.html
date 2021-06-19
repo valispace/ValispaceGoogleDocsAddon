@@ -106,6 +106,7 @@
     // Disable View Requirements Tree Button and Closes DropDown Div
     $('#viewRequirementsTree').off()
     $('#insertAll').off()
+    $('#genFromTemplate').off()
     document.getElementById("myDropdown").classList.remove("show");
 
 
@@ -138,6 +139,7 @@
       document.getElementById("updating-status").innerHTML = '';
       $('#viewRequirementsTree').click(expandRequirementTree);
       $('#insertAll').click(insertAll)
+      $('#genFromTemplate').click(genFromTemplate)
     })
   }
 

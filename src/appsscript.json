@@ -5,6 +5,10 @@
       "userSymbol": "Docs",
       "serviceId": "docs",
       "version": "v1"
+    }, {
+      "userSymbol": "Drive",
+      "serviceId": "drive",
+      "version": "v2"
     }],
     "libraries": [{
       "userSymbol": "OAuth2",

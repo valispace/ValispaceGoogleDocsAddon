@@ -261,20 +261,12 @@ function insertRequirementsWithSpecGroups_asTable_fromTemplate(insertion_array, 
       last_index = direct_insert(all_data, line[0], line[1], true);
       if(reqs.length>0){
         reqs.reverse();
-        [tableIndex, tableIndex_, numOfCells] = insertRequirementsInSpec_asTable_fromTemplate(projectId, reqs, all_data, null, true, numOfCells);
-        // console.log(index_and_element)
-        // var txtOff=doc.getCursor().getOffset();
+        index_and_element = insertRequirementsInSpec_asTable_fromTemplate(reqs, all_data, null, true);
         reqs = []
       }
-      // console.log(line[0])
-      // var txtEl=doc.getCursor().getElement();
-      // var txtOff=doc.getCursor().getOffset();
-      // console.log
-      // var pos=doc.newPosition(txtEl, txtOff + 1);
-      // doc.setCursor(pos);
+      last_index = direct_insert(all_data, line[0], line[1], true);
     }
     else{
-      // console.log(line.identifier)
       reqs.push(line);
     }
   }
