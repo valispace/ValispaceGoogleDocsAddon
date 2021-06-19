@@ -29,7 +29,7 @@ var Inserter = {
     var body = doc.getBody()
     var cursor = doc.getCursor()
     index = getCursorIndex(body, cursor)
-    console.log(index)
+    // console.log(index)
 
     var el
     

@@ -332,12 +332,12 @@ toggle between hiding and showing the dropdown content */
 		// Order Requirements by Identifier - TODO: Function to Select what to order by
 		var root = document.getElementById("reqTreeMain")
 		var children = root.getElementsByClassName("specification");
-		console.log(children.length);
+		// console.log(children.length);
 		var insertion = []
 		for (var i = 0; i < children.length; i++) {
 			insertion = insertion.concat(recursive_insertion(all_data, children.item(i)));
 		}
-		console.log(insertion)
+		// console.log(insertion)
 		google.script.run
 		.withFailureHandler(function () { document.getElementById("updating-status").innerHTML = 'Error Inserting '})
 		//.withSuccessHandler(console.log(insertion))
@@ -370,8 +370,16 @@ toggle between hiding and showing the dropdown content */
 				// directInsertPromise(all_data, node.id, 'name');
 				reqs.push([node.id, 'name'])
 			}
+
+			// TODO: THis can definately be optimized. I'm currently going through the requirements first just to have them at the top of the tree, and greoups would be below.
 			for (var i = 0; i < children.length; i++) {
-				if (children.item(i).tagName == "LI"){
+				if (children.item(i).tagName == "LI" && children.item(i).classList.contains('requirement')){
+					var result = recursive_insertion(all_data, children.item(i));
+					if(result){reqs = reqs.concat(result)}
+				}
+			}
+			for (var i = 0; i < children.length; i++) {
+				if (children.item(i).tagName == "LI" && !children.item(i).classList.contains('requirement')){
 					var result = recursive_insertion(all_data, children.item(i));
 					if(result){reqs = reqs.concat(result)}
 				}
@@ -406,12 +414,15 @@ toggle between hiding and showing the dropdown content */
 		var objects = document.getElementsByClassName("add-element");
 		for (i = 0; i < objects.length; i++) {
 			objects[i].addEventListener("click", function () {
+				var t0 = performance.now();
+
 				document.getElementById("updating-status").innerHTML = 'Inserting Requirements...'
 
 				var projectId = $("#options-projects").val();
 
-				// TODO: Try checking Input to download only the necessary data; Maybe do it on google script
+				// var t01 = performance.now();
 
+				// TODO: Try checking Input to download only the necessary data; Maybe do it on google script
 				var specifications = JSON.parse(document.getElementById(types.specifications.data).getAttribute('data'));
 				var labels = JSON.parse(document.getElementById(types.labels.data).getAttribute('data'));
 				var requirements = JSON.parse(document.getElementById(types.requirements.data).getAttribute('data'));
@@ -420,6 +431,7 @@ toggle between hiding and showing the dropdown content */
 				var tags = JSON.parse(document.getElementById(types.tags.data).getAttribute('data'));
 				var files = JSON.parse(document.getElementById(types.files.data).getAttribute('data'));
 				var users = JSON.parse(document.getElementById(types.users.data).getAttribute('data'));
+				var user_groups = JSON.parse(document.getElementById(types.user_groups.data).getAttribute('data'));
 				var all_data = {
 					'specifications': specifications,
 					'labels': labels,
@@ -428,11 +440,16 @@ toggle between hiding and showing the dropdown content */
 					'states': states,
 					'tags': tags,
 					'files': files,
-					'users': users
-				}
+					'users': users,
+					'user_groups': user_groups
+				}	
+				// var t02 = performance.now();
+				// console.log("Parsing all Data: " + (t02-t01).toString() + "milliseconds")
 
 
 				// Order Requirements by Identifier - TODO: Function to Select what to order by
+
+				//var t03 = performance.now();
 
 				var parent = this.parentElement.id.split("_");
 				var parentType = parent[0].toString();
@@ -447,44 +464,54 @@ toggle between hiding and showing the dropdown content */
 						if (a.identifier > b.identifier)
 							return 1;
 					})
+				//var t04 = performance.now();
+				//console.log("Filtering and Ordering Requirements: " + (t04-t03).toString() + "milliseconds")
 
-				var iteration = 0
-				var maxIterations = 100
-				var limitNumRows = 500
+	//			var iteration = 0
+	//			var maxIterations = 100
+	//			var limitNumRows = 500
 				// numberofReq = requirementsToInsert.length
 				//callInsertRequirement(projectId, parentId, parentType, requirementsToInsert, requirements, tags, groups, files)
+				//var t05 = performance.now();
 				var insertion = recursive_insertion(all_data, this.parentElement)
 				if(!Array.isArray(insertion)){
 					insertion = [insertion];
 				}
+				//var t06 = performance.now();
+				//console.log("Recursive Function Build Insertion list: " + (t06-t05).toString() + "milliseconds")
+
 				// console.log(insertion)
+				//var t07 = performance.now();
 				google.script.run
 				.withFailureHandler(function () { document.getElementById("updating-status").innerHTML = 'Error Inserting '})
-				//.withSuccessHandler(console.log(insertion))
+				.withSuccessHandler(function () { document.getElementById("updating-status").innerHTML = ''})
 				.insertRequirementsWithSpecGroups_asTable_fromTemplate(insertion, all_data, null);
-				document.getElementById("updating-status").innerHTML = '';
+				//var t08 = performance.now();
+				//console.log("Google Call: " + (t08-t07).toString() + "milliseconds")
+				//document.getElementById("updating-status").innerHTML = '';
 
 				// Recursive Function to Insert Requirements
-				function callInsertRequirement(projectId, parentId, parentType, requirementsToInsert, requirements, tags, groups, files, previousTableIndex = null) {
-					// TODO: Avoid sending duplicated requirements; Instead of a Subset, I could pass the index only - requirementsToInsert and rrequirements
-					// THis is needed when we are referencing to a requriement that is not in the subset (e.g. as a parent)
-					subset = requirementsToInsert.slice(iteration * (limitNumRows), iteration * (limitNumRows) + limitNumRows)
-					if (subset.length > 0) {
-						google.script.run
-							.withFailureHandler(function () { document.getElementById("updating-status").innerHTML = 'Error Inserting Part ' + iteration })
-							.withSuccessHandler(function (previousTableIndex) {
-								iteration++;
-								if (iteration < maxIterations) {
-									document.getElementById("updating-status").innerHTML = 'Inserting Requirements - Part: ' + (iteration + 1)
-									callInsertRequirement(projectId, parentId, parentType, requirementsToInsert, requirements, tags, groups, files, previousTableIndex[0]);
-								}
-							})
-							.insertRequirementsInSpec_asTable_fromTemplate(subset, all_data, previousTableIndex);
-					} else {
-						document.getElementById("updating-status").innerHTML = '';
-					}
-				}
-
+	//			function callInsertRequirement(projectId, parentId, parentType, requirementsToInsert, requirements, tags, groups, files, previousTableIndex = null) {
+	//				// TODO: Avoid sending duplicated requirements; Instead of a Subset, I could pass the index only - requirementsToInsert and rrequirements
+	//				// THis is needed when we are referencing to a requriement that is not in the subset (e.g. as a parent)
+	//				subset = requirementsToInsert.slice(iteration * (limitNumRows), iteration * (limitNumRows) + limitNumRows)
+	//				if (subset.length > 0) {
+	//					google.script.run
+	//						.withFailureHandler(function () { document.getElementById("updating-status").innerHTML = 'Error Inserting Part ' + iteration })
+	//						.withSuccessHandler(function (previousTableIndex) {
+	//							iteration++;
+	//							if (iteration < maxIterations) {
+	//								document.getElementById("updating-status").innerHTML = 'Inserting Requirements - Part: ' + (iteration + 1)
+	//								callInsertRequirement(projectId, parentId, parentType, requirementsToInsert, requirements, tags, groups, files, previousTableIndex[0]);
+	//							}
+	//						})
+	//						.insertRequirementsInSpec_asTable_fromTemplate(subset, all_data, previousTableIndex);
+	//				} else {
+	//					document.getElementById("updating-status").innerHTML = '';
+	//				}
+	//			}
+			//var t1 = performance.now();
+			//console.log("Insert Function Call Time: " + (t1-t0).toString() + "milliseconds")
 			});
 		}
 
@@ -504,6 +531,7 @@ toggle between hiding and showing the dropdown content */
 				$('#projectTree').html(newHtml);
 				addTreeListener();
 			}
+
 		)
 			.withFailureHandler(
 				function (error) {
@@ -539,7 +567,13 @@ toggle between hiding and showing the dropdown content */
 		var specifications = JSON.parse(document.getElementById(types.specifications.data).getAttribute('data'));
 		var groups = JSON.parse(document.getElementById(types.groups.data).getAttribute('data'));
 
+		// Order groups
+
+
 		// console.log(specifications)
+		//groups.sort(function (a, b) {
+			//return a.toString().localeCompare(b, 'en', { numeric: true });
+					//})
 
 		// HTML Initial
 		var htmlToWrite = '<ul class="reqTreeMain" id="reqTreeMain">'
@@ -642,8 +676,14 @@ toggle between hiding and showing the dropdown content */
 
 	function getRequirements() {
 		var requirements = JSON.parse(document.getElementById("requirementsData").getAttribute('data'));
-
-
+		requirements.sort(function (a, b) {
+						if (a.identifier == b.identifier)
+							return 0;
+						if (a.identifier < b.identifier)
+							return -1;
+						if (a.identifier > b.identifier)
+							return 1;
+					})
 
 		for (index in requirements) {
 			var requirement = requirements[index]
@@ -655,18 +695,22 @@ toggle between hiding and showing the dropdown content */
 			// If Not in a Group ['group'] = null, it is in a specificaiton only
 			if (requirement['group'] == null) {
 				var parentId = 'children_' + types.specifications.name + '_' + requirement['specification'].toString()
-				var htmlToWrite = document.getElementById(parentId).innerHTML
-				htmlToWrite = htmlToWrite.concat('<li class="reqSearcheableObj requirement" id="', reqName, '">', reqIcon, '<div class="requirement-text">', displayName, '</div>', plusIcon, propertiesIcon);
+				// var htmlToWrite = document.getElementById(parentId).innerHTML
 
-				document.getElementById(parentId).innerHTML = htmlToWrite
+				// liNode.innerHTML = reqIcon+ '<div class="requirement-text">'+ displayName+ '</div>'+ plusIcon+ propertiesIcon
+				// liNode.class
+				// htmlToWrite = '<li class="reqSearcheableObj requirement" id="'+ reqName+ '">'+ ;
+				//document.getElementById(parentId).innerHTML = htmlToWrite
 			} else {
 				var parentId = 'children_' + types.groups.name + '_' + requirement['group'].toString()
-				var htmlToWrite = document.getElementById(parentId).innerHTML
-				htmlToWrite = htmlToWrite.concat('<li class="reqSearcheableObj requirement" id="', reqName, '">', reqIcon, '<div class="requirement-text">', displayName, '</div>', plusIcon, propertiesIcon);
-
-				document.getElementById(parentId).innerHTML = htmlToWrite
 			}
 
+			var liNode = document.createElement("li");
+			liNode.innerHTML = reqIcon+ '<div class="requirement-text">'+ displayName+ '</div>'+ plusIcon+ propertiesIcon
+			liNode.classList.add("reqSearcheableObj");
+			liNode.classList.add("requirement");
+
+			document.getElementById(parentId).appendChild(liNode)
 		}
 	}
 
