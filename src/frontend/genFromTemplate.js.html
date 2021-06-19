@@ -27,15 +27,31 @@ function genFromTemplate(){
   all_data = parseData()
   google.script.run.withSuccessHandler(html => {
     console.log(html);
-    google.script.run.withSuccessHandler(id => {
-      console.log(id);
+    var rendered_html = nunjucks.renderString(html, all_data)
+    google.script.run.withFailureHandler(
+      download('rendered.html', rendered_html)
+    ).withSuccessHandler(id => {
+      window.open("https://docs.google.com/document/d/" + id + '/edit');
     }).saveConvertHtmlDrive(
-      nunjucks.renderString(html, {all_data})
+      rendered_html
     )
   }
   ).getGoogleDocumentAsHTML();
 
 
+}
+
+function download(filename, text) {
+    var element = document.createElement('a');
+    element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
+    element.setAttribute('download', filename);
+
+    element.style.display = 'none';
+    document.body.appendChild(element);
+
+    element.click();
+
+    document.body.removeChild(element);
 }
 
 
