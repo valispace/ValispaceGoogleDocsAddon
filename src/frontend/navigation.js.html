@@ -139,6 +139,7 @@ toggle between hiding and showing the dropdown content */
 	
 
 	function toggleObjectProperties(objectId) {
+		console.log(objectId)
 		if (document.contains(document.getElementById(objectId + '_properties'))) {
 			document.getElementById(objectId + '_properties').remove();
 		} else {
@@ -406,6 +407,8 @@ toggle between hiding and showing the dropdown content */
 		var objects = document.querySelectorAll(".show-properties, .requirement-text");
 		for (i = 0; i < objects.length; i++) {
 			objects[i].addEventListener("click", function () {
+				console.log('Before')
+				console.log(this.parentElement.id)
 				toggleObjectProperties(this.parentElement.id)
 			});
 		}
@@ -709,6 +712,7 @@ toggle between hiding and showing the dropdown content */
 			liNode.innerHTML = reqIcon+ '<div class="requirement-text">'+ displayName+ '</div>'+ plusIcon+ propertiesIcon
 			liNode.classList.add("reqSearcheableObj");
 			liNode.classList.add("requirement");
+			liNode.id = reqName
 
 			document.getElementById(parentId).appendChild(liNode)
 		}
