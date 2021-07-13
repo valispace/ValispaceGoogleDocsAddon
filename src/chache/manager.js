@@ -7,7 +7,7 @@ WorkspacesCache = new Cache(types.workspaces)
 ProjectsCache = new Cache(types.projects)
 
 SpecificationsCache = new Cache(types.specifications)
-LabelsCache = new Cache(types.labels)
+FoldersCache = new Cache(types.folders)
 GroupsCache = new Cache(types.groups)
 RequirementsCache = new Cache(types.requirements)
 

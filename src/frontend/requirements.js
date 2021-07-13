@@ -1,7 +1,7 @@
 function get_data(projectId, dataType) {
   switch (dataType) {
-    case 'labelsData':
-      return JSON.parse(getAuthenticatedValispaceUrl('requirements/specifications/labels/?project=' + projectId));
+    case 'foldersData':
+      return JSON.parse(getAuthenticatedValispaceUrl('requirements/specifications/folders/?project=' + projectId));
     case 'specificationsData':
       return JSON.parse(getAuthenticatedValispaceUrl('requirements/specifications/full_list/?project=' + projectId + '&clean_text=description'));
     case 'requirementsData':
@@ -11,7 +11,7 @@ function get_data(projectId, dataType) {
     case 'statesData':
       return JSON.parse(getAuthenticatedValispaceUrl('requirements/states/?project=' + projectId));
     case 'tagsData':
-      return JSON.parse(getAuthenticatedValispaceUrl('tag/'));
+      return JSON.parse(getAuthenticatedValispaceUrl('tags/'));
     case 'filesData':
       return JSON.parse(getAuthenticatedValispaceUrl('files/?project=' + projectId));
     case 'usersData':
@@ -23,7 +23,7 @@ function get_data(projectId, dataType) {
 
 // TODO: Move this to a more Generic
 function get_tag(tag_id) {
-  return JSON.parse(getAuthenticatedValispaceUrl('tag/' + tag_id + '/'));
+  return JSON.parse(getAuthenticatedValispaceUrl('tags/' + tag_id + '/'));
 }
 
 function get_requirement(req_id) {
@@ -126,7 +126,7 @@ function direct_insert(all_data, objectName, property){
 
 // function direct_insert(objectList, objectName, property) {
 //   specificationsData = objectList['specifications']
-//   labelsData = objectList['labels']
+//   foldersData = objectList['folders']
 //   requirementsData = objectList['requirements']
 //   groupsData = objectList['groups']
 //   statesData = objectList['states']
@@ -219,7 +219,7 @@ function getTemplateTable2(documentId) {
 function insertRequirementsInSpec_asTable_fromTemplate(projectId, parentId, parentType, requirements, all_data, previousTableIndex = null, individual_tables=false) {
 
   specificationsData = all_data['specifications']
-  labelsData = all_data['labels']
+  foldersData = all_data['folders']
   requirementsData = all_data['requirements']
   groupsData = all_data['groups']
   statesData = all_data['states']

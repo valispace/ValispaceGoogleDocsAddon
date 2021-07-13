@@ -25,10 +25,10 @@
 			properties: ["name", "description", "owner"],
 			filter: 'specification'
 		},
-		labels: {
-			name: 'labels',
+		folders: {
+			name: 'folders',
 			url: ['project', '%project', 'specifications', 'groups', '%id', 'requirements'],
-			data: 'labelsData'
+			data: 'foldersData'
 		},
 		groups: {
 			name: 'groups',
@@ -87,7 +87,7 @@
 			// TODO: Try checking INput to download only the necessary data; Maybe do it on google script
 			// TODO: Use the dataList
 			var specifications = JSON.parse(document.getElementById(types.specifications.data).getAttribute('data'));
-			var labels = JSON.parse(document.getElementById(types.labels.data).getAttribute('data'));
+			var folders = JSON.parse(document.getElementById(types.folders.data).getAttribute('data'));
 			var requirements = JSON.parse(document.getElementById(types.requirements.data).getAttribute('data'));
 			var groups = JSON.parse(document.getElementById(types.groups.data).getAttribute('data'));
 			var tags = JSON.parse(document.getElementById(types.tags.data).getAttribute('data'));
@@ -96,7 +96,7 @@
 			var user_groups = JSON.parse(document.getElementById(types.user_groups.data).getAttribute('data'));
 			var all_data = {
 				'specifications': specifications,
-				'labels': labels,
+				'folders': folders,
 				'requirements': requirements,
 				'groups': groups,
 				'tags': tags,
@@ -171,7 +171,7 @@ toggle between hiding and showing the dropdown content */
 					// console.log(reqId, propertyName);
 					// TODO: Try checking INput to download only the necessary data; Maybe do it on google script
 					var specifications = JSON.parse(document.getElementById(types.specifications.data).getAttribute('data'));
-					var labels = JSON.parse(document.getElementById(types.labels.data).getAttribute('data'));
+					var folders = JSON.parse(document.getElementById(types.folders.data).getAttribute('data'));
 					var requirements = JSON.parse(document.getElementById(types.requirements.data).getAttribute('data'));
 					var groups = JSON.parse(document.getElementById(types.groups.data).getAttribute('data'));
 					var states = JSON.parse(document.getElementById(types.states.data).getAttribute('data'));
@@ -180,7 +180,7 @@ toggle between hiding and showing the dropdown content */
 					var users = JSON.parse(document.getElementById(types.users.data).getAttribute('data'));
 					var all_data = {
 						'specifications': specifications,
-						'labels': labels,
+						'folders': folders,
 						'requirements': requirements,
 						'groups': groups,
 						'states': states,
@@ -286,10 +286,10 @@ toggle between hiding and showing the dropdown content */
 		var value = filter[1]
 		// console.log(property, value)
 		var specifications = JSON.parse(document.getElementById(types.specifications.data).getAttribute('data'));
-		var labels = JSON.parse(document.getElementById(types.labels.data).getAttribute('data'));
+		var folders = JSON.parse(document.getElementById(types.folders.data).getAttribute('data'));
 		var requirements = JSON.parse(document.getElementById(types.requirements.data).getAttribute('data'));
 		var groups = JSON.parse(document.getElementById(types.groups.data).getAttribute('data'));
-		var all_data = [specifications, labels, requirements, groups]
+		var all_data = [specifications, folders, requirements, groups]
 		var identifiers = []
 		for (data of all_data) {
 			data.filter(x => {
@@ -334,7 +334,7 @@ toggle between hiding and showing the dropdown content */
 				// TODO: Try checking Input to download only the necessary data; Maybe do it on google script
 
 				var specifications = JSON.parse(document.getElementById(types.specifications.data).getAttribute('data'));
-				var labels = JSON.parse(document.getElementById(types.labels.data).getAttribute('data'));
+				var folders = JSON.parse(document.getElementById(types.folders.data).getAttribute('data'));
 				var requirements = JSON.parse(document.getElementById(types.requirements.data).getAttribute('data'));
 				var groups = JSON.parse(document.getElementById(types.groups.data).getAttribute('data'));
 				var states = JSON.parse(document.getElementById(types.states.data).getAttribute('data'));
@@ -343,7 +343,7 @@ toggle between hiding and showing the dropdown content */
 				var users = JSON.parse(document.getElementById(types.users.data).getAttribute('data'));
 				var all_data = {
 					'specifications': specifications,
-					'labels': labels,
+					'folders': folders,
 					'requirements': requirements,
 					'groups': groups,
 					'states': states,
@@ -447,7 +447,7 @@ toggle between hiding and showing the dropdown content */
 		// console.log('Inside  Building Tree')
 		// document.getElementById("updating-status").innerHTML = 'Building Tree...'
 
-		var labels = JSON.parse(document.getElementById(types.labels.data).getAttribute('data'));
+		var folders = JSON.parse(document.getElementById(types.folders.data).getAttribute('data'));
 		var specifications = JSON.parse(document.getElementById(types.specifications.data).getAttribute('data'));
 		var groups = JSON.parse(document.getElementById(types.groups.data).getAttribute('data'));
 
@@ -457,13 +457,13 @@ toggle between hiding and showing the dropdown content */
 		var htmlToWrite = '<ul class="reqTreeMain">'
 
 		// Root
-		if (labels != null) {
-			var labelsRoot = labels.filter(x => x['parent'] === null)
+		if (folders != null) {
+			var foldersRoot = folders.filter(x => x['parent'] === null)
 		} else {
-			labelsRoot = []
+			foldersRoot = []
 		}
 		if (specifications != null) {
-			var specificationsRoot = specifications.filter(x => x['labels'].length === 0)
+			var specificationsRoot = specifications.filter(x => x['folders'].length === 0)
 		} else {
 			specificationsRoot = []
 		}
@@ -514,22 +514,22 @@ toggle between hiding and showing the dropdown content */
 		}
 
 
-		function getLabels(parents) {
+		function getFolders(parents) {
 			// subHtml = ''
 			for (index in parents) {
 				var parent = parents[index]
-				var parentId_html = types.labels.name + '_' + parent['id']
+				var parentId_html = types.folders.name + '_' + parent['id']
 
 				// Add to html
-				htmlToWrite = htmlToWrite.concat('<li class="reqSearcheableObj label" id="', parentId_html, '">', expandIcon, folderIcon, '<div class="truncated-text">', String(parent['name']), '</div></li>')
+				htmlToWrite = htmlToWrite.concat('<li class="reqSearcheableObj folder" id="', parentId_html, '">', expandIcon, folderIcon, '<div class="truncated-text">', String(parent['name']), '</div></li>')
 				// subHtml.concat(parent['name'])
 
-				var labelsInside = labels.filter(x => x['parent'] === parent['id'])
+				var foldersInside = folders.filter(x => x['parent'] === parent['id'])
 
 				htmlToWrite = htmlToWrite.concat('<div class="nested dropdown-content" id="children_', parentId_html, '">')
-				getLabels(labelsInside)
+				getFolders(foldersInside)
 
-				var specsInside = specifications.filter(x => x['labels'][0] === parent['id'])
+				var specsInside = specifications.filter(x => x['folders'][0] === parent['id'])
 
 				for (index in specsInside) {
 					var specification = specsInside[index]
@@ -542,7 +542,7 @@ toggle between hiding and showing the dropdown content */
 			}
 		}
 
-		getLabels(labelsRoot)
+		getFolders(foldersRoot)
 
 		getSpecificationsAndGroups(specificationsRoot)
 
