@@ -110,6 +110,7 @@ function getTextToInsert(all_data, object, property, projectId){
     'vm-methods':[replaceAttributesWithId, ['verification_methods', vm_methods, object, 'method']]
   }
   
+ 
   text_to_insert = '';
   if(substitution.hasOwnProperty(property)){
     var func, args
@@ -287,7 +288,6 @@ function insertRequirementsWithSpecGroups_asTable_fromTemplate(insertion_array, 
   CacheService.getScriptCache().remove('templateTableData')
   CacheService.getScriptCache().remove('templateTableCellAttributes')
 
-  console.log('Function Run')
   console.log(new Date().getTime()-now);
 }
 
@@ -374,7 +374,7 @@ function insertRequirementsInSpec_asTable_fromTemplate(projectId, requirements, 
             text_to_insert = cellText
             text_to_insert = cellText.replace(prop_regex, match => getTextToInsert(all_data, requirements[req], match.substring(1), projectId));
             
-
+            cellText = cellText.trim();
             subTableRow.push(text_to_insert)
             if (text_to_insert!= cellText){
               subUrlMapping.push(urlTranslator(requirements[req], types['requirements'], base_path) + `${VALI_PARAMETER_STR}requirements_${requirements[req].id}__${cellText.replace('$', '')}`);
@@ -515,7 +515,7 @@ function PropertiesCache(local, propertyName){
 
 function getUserFrom(origin, usersData, user_groupsData) {
   if (origin == null){
-    return ""
+    return "-"
   }
   text = '-'
   if (origin.contenttype == 5) {
@@ -536,11 +536,9 @@ function getUserFrom(origin, usersData, user_groupsData) {
 }
 
 function replaceAttributesWithId(attribute, objectsList, objectToSearch, attributeToInsert) {
-
-  if (objectToSearch[attribute] == null) {
-    return ""
+  if (objectToSearch[attribute] == null | !objectToSearch[attribute].length) {
+    return '-';
   }
-
   objectsIds = objectToSearch[attribute];
     objectsIds = Array.isArray(objectsIds) ? objectsIds : [objectsIds];
     objectAttributes = objectsIds.map(objectId=>objectsList.find(x => x['id'] === objectId)[attributeToInsert]);
@@ -576,8 +574,8 @@ function getFilesInRequirement(filesList, requirement) {
 
 function getImagesinFilesInRequirement(filesList, requirement) {
   textToInsert = ''
-  var filesOnReq = filesList.filter(x => x['object_id'] === requirement['id'] & x['mimetype'] === "image/jpeg")
-
+  var filesOnReq = filesList.filter(x => x['object_id'] === requirement['id'] && x['mimetype'] !== null && x['mimetype'].includes("image/"))
+  
   for (fileIndex in filesOnReq) {
     var imageURL = filesOnReq[fileIndex]['download_url']
     textToInsert += '$START_IMG_META=' +

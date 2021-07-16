@@ -76,6 +76,7 @@ function update_text(el, objectList, mergeAdjacent=false, base_path){
         var objType = objectName[0].toString();
         var objId = parseInt(objectName[1]);
         var objData = objectList[objType].find(x => x['id'] === objId);
+        // console.log(objData[objProperty])
         if(objData){
           if (objData[objProperty]) {
             text_to_insert = objData[objProperty];
@@ -84,21 +85,21 @@ function update_text(el, objectList, mergeAdjacent=false, base_path){
             text_to_insert = getUserFrom(objData[objProperty], objectList['users'], objectList['user_groups']);
           }
           else if (objProperty == 'tags') {
-            text_to_insert = replaceAttributesWithId('tags', objectList[types.tags.name], objectList[types.requirements.name], objId, 'name')
+            text_to_insert = replaceAttributesWithId('tags', objectList[types.tags.name], objData, 'name')
           }
           // Replacing Group (Section) Name
           else if (objProperty == 'section') {
-            text_to_insert = replaceAttributesWithId('group', objectList[types.groups.name], objectList[types.requirements.name], objId, 'name')
+            text_to_insert = replaceAttributesWithId('group', objectList[types.groups.name], objData, 'name')
           }
           // Replacing Parent Name
           else if (objProperty == 'parents') {
             //            textToInsert = replaceParents(requirements, req, 'identifier')
-            text_to_insert = replaceAttributesWithId('parents', objectList[types.requirements.name], objectList[types.requirements.name], objId, 'identifier')
+            text_to_insert = replaceAttributesWithId('parents', objectList[types.requirements.name], objData, 'identifier')
           }
           // Replacing Children Name
           else if (objProperty == 'children') {
             //            textToInsert = replaceParents(requirements, req, 'identifier')
-            text_to_insert = replaceAttributesWithId('children', objectList[types.requirements.name], objectList[types.requirements.name], objId, 'identifier')
+            text_to_insert = replaceAttributesWithId('children', objectList[types.requirements.name], objData, 'identifier')
           }
           // Replacing Files Names
           else if (objProperty == 'files') {

@@ -34,6 +34,9 @@ var Inserter = {
     var el
     
     var text_to_insert = object.data
+    if (text_to_insert == ''){
+      text_to_insert = '-'
+    }
     el = body.insertParagraph(index, text_to_insert)
     el = el.getChild(0);
 
