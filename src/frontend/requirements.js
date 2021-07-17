@@ -615,6 +615,17 @@ function replaceImagesURLToFile(element) {
       var img = element.getParent().asParagraph().insertInlineImage(0, imgBlob);
       element.replaceText(searchText, '');
       img.setLinkUrl(meta_url)
+      maxWidth = 500
+      maxHeight = 500
+      if (img.getWidth()>maxWidth | img.getHeight()>maxHeight){
+        console.log("Rescale Image")
+        ratio = maxWidth/img.getWidth()
+        img.setWidth(img.getWidth()*ratio)
+        img.setHeight(img.getHeight()*ratio)
+        // TODO: 
+      }
+
+
     }
   }
 }
