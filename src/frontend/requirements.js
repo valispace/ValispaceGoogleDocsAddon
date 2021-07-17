@@ -594,15 +594,17 @@ function escapeRegExp(text) {
 function replaceImagesURLToFile(element) {
 
   var text = element.getText()
-  var meta_url = element.getLinkUrl().split('name=requirements')[0]
+  var meta_url_base = element.getLinkUrl().split('name=requirements')[0]
   var image_metas = text.split('$END_IMG_META')
 
   for (index in image_metas) {
     var meta = image_metas[index]
     if (meta.includes('$START_IMG_URL')) {
 
+      console.log(meta)
       url = meta.split('$START_IMG_URL=')[1].split('$END_IMG_URL')[0]
-      meta_url += 'name=' + meta.split('$START_IMG_ID=')[1].split('$END_IMG_ID')[0]
+      meta_url = meta_url_base + 'name=' + meta.split('$START_IMG_ID=')[1].split('$END_IMG_ID')[0]
+      console.log(meta_url)
       //      Logger.log(url)
 
       var imgBlob = UrlFetchApp.fetch(url).getBlob();
@@ -615,6 +617,7 @@ function replaceImagesURLToFile(element) {
       var img = element.getParent().asParagraph().insertInlineImage(0, imgBlob);
       element.replaceText(searchText, '');
       img.setLinkUrl(meta_url)
+
       maxWidth = 500
       maxHeight = 500
       if (img.getWidth()>maxWidth | img.getHeight()>maxHeight){
@@ -645,7 +648,6 @@ function findAndReplaceImages(origin) {
     for (let columnIndex = 0; columnIndex < numColumns; columnIndex++) {
       cellContent = table.getCell(rowIndex, columnIndex).getText()
       if (cellContent.includes('$START_IMG_META=')) {
-
         replaceImagesURLToFile(table.getCell(rowIndex, columnIndex).getChild(0).getChild(0))
       }
     }
