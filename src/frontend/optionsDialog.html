@@ -25,6 +25,12 @@
   </div>
   <br>
 
+  <div>
+    <div class="input-label">
+      <input type="checkbox" id="insert_individual_tables" name="insert_individual_tables", onclick="setIndividualInsertion()">
+      <label for="insert_individual_tables">Insert one table per requirement </label>
+    </div>
+  </div>
 
   <!-- <div id="LastButtons">
     <input type="button" value="Close" class="button" onclick="google.script.host.close()">
@@ -48,6 +54,11 @@
     function resetTableID() {
       google.script.run.withSuccessHandler(closeIt).resetReqTableTemplate();
     };
+
+    function setIndividualInsertion(){
+      var individualInsertion = $('#insert_individual_tables').checked;
+      google.script.run.setIndividualInsertion(individualInsertion);
+    }
 
 
   </script>

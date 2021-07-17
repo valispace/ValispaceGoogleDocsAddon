@@ -20,24 +20,46 @@ var Inserter = {
     this.loaded = true
     return true
   },
-  insert: function(object, type='text'){
+  insert: function(object, type='text', new_line=false){
     id = `${object.name}__${object.property}`
     if (!(id in this.inserted_elements)) {this.inserted_elements[id] = []}
 
-    var index = this.get_position(type=="table")
-    var el
 
-    el = index.insertText(object.data)
+    var doc=DocumentApp.getActiveDocument();
+    var body = doc.getBody()
+    var cursor = doc.getCursor()
+    index = getCursorIndex(body, cursor)
+    // console.log(index)
+
+    var el
+    
+    var text_to_insert = object.data
+    if (text_to_insert == ''){
+      text_to_insert = '-'
+    }
+    el = body.insertParagraph(index, text_to_insert)
+    el = el.getChild(0);
+
+
     el.setLinkUrl(object.url + `${VALI_PARAMETER_STR}${id}`)
     if(type=='text'){
       el.setForegroundColor("#000000").setUnderline(false)
     }
+    if (new_line){
+      el.insertText(0,'\n')
+    }
+    
     if(type=='image'){
-      replaceImagesURLToFile(el);
+      replaceImagesURLToFile(el)
     }
     // console.log(el)
     this.inserted_elements[id].push(el)
+    // var txtEl=doc.getCursor().getElement();
+    // var txtOff=doc.getCursor().getOffset();
+    // var pos=doc.newPosition(txtEl, txtOff + 1);
+    // doc.setCursor(pos);
     // console.log(this.inserted_elements)
+    return index
   },
   update: function(){
     const all_links = getAllLinks()
@@ -67,15 +89,11 @@ var Inserter = {
     }
   },
   get_body: function(){
-    if (!this.body){
-      this.body = this.get_active_document().getBody();
-    }
+    this.body = this.get_active_document().getBody();
     return this.body
   },
   get_active_document: function(){
-    if (!this.document){
-      this.document = DocumentApp.getActiveDocument();
-    }
+    this.document = DocumentApp.getActiveDocument();
     return this.document
   },
 }
