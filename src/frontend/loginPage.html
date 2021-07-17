@@ -16,22 +16,21 @@
       <div class="input-label">
         <label for="deployment">Deployment Url<br></label>
       </div>
-      <div class="input-field">
-        <input type="text" id="deployment" name="deployment" value="https://demo.valispace.com">
+      <div>
+        <input type="text" class="input-field" id="deployment" name="deployment" value=<?= getSavedDeployment()?>>
       </div>
 
-      <div class="input-label">
-        <label for="username">Username<br></label>
+      <div>
+        <label for="username" >Username<br></label>
       </div>
-      <div class="input-field">
-        <input type="text" id="username" name="username">
+      <div>
+        <input class="input-field" type="text" id="username" name="username">
       </div>
-
-      <div class="input-label">
+      <div>
         <label for="pass">Password<br></label>
       </div>
-      <div class="input-field">
-        <input type="password" id="pass" name="password">
+      <div>
+        <input class="input-field" type="password" id="pass" name="password">
       </div>
       <div class="buttons-container">
         <input type="submit" value="Connect" class="valiButton" onclick="connect()">

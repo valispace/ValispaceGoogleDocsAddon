@@ -1,4 +1,5 @@
 var TemplateDocumentId_original = '1bDQClCWVcvzPARYl5ohGvBgZlQ519NGGCStqizzK-bU';
+var defaultDeployment = 'https://demo.valispace.com';
 
 function onOpen(e) {
   DocumentApp.getUi().createAddonMenu()
@@ -11,6 +12,9 @@ function showSidebar() {
   if (PropertiesService.getDocumentProperties().getProperty('TemplateDocumentId') === null) {
     PropertiesService.getDocumentProperties().setProperty('TemplateDocumentId', TemplateDocumentId_original);
   };
+  if (PropertiesService.getUserProperties().getProperty('savedDeployment') === null) {
+    PropertiesService.getUserProperties().setProperty('savedDeployment', defaultDeployment);
+  };
   // Check if Connection is still valid and skip login page if valid.
   if (checkValispaceConnexion()) {
     var template = HtmlService.createTemplateFromFile('frontend/sidebarTemplate');
@@ -20,7 +24,6 @@ function showSidebar() {
 
   var page = template.evaluate();
   page.setTitle('Valispace on Google Docs');
-
   DocumentApp.getUi().showSidebar(page);
 
 }
@@ -30,14 +33,13 @@ function disconnect() {
   var template = HtmlService.createTemplateFromFile('frontend/loginPage');
   var page = template.evaluate();
   page.setTitle('Valispace on Google Docs');
-  Logger.log('Should go to Login Page')
   DocumentApp.getUi().showSidebar(page);
 }
 
+
+
 function goToMainPage() {
   // TODO : Remove this if not necessary
-  Logger.log('Is it connected?')
-  Logger.log(checkValispaceConnexion())
   var template = HtmlService.createTemplateFromFile('frontend/sidebarTemplate');
   var page = template.evaluate();
   page.setTitle('Valispace on Google Docs');
@@ -49,3 +51,10 @@ function onInstall(e) {
   onOpen(e);
 }
 
+
+function getSavedDeployment(){
+  return PropertiesService.getUserProperties().getProperty('savedDeployment')
+}
+function setSavedDeployment(deployment){
+  PropertiesService.getUserProperties().setProperty('savedDeployment', deployment)
+}
