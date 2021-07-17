@@ -15,6 +15,9 @@ function showSidebar() {
   if (PropertiesService.getUserProperties().getProperty('savedDeployment') === null) {
     PropertiesService.getUserProperties().setProperty('savedDeployment', defaultDeployment);
   };
+  if (PropertiesService.getUserProperties().getProperty('savedUsername') === null) {
+    PropertiesService.getUserProperties().setProperty('savedUsername', '');
+  };
   // Check if Connection is still valid and skip login page if valid.
   if (checkValispaceConnexion()) {
     var template = HtmlService.createTemplateFromFile('frontend/sidebarTemplate');
@@ -57,4 +60,10 @@ function getSavedDeployment(){
 }
 function setSavedDeployment(deployment){
   PropertiesService.getUserProperties().setProperty('savedDeployment', deployment)
+}
+function getSavedUsername(){
+  return PropertiesService.getUserProperties().getProperty('savedUsername')
+}
+function setSavedUsername(savedusername){
+  PropertiesService.getUserProperties().setProperty('savedUsername', savedusername)
 }
