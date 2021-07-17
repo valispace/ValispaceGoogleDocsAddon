@@ -351,14 +351,7 @@ toggle between hiding and showing the dropdown content */
 			var parentId = parseInt(parent[1]);
 			var requirementsToInsert = all_data['requirements']
 					.filter(x => x[types[parentType].filter] === parentId)
-					.sort(function (a, b) {
-						if (a.identifier == b.identifier)
-							return 0;
-						if (a.identifier < b.identifier)
-							return -1;
-						if (a.identifier > b.identifier)
-							return 1;
-					})
+					.sort((a, b) => a.identifier.toString().localeCompare(b.identifier.toString(), navigator.languages[0] || navigator.language, {numeric: true, ignorePunctuation: true}))
 			return requirementsToInsert[0];
 		}
 		else{
