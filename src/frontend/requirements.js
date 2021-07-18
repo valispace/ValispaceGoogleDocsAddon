@@ -575,16 +575,26 @@ function getFilesInRequirement(filesList, requirement) {
 function getImagesinFilesInRequirement(filesList, requirement) {
   textToInsert = ''
   var filesOnReq = filesList.filter(x => x['object_id'] === requirement['id'] && x['mimetype'] !== null && x['mimetype'].includes("image/"))
+
+  // textToInsert += '$START_IMGS_REQ_' + requirement['id']
   
   for (fileIndex in filesOnReq) {
-    var imageURL = filesOnReq[fileIndex]['download_url']
-    textToInsert += '$START_IMG_META=' +
-      '$START_IMG_ID=files_' + filesOnReq[fileIndex]['id'] + '$END_IMG_ID' +
-      '$START_IMG_URL=' + imageURL + '$END_IMG_URL' +
-      '$END_IMG_META'
+    file = filesOnReq[fileIndex]
+    textToInsert += generateFileURL(file)
     //
   }
+
+  // textToInsert += '$END_IMGS_REQ_' + requirement['id']
   return textToInsert
+}
+
+function generateFileURL(file){
+  var imageURL = file['download_url']
+  text = '$START_IMG_META=' +
+    '$START_IMG_ID=files_' + file['id'] + '$END_IMG_ID' +
+    '$START_IMG_URL=' + imageURL + '$END_IMG_URL' +
+    '$END_IMG_META'
+    return text
 }
 
 function escapeRegExp(text) {
@@ -592,7 +602,7 @@ function escapeRegExp(text) {
 }
 
 function replaceImagesURLToFile(element) {
-
+  var doc = DocumentApp.getActiveDocument();
   var text = element.getText()
   var meta_url_base = element.getLinkUrl().split('name=requirements')[0]
   var image_metas = text.split('$END_IMG_META')
@@ -601,10 +611,10 @@ function replaceImagesURLToFile(element) {
     var meta = image_metas[index]
     if (meta.includes('$START_IMG_URL')) {
 
-      console.log(meta)
+      // console.log(meta)
       url = meta.split('$START_IMG_URL=')[1].split('$END_IMG_URL')[0]
       meta_url = meta_url_base + 'name=' + meta.split('$START_IMG_ID=')[1].split('$END_IMG_ID')[0]
-      console.log(meta_url)
+      // console.log(meta_url)
       //      Logger.log(url)
 
       var imgBlob = UrlFetchApp.fetch(url).getBlob();
@@ -613,8 +623,10 @@ function replaceImagesURLToFile(element) {
       searchText = escapeRegExp(searchText)
 
       // var element = body.findText(searchText);
-
+      // var text = element.getParent().asParagraph().insertText(0, ' ')
       var img = element.getParent().asParagraph().insertInlineImage(0, imgBlob);
+
+      // var text = imgPosition.insertText('---')
       element.replaceText(searchText, '');
       img.setLinkUrl(meta_url)
 

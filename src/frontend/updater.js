@@ -3,6 +3,9 @@ function update_all_values(objectList){
   var doc = DocumentApp.getActiveDocument();
   var update_images=true;
 
+  var imgList = []
+  var imgListNamedRange = doc.newRange();
+
   var base_path = PropertiesService.getUserProperties().getProperty('deployment_url')
   iterateSections(doc, function(section, sectionIndex, isFirstPageSection) {
     if (!("getParagraphs" in section)) {
@@ -22,25 +25,102 @@ function update_all_values(objectList){
 
       // go over all text elements in paragraph / list-item
       for (var el=par.getChild(0); el!=null; el=el.getNextSibling()) {
-        //console.log(el.getType().name())
+        // console.log(el.getType().name())
         if (el.getType() == DocumentApp.ElementType.TABLE ||
         el.getType() == DocumentApp.ElementType.TABLE_ROW ||
         el.getType() == DocumentApp.ElementType.TABLE_CELL ||
         el.getType() == DocumentApp.ElementType.PARAGRAPH){
-
-          find_links(el);
+          // find_links(el);
         }
         if (el.getType() == DocumentApp.ElementType.TEXT) {
           update_text(el, objectList, mergeAdjacent, base_path)
         }
         if (el.getType() == DocumentApp.ElementType.INLINE_IMAGE && update_images) {
-          update_image(el, objectList, base_path)
+          imgList.push(el)
         }
       }
     };
     section.getParagraphs().forEach(find_links);
     section.getTables().forEach(find_links)
+
+    verify_and_update_images(imgList, objectList, base_path)
+
   });
+}
+
+function verify_and_update_images(imgList, objectList, base_path){
+  // TODO: CHeck if image needs to be update or not
+  reqsInDoc = {}
+  imgMap = {}
+  toUpdate = []
+  
+  for (img in imgList){
+    imgURL = imgList[img].getLinkUrl()
+    reqId = parseInt(imgURL.split('requirements/')[1].split('?')[0])
+    // TODO: Insted of a simple split, split with & and search for "name"
+    imgId = parseInt(imgURL.split('files_')[1])
+    if (reqId in reqsInDoc){
+      reqsInDoc[reqId].push(imgId)
+    } else {
+      reqsInDoc[reqId] = [imgId]
+    }
+    imgMap[imgId] = img
+  }
+
+  // console.log(reqsInDoc)
+  for (var req in reqsInDoc){
+    var imagesOnReq = objectList['files'].filter(x => x['object_id'] === parseInt(req) && x['mimetype'] !== null && x['mimetype'].includes("image/"))
+    console.log("Images on Document: ")
+    console.log(reqsInDoc[req])
+    // console.log("Images on Requirement: ")
+    // console.log(imagesOnReq)
+
+
+    for (img in imagesOnReq){
+      console.log(imgList[img].getLinkUrl())
+      var imgID = parseInt(imagesOnReq[img]['id'])
+
+      if (reqsInDoc[req].includes(imgID)){
+        console.log('Exists in the Document and in the Requirement. UPDATE ON DOC')
+        toUpdate.push(imgID)
+        removeFromList(reqsInDoc[req], parseInt(imagesOnReq[img]['id']))
+      } else {
+        console.log('Doesnt exist in the Document but exist in the Requirement. INSERT')
+
+        textToInsert =''
+        textToInsert += generateFileURL(imagesOnReq[img])
+        
+        text = imgList[img].getParent().appendText(textToInsert);
+        replaceImagesURLToFile(text)
+
+        removeFromList(reqsInDoc[req], parseInt(imagesOnReq[img]['id']))
+      }
+    }
+
+    if (reqsInDoc[req].length>0){
+      console.log('Exist exist in the Document but doesnt in the Requirement. DELETE FROM DOC')
+      for (img in imgList){
+        imgURL = imgList[img].getLinkUrl()
+        imgId = parseInt(imgURL.split('files_')[1])
+        if (reqsInDoc[req].includes(imgId)){
+          text = imgList[img].getParent().appendText('-');
+          imgList[img].removeFromParent()
+        }
+      }
+    }
+  }
+
+  for (img in toUpdate){
+    update_image(imgList[img], objectList, base_path)
+  }
+
+  function removeFromList(list, value){
+    for (var i=0;i<list.length;i++){
+      if(list[i]===value){
+        list.splice(i,1)
+      }
+    }
+  }
 }
 
 function update_text(el, objectList, mergeAdjacent=false, base_path){
@@ -135,7 +215,7 @@ function update_text(el, objectList, mergeAdjacent=false, base_path){
 function update_image(image, objectList, base_path){
   // go over all image elements
   var url = image.getLinkUrl();
-
+  
   if (url != null) {
     if (url.includes(VALI_PARAMETER_STR)){
       objectName = url.split(VALI_PARAMETER_STR)[1]
