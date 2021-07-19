@@ -124,7 +124,7 @@ function verify_and_update_images(imgList, objectList, base_path){
 }
 
 function update_text(el, objectList, mergeAdjacent=false, base_path){
-  //console.log(el.getText(), el.getLinkUrl())
+  // console.log(el.getText(), el.getLinkUrl())
   // go over all styling segments in text element
   var attributeIndices_top = el.getTextAttributeIndices();
   var lastLink = null;
@@ -157,6 +157,7 @@ function update_text(el, objectList, mergeAdjacent=false, base_path){
         var objId = parseInt(objectName[1]);
         var objData = objectList[objType].find(x => x['id'] === objId);
         // console.log(objData[objProperty])
+        text_to_insert = "-"
         if(objData){
           if (objData[objProperty]) {
             text_to_insert = objData[objProperty];
