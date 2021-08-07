@@ -576,15 +576,11 @@ function getImagesinFilesInRequirement(filesList, requirement) {
   textToInsert = ''
   var filesOnReq = filesList.filter(x => x['object_id'] === requirement['id'] && x['mimetype'] !== null && x['mimetype'].includes("image/"))
 
-  // textToInsert += '$START_IMGS_REQ_' + requirement['id']
-  
   for (fileIndex in filesOnReq) {
     file = filesOnReq[fileIndex]
     textToInsert += generateFileURL(file)
-    //
   }
 
-  // textToInsert += '$END_IMGS_REQ_' + requirement['id']
   return textToInsert
 }
 

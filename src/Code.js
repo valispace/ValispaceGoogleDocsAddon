@@ -1,4 +1,5 @@
-var TemplateDocumentId_original = '1bDQClCWVcvzPARYl5ohGvBgZlQ519NGGCStqizzK-bU';
+var releaseVersion = "0.1"
+var TemplateDocumentId_original = '1ta4E39lwjjB8sVk2UPRBPZiy-rH9P_cmhCpLyyIQbXE';
 var defaultDeployment = 'https://demo.valispace.com';
 
 function onOpen(e) {
@@ -66,4 +67,8 @@ function getSavedUsername(){
 }
 function setSavedUsername(savedusername){
   PropertiesService.getUserProperties().setProperty('savedUsername', savedusername)
+}
+
+function getCurrentVersion(){
+  return releaseVersion
 }

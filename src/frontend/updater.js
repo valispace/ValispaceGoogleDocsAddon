@@ -50,10 +50,11 @@ function update_all_values(objectList){
 
 function verify_and_update_images(imgList, objectList, base_path){
   // TODO: CHeck if image needs to be update or not
-  reqsInDoc = {}
-  imgMap = {}
-  toUpdate = []
+  reqsInDoc = {} // Dictionary mapping an Req Id IN the document to its images, also in the document
+  imgMap = {} // Maps an Valispace Image ID to the Document object, only contains images in the document
+  toUpdate = [] // List of images that need to be updated
   
+  // TODO: This can be done outside, direclty when the imgList is generated. 
   for (img in imgList){
     imgURL = imgList[img].getLinkUrl()
     reqId = parseInt(imgURL.split('requirements/')[1].split('?')[0])
@@ -69,15 +70,15 @@ function verify_and_update_images(imgList, objectList, base_path){
 
   // console.log(reqsInDoc)
   for (var req in reqsInDoc){
+    // All images existing in the Requirement (in Valispace DB)
     var imagesOnReq = objectList['files'].filter(x => x['object_id'] === parseInt(req) && x['mimetype'] !== null && x['mimetype'].includes("image/"))
     console.log("Images on Document: ")
     console.log(reqsInDoc[req])
-    // console.log("Images on Requirement: ")
-    // console.log(imagesOnReq)
+    console.log("Images on Requirement: ")
+    console.log(imagesOnReq)
 
 
     for (img in imagesOnReq){
-      console.log(imgList[img].getLinkUrl())
       var imgID = parseInt(imagesOnReq[img]['id'])
 
       if (reqsInDoc[req].includes(imgID)){
@@ -87,10 +88,10 @@ function verify_and_update_images(imgList, objectList, base_path){
       } else {
         console.log('Doesnt exist in the Document but exist in the Requirement. INSERT')
 
-        textToInsert =''
-        textToInsert += generateFileURL(imagesOnReq[img])
+        textToInsert = generateFileURL(imagesOnReq[img])
         
-        text = imgList[img].getParent().appendText(textToInsert);
+        text = imgMap[img].getParent().appendText(textToInsert);
+        // TODO: Maybe it is faster to do this only at the end.
         replaceImagesURLToFile(text)
 
         removeFromList(reqsInDoc[req], parseInt(imagesOnReq[img]['id']))
@@ -103,8 +104,14 @@ function verify_and_update_images(imgList, objectList, base_path){
         imgURL = imgList[img].getLinkUrl()
         imgId = parseInt(imgURL.split('files_')[1])
         if (reqsInDoc[req].includes(imgId)){
-          text = imgList[img].getParent().appendText('-');
+          numChild = imgList[img].getParent().getNumChildren();
+          console.log(numChild)
+          if (numChild <= 1){
+            text = imgList[img].getParent().appendText('-');
+            text.setLinkUrl(base_path)
+          }
           imgList[img].removeFromParent()
+
         }
       }
     }
@@ -186,6 +193,10 @@ function update_text(el, objectList, mergeAdjacent=false, base_path){
           else if (objProperty == 'files') {
             reqId = objId
             text_to_insert = getFilesInRequirement(objectList[types.files.name], reqId)
+          }
+          else if (objProperty == 'images') {
+            reqId = objId
+            // TODO - It function here for the updater.
           }
           var new_data = text_to_insert;
           var new_url =  urlTranslator(objData, types[objType], base_path);
