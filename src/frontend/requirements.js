@@ -3,17 +3,33 @@ function get_data(projectId, dataType) {
     case 'foldersData':
       return JSON.parse(getAuthenticatedValispaceUrl('requirements/specifications/folders/?project=' + projectId));
     case 'specificationsData':
-      return JSON.parse(getAuthenticatedValispaceUrl('requirements/specifications/full_list/?project=' + projectId + '&clean_text=description'));
+      specificationData = getAuthenticatedValispaceUrl('requirements/specifications/full_list/?project=' + projectId + '&clean_text=description')
+      delete specificationData['vpermission']
+      delete specificationData['Contenttype']
+      return JSON.parse(specificationData);
     case 'requirementsData':
-      return JSON.parse(getAuthenticatedValispaceUrl('requirements/full_list/?project=' + projectId + '&clean_text=text,comment'));
-      case 'groupsData':
-        return JSON.parse(getAuthenticatedValispaceUrl('requirements/groups/?project=' + projectId + '&clean_text=description'));
+      requirementsData = getAuthenticatedValispaceUrl('requirements/full_list/?project=' + projectId + '&clean_text=text,comment')
+      delete requirementsData['Contenttype']
+      delete requirementsData['vpermission']
+      delete requirementsData['Image_1024']
+      delete requirementsData['Image_512']
+      delete requirementsData['Image_256']
+      delete requirementsData['Image_128']
+      delete requirementsData['Image_64']
+      return JSON.parse(requirementsData);
+    case 'groupsData':
+      groupData = getAuthenticatedValispaceUrl('requirements/groups/?project=' + projectId + '&clean_text=description')
+      delete groupData['vpermission']
+      delete groupData['Contenttype']
+      return JSON.parse(groupData);
     case 'statesData':
       return JSON.parse(getAuthenticatedValispaceUrl('requirements/states/?project=' + projectId));
     case 'tagsData':
       return JSON.parse(getAuthenticatedValispaceUrl('tags/'));
     case 'filesData':
-      return JSON.parse(getAuthenticatedValispaceUrl('files/?project=' + projectId));
+      filesData = getAuthenticatedValispaceUrl('files/?project=' + projectId)
+      delete filesData['preview_ready']
+      return JSON.parse(filesData);
     case 'usersData':
       return JSON.parse(getAuthenticatedValispaceUrl('user'));
     case 'user_groupsData':
@@ -67,17 +83,20 @@ function getCursorIndex(body, cursor) {
     return;
   }
   return index
+
 }
 
 
-function getTextToInsert(all_data, object, property){
+function getTextToInsert(all_data, object, property, projectId){
+  
   property = property=='rationale'?'comment':property;
-  projectId = PropertiesService.getUserProperties().getProperty('projectID');
+
   //Special patch to get vm_methods
   vm_methods = null
   if(property=='vm-methods'){
     vm_methods = JSON.parse(getAuthenticatedValispaceUrl('requirements/requirement-vms/?project=' + projectId))
   }
+
   substitution = {
     'owner': [getUserFrom, [object[property], all_data['users'], all_data['user_groups']]],
     'tags': [replaceAttributesWithId, ['tags', all_data['tags'], object, 'name']],
@@ -88,10 +107,15 @@ function getTextToInsert(all_data, object, property){
     'images': [getImagesinFilesInRequirement, [all_data['files'], object]],
     'vm-methods':[replaceAttributesWithId, ['verification_methods', vm_methods, object, 'method']]
   }
+  
+ 
   text_to_insert = '';
   if(substitution.hasOwnProperty(property)){
     var func, args
+
     [func, args] = substitution[property];
+
+
     text_to_insert = func.apply( this, args );
   }
   else if (object.hasOwnProperty(property)) {
@@ -102,7 +126,7 @@ function getTextToInsert(all_data, object, property){
 }
 
 
-function direct_insert(all_data, objectName, property){
+function direct_insert(all_data, objectName, property, new_line=false){
   var insertion_type = property == 'images' ? 'image' : 'text';
   var parentType = objectName.split("_")[0].toString();
   var parentId = parseInt(objectName.split("_")[1]);
@@ -112,7 +136,8 @@ function direct_insert(all_data, objectName, property){
   var object = all_data[types[parentType].name].find(x => x['id'] === parentId);
   var url_meta = urlTranslator(object, types[parentType], base_path);
 
-  var text_to_insert = getTextToInsert(all_data, object, property);
+  projectId = PropertiesService.getUserProperties().getProperty('projectID');
+  var text_to_insert = getTextToInsert(all_data, object, property, projectId);
 
   var insertion_data = new InsertionData(
     text_to_insert,
@@ -120,7 +145,7 @@ function direct_insert(all_data, objectName, property){
     objectName,
     property
   );
-  Inserter.insert(insertion_data, insertion_type);
+  return Inserter.insert(insertion_data, insertion_type, new_line);
 }
 
 
@@ -216,7 +241,63 @@ function getTemplateTable2(documentId) {
   return [templateTableData, templateTableCellAttributes]
 }
 
-function insertRequirementsInSpec_asTable_fromTemplate(projectId, parentId, parentType, requirements, all_data, previousTableIndex = null, individual_tables=false) {
+
+function insertRequirementsWithSpecGroups_asTable_fromTemplate(insertion_array, all_data){
+  CacheService.getScriptCache().remove('templateTableData')
+  CacheService.getScriptCache().remove('templateTableCellAttributes')
+  now = new Date().getTime();
+  var projectId = PropertiesCache('User', 'projectID')
+
+  numOfCells = 0
+  var reqs = []
+  insertion_array.reverse();
+
+  // console.log(insertion_array)
+
+  for(line of insertion_array){
+    // console.log(line)
+    if(Array.isArray(line)){
+      last_index = direct_insert(all_data, line[0], line[1], true);
+      if(reqs.length>0){
+        reqs.reverse();
+        [tableIndex, tableIndex_, numOfCells] = insertRequirementsInSpec_asTable_fromTemplate(projectId, reqs, all_data, null, true, numOfCells);
+        // console.log(index_and_element)
+        // var txtOff=doc.getCursor().getOffset();
+        reqs = []
+      }
+      // console.log(line[0])
+      // var txtEl=doc.getCursor().getElement();
+      // var txtOff=doc.getCursor().getOffset();
+      // console.log
+      // var pos=doc.newPosition(txtEl, txtOff + 1);
+      // doc.setCursor(pos);
+    }
+    else{
+      // console.log(line.identifier)
+      reqs.push(line);
+    }
+  }
+
+  if(reqs.length>0){
+    [tableIndex, tableIndex_, numOfCells] = insertRequirementsInSpec_asTable_fromTemplate(projectId, reqs, all_data, null, true, numOfCells);
+    reqs = []
+  }
+
+  CacheService.getScriptCache().remove('templateTableData')
+  CacheService.getScriptCache().remove('templateTableCellAttributes')
+
+  console.log(new Date().getTime()-now);
+}
+
+
+function insertRequirementsInSpec_asTable_fromTemplate(projectId, requirements, all_data, previousTableIndex = null, individual_tables=false, numOfCells = 0) {
+  
+  var individual_tables_setting = PropertiesCache('Document', 'IndividualInsertion')
+  var base_path = PropertiesCache('User', 'deployment_url')
+
+  if(individual_tables==false){
+    individual_tables = individual_tables_setting;
+  }
 
   specificationsData = all_data['specifications']
   foldersData = all_data['folders']
@@ -229,11 +310,25 @@ function insertRequirementsInSpec_asTable_fromTemplate(projectId, parentId, pare
   user_groupsData = all_data['user_groups']
 
 
-  documentId = PropertiesService.getDocumentProperties().getProperty('TemplateDocumentId')
-  var base_path = PropertiesService.getUserProperties().getProperty('deployment_url')
-  values = getTemplateTable2(documentId)
-  templateTableData = values[0]
-  templateTableCellAttributes = values[1]
+
+  var cache = CacheService.getScriptCache();
+  if (cache.get('templateTableCellAttributes') == null || cache.get('templateTableData') == null) {
+    documentId = PropertiesService.getDocumentProperties().getProperty('TemplateDocumentId')
+    values = getTemplateTable2(documentId)
+    templateTableData = values[0]
+    templateTableCellAttributes = values[1]
+    cache.put('templateTableData', JSON.stringify(templateTableData))
+    cache.put('templateTableCellAttributes', JSON.stringify(templateTableCellAttributes))
+  } else {
+    templateTableData = JSON.parse(cache.get('templateTableData'))
+    templateTableCellAttributes = JSON.parse(cache.get('templateTableCellAttributes'))
+  }
+
+  // This number limits the amount of cells that will be created and formated before closing and saving the requirement.
+  // Smaller numbers saves more often but makes execution slower; Higher numbers stack too many changes before saving and returns and error
+  // This number was "found empirically" and it needs to scale with the number of cells on the template table.
+  cellLimit = 12000/(templateTableData.length*templateTableData[0].length)
+
 
   var table = []
   var tables = []
@@ -242,47 +337,58 @@ function insertRequirementsInSpec_asTable_fromTemplate(projectId, parentId, pare
   var urlMapping = []
   var tables_urlMapping = []
 
+  // TODO: insertHeader property as UserProperty and add option on Options
+  var insertHeader = true
 
+   
   for (req in requirements) {
-    if (requirements[req][types[parentType].filter] === parentId) {
-      for (let rowIndex = 0; rowIndex < templateTableData.length; rowIndex++) {
-        //Header
-        if(rowIndex==0 && ((previousTableIndex == null && req==0) || individual_tables==true)){
-          header = []
-          headerStyle = []
-          headerUrl = []
+    for (let rowIndex = 0; rowIndex < templateTableData.length; rowIndex++) {
+      // Header
 
-          for (let cellIndex = 0; cellIndex < templateTableData[rowIndex].length; cellIndex++) {
-            header.push(templateTableData[rowIndex][cellIndex])
-            headerStyle.push([[rowIndex], [cellIndex]])
-            headerUrl.push([])
-          }
-          table.push(header)
-          styleTableMapping.push(headerStyle)
-          urlMapping.push(headerUrl)
+      if(insertHeader==true && rowIndex==0 && ((previousTableIndex == null && req==0) || individual_tables==true)){
+        header = []
+        headerStyle = []
+        headerUrl = []
+
+        for (let cellIndex = 0; cellIndex < templateTableData[0].length; cellIndex++) {
+          header.push(templateTableData[rowIndex][cellIndex])
+          headerStyle.push([[rowIndex], [cellIndex]])
+          headerUrl.push([])
         }
-        else if(rowIndex>0){
+        table.push(header)
+        styleTableMapping.push(headerStyle)
+        urlMapping.push(headerUrl)
+      }
+        if(rowIndex>0){
           subTableRow = []
           subTableStyleRow = []
           subUrlMapping = []
           for (let cellIndex = 0; cellIndex < templateTableData[rowIndex].length; cellIndex++) {
             // cellValue = templateTableData[rowIndex][cellIndex]
             cellText = templateTableData[rowIndex][cellIndex]
+
             //NEW MATCHING VIA REGEX SUBSTITUTION
             const prop_regex = /\$\w+/gm;
             text_to_insert = cellText
-            text_to_insert = cellText.replace(prop_regex, match => getTextToInsert(all_data, requirements[req], match.substring(1)));
-
+            text_to_insert = cellText.replace(prop_regex, match => getTextToInsert(all_data, requirements[req], match.substring(1), projectId));
+            
+            cellText = cellText.trim();
             subTableRow.push(text_to_insert)
-            subUrlMapping.push(urlTranslator(requirements[req], types['requirements'], base_path) + `${VALI_PARAMETER_STR}requirements_${requirements[req].id}__${cellText.replace('$', '')}`);
+            if (text_to_insert!= cellText){
+              subUrlMapping.push(urlTranslator(requirements[req], types['requirements'], base_path) + `${VALI_PARAMETER_STR}requirements_${requirements[req].id}__${cellText.replace('$', '')}`);
+            }
+            else{
+              subUrlMapping.push([])
+            }
+
             subTableStyleRow.push([[rowIndex], [cellIndex]])
+
           }
           table.push(subTableRow)
           styleTableMapping.push(subTableStyleRow)
           urlMapping.push(subUrlMapping)
         }
       }
-    }
     if(individual_tables){
       tables.push(table)
       tables_styleTableMapping.push(styleTableMapping)
@@ -292,11 +398,19 @@ function insertRequirementsInSpec_asTable_fromTemplate(projectId, parentId, pare
       urlMapping = []
     }
   }
+
+
   if (!individual_tables){
       tables.push(table)
       tables_styleTableMapping.push(styleTableMapping)
       tables_urlMapping.push(urlMapping)
   }
+
+  // console.log(tables_styleTableMapping)
+  // console.log(tables_urlMapping)
+  // console.log(tables_styleTableMapping[0].length)
+  // console.log(tables_styleTableMapping[0][0].length)
+  
 
   // Inserting Tables
   for(i in tables){
@@ -317,20 +431,16 @@ function insertRequirementsInSpec_asTable_fromTemplate(projectId, parentId, pare
     };
 
     var docTable = body.insertTable(indexCursor, table)
+    var paragraph = body.insertParagraph(indexCursor, "")
     var tableIndex = body.getChildIndex(docTable)
 
-
     // var tableIndex = body.getChildIndex(docTable)
-    doc.saveAndClose()
-
-
-
+    // doc.saveAndClose()
+    
     // Formating Table
     tableLength = docTable.getNumRows()
-    cellLimit = 4000
     rowIndex = 0
     while (rowIndex < tableLength) {
-
       var doc = DocumentApp.getActiveDocument();
       var body = doc.getBody();
 
@@ -344,31 +454,74 @@ function insertRequirementsInSpec_asTable_fromTemplate(projectId, parentId, pare
 
 
       rowIndex = formatingTable3(docTable, styleTableMapping, urlMapping, templateTableCellAttributes, rowIndex, cellLimit)
-      doc.saveAndClose()
+      findAndReplaceImages(docTable)
+
+      for (row = 0; row < docTable.getNumRows(); row++) {
+        numOfCells += docTable.getRow(row).getNumCells();
+      }
+
+      // Logger.log(numOfCells)
+      if (numOfCells > cellLimit){
+        doc.saveAndClose()
+        numOfCells = 0
+      }
 
       previousTableIndex = tableIndex;
 
     }
 
+
     // TODO: Put this Function inside the Loop and work with cell, instead of entire table
     var doc = DocumentApp.getActiveDocument();
     var body = doc.getBody();
     var docTable = body.getChild(tableIndex)
-
     findAndReplaceImages(docTable)
-    doc.saveAndClose()
+    // var pos=doc.newPosition(docTable.getNextSibling(), 1);
+    // doc.setCursor(pos);
+    
   }
-  return tableIndex
+
+  // doc.saveAndClose()
+  return [tableIndex, DocumentApp.getActiveDocument().getChild(tableIndex), numOfCells]
   // return [table, styleTableMapping]
 }
 
+function PropertiesCache(local, propertyName){
+  cache = CacheService.getScriptCache()
+
+  if (cache.get(propertyName) == null){
+    if (local == "Document"){
+      property = PropertiesService.getDocumentProperties().getProperty(propertyName)
+      cache.put(propertyName, property)
+    } else if (local == "User"){
+      property = PropertiesService.getUserProperties().getProperty(propertyName)
+      cache.put(propertyName, property)
+    } else {
+      console.log('Error: Use either Document or User Properties')
+    }
+  } else {
+    if (local == "Document"){
+      property = cache.get(propertyName)
+    } else if (local == "User"){
+      property = cache.get(propertyName)
+    } else {
+      console.log('Error: Use either Document or User Properties')
+    }
+  }
+  return property
+}
+
 function getUserFrom(origin, usersData, user_groupsData) {
-  // console.log(origin)
+  if (origin == null){
+    return "-"
+  }
   text = '-'
   if (origin.contenttype == 5) {
     user = usersData.find(x => x['id'] === origin.id)
     if (user.first_name || user.last_name) {
       text = user.first_name + ' ' + user.last_name
+    } else {
+      text = user.username
     }
   }
   else if (origin.contenttype == 4) {
@@ -381,7 +534,10 @@ function getUserFrom(origin, usersData, user_groupsData) {
 }
 
 function replaceAttributesWithId(attribute, objectsList, objectToSearch, attributeToInsert) {
-    objectsIds = objectToSearch[attribute];
+  if (objectToSearch[attribute] == null | !objectToSearch[attribute].length) {
+    return '-';
+  }
+  objectsIds = objectToSearch[attribute];
     objectsIds = Array.isArray(objectsIds) ? objectsIds : [objectsIds];
     objectAttributes = objectsIds.map(objectId=>objectsList.find(x => x['id'] === objectId)[attributeToInsert]);
     if (objectAttributes){
@@ -416,8 +572,8 @@ function getFilesInRequirement(filesList, requirement) {
 
 function getImagesinFilesInRequirement(filesList, requirement) {
   textToInsert = ''
-  var filesOnReq = filesList.filter(x => x['object_id'] === requirement['id'] & x['mimetype'] === "image/jpeg")
-
+  var filesOnReq = filesList.filter(x => x['object_id'] === requirement['id'] && x['mimetype'] !== null && x['mimetype'].includes("image/"))
+  
   for (fileIndex in filesOnReq) {
     var imageURL = filesOnReq[fileIndex]['download_url']
     textToInsert += '$START_IMG_META=' +
@@ -457,6 +613,17 @@ function replaceImagesURLToFile(element) {
       var img = element.getParent().asParagraph().insertInlineImage(0, imgBlob);
       element.replaceText(searchText, '');
       img.setLinkUrl(meta_url)
+      maxWidth = 500
+      maxHeight = 500
+      if (img.getWidth()>maxWidth | img.getHeight()>maxHeight){
+        console.log("Rescale Image")
+        ratio = maxWidth/img.getWidth()
+        img.setWidth(img.getWidth()*ratio)
+        img.setHeight(img.getHeight()*ratio)
+        // TODO: 
+      }
+
+
     }
   }
 }
@@ -496,6 +663,43 @@ function formatingTable3(table, styleTableMapping, urlMapping, templateTableCell
       styleCellAttributes = templateTableCellAttributes[cellStyleLocation[0]][cellStyleLocation[1]]
       //      styleTextAttributes = templateTableTextAttributes[cellStyleLocation[0]][cellStyleLocation[1]]
 
+      
+      // TODO: There might be a better way of doing this. This is needed because the Caching of the cellAtributes doesn't return the object of documentApp.alignment
+      if ('VERTICAL_ALIGNMENT' in styleCellAttributes){
+        if (styleCellAttributes['VERTICAL_ALIGNMENT']=="TOP"){
+          styleCellAttributes['VERTICAL_ALIGNMENT'] = DocumentApp.VerticalAlignment.TOP  
+        }
+        else if (styleCellAttributes['VERTICAL_ALIGNMENT']=="CENTER"){
+          styleCellAttributes['VERTICAL_ALIGNMENT'] = DocumentApp.VerticalAlignment.CENTER  
+        }
+        else if (styleCellAttributes['VERTICAL_ALIGNMENT']=="BOTTOM"){
+          styleCellAttributes['VERTICAL_ALIGNMENT'] = DocumentApp.VerticalAlignment.BOTTOM  
+        }
+      }
+
+      if ('HORIZONTAL_ALIGNMENT' in styleCellAttributes){
+        if (styleCellAttributes['HORIZONTAL_ALIGNMENT']=="TOP"){
+          styleCellAttributes['HORIZONTAL_ALIGNMENT'] = DocumentApp.HorizontalAlignment.TOP  
+        }
+        else if (styleCellAttributes['HORIZONTAL_ALIGNMENT']=="CENTER"){
+          styleCellAttributes['HORIZONTAL_ALIGNMENT'] = DocumentApp.HorizontalAlignment.CENTER  
+        }
+        else if (styleCellAttributes['VERTICAL_ALIGNMENT']=="BOTTOM"){
+          styleCellAttributes['HORIZONTAL_ALIGNMENT'] = DocumentApp.HorizontalAlignment.BOTTOM  
+        }
+      }
+
+      if ('TEXT_ALIGNMENT' in styleCellAttributes){
+        if (styleCellAttributes['TEXT_ALIGNMENT']=="NORMAL"){
+          styleCellAttributes['TEXT_ALIGNMENT'] = DocumentApp.TextAlignment.NORMAL  
+        }
+        else if (styleCellAttributes['TEXT_ALIGNMENT']=="SUPERSCRIPT"){
+          styleCellAttributes['TEXT_ALIGNMENT'] = DocumentApp.TextAlignment.SUPERSCRIPT  
+        }
+        else if (styleCellAttributes['TEXT_ALIGNMENT']=="SUBSCRIPT"){
+          styleCellAttributes['TEXT_ALIGNMENT'] = DocumentApp.TextAlignment.SUBSCRIPT  
+        }
+      }
 
       delete styleCellAttributes[DocumentApp.Attribute.LINK_URL]
       table.getCell(rowIndex, columnIndex).setLinkUrl(urlMapping[rowIndex][columnIndex])

@@ -8,6 +8,8 @@
         .withSuccessHandler(function () {
           goToMainPage()
           resolve('Connected. Opening Addon...')
+          google.script.run.setSavedDeployment($('#deployment').val())
+          google.script.run.setSavedUsername($('#username').val())
         })
         .withFailureHandler(function () { reject("Error Connecting. Try Again") })
         .valispaceAskToken($('#deployment').val(), $('#username').val(), $('#pass').val());

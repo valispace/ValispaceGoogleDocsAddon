@@ -42,12 +42,6 @@
     <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js">
     </script>
     <script>
-        function connect() {
-            google.script.run
-                .withSuccessHandler(closeIt)
-                .withFailureHandler(errorMessage)
-                .valispaceAskToken($('#deployment').val(), $('#username').val(), $('#pass').val());
-        };
 
         function insert(){
             google.script.run

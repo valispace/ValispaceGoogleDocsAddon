@@ -47,7 +47,6 @@ function valispaceAskToken(deployment_url, username, passwd){
     throw new Error(`Login Error`)
     //TODO: This dialog fails to show
   }
-  Logger.log((responseData))
   return responseData
 }
 
