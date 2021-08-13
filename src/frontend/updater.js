@@ -8,6 +8,7 @@ function update_all_values(objectList){
 
   var base_path = PropertiesService.getUserProperties().getProperty('deployment_url')
   iterateSections(doc, function(section, sectionIndex, isFirstPageSection) {
+
     if (!("getParagraphs" in section)) {
       // as we're using some undocumented API, adding this to avoid cryptic
       // messages upon possible API changes.
@@ -35,17 +36,17 @@ function update_all_values(objectList){
         if (el.getType() == DocumentApp.ElementType.TEXT) {
           update_text(el, objectList, mergeAdjacent, base_path)
         }
-        if (el.getType() == DocumentApp.ElementType.INLINE_IMAGE && update_images) {
-          imgList.push(el)
+        if (el.getType() == DocumentApp.ElementType.INLINE_IMAGE &&
+        update_images && el.asInlineImage() != NaN) {
+          imgList.push(el.asInlineImage());
         }
       }
     };
     section.getParagraphs().forEach(find_links);
     section.getTables().forEach(find_links)
-
-    verify_and_update_images(imgList, objectList, base_path)
-
   });
+
+  verify_and_update_images(imgList, objectList, base_path);
 }
 
 function verify_and_update_images(imgList, objectList, base_path){
@@ -53,14 +54,14 @@ function verify_and_update_images(imgList, objectList, base_path){
   reqsInDoc = {} // Dictionary mapping an Req Id IN the document to its images, also in the document
   imgMap = {} // Maps an Valispace Image ID to the Document object, only contains images in the document
   toUpdate = [] // List of images that need to be updated
-  
-  // TODO: This can be done outside, direclty when the imgList is generated. 
+
+  // TODO: This can be done outside, direclty when the imgList is generated.
   for (img in imgList){
     imgURL = imgList[img].getLinkUrl()
     reqId = parseInt(imgURL.split('requirements/')[1].split('?')[0])
     // TODO: Insted of a simple split, split with & and search for "name"
     imgId = parseInt(imgURL.split('files_')[1])
-    if (reqId in reqsInDoc){
+    if (reqId in reqsInDoc && !reqsInDoc[reqId].includes(imgId)){
       reqsInDoc[reqId].push(imgId)
     } else {
       reqsInDoc[reqId] = [imgId]
@@ -87,10 +88,8 @@ function verify_and_update_images(imgList, objectList, base_path){
         removeFromList(reqsInDoc[req], parseInt(imagesOnReq[img]['id']))
       } else {
         console.log('Doesnt exist in the Document but exist in the Requirement. INSERT')
-
         textToInsert = generateFileURL(imagesOnReq[img])
-        
-        text = imgMap[img].getParent().appendText(textToInsert);
+        text = imgList[img - 1].getParent().appendText(textToInsert);
         // TODO: Maybe it is faster to do this only at the end.
         replaceImagesURLToFile(text)
 
@@ -100,7 +99,9 @@ function verify_and_update_images(imgList, objectList, base_path){
 
     if (reqsInDoc[req].length>0){
       console.log('Exist exist in the Document but doesnt in the Requirement. DELETE FROM DOC')
-      for (img in imgList){
+      //for (img in imgList.reverse()){
+      for (var img=(imgList.length - 1); img>-1; img--) {
+        console.log(img);
         imgURL = imgList[img].getLinkUrl()
         imgId = parseInt(imgURL.split('files_')[1])
         if (reqsInDoc[req].includes(imgId)){
@@ -111,7 +112,6 @@ function verify_and_update_images(imgList, objectList, base_path){
             text.setLinkUrl(base_path)
           }
           imgList[img].removeFromParent()
-
         }
       }
     }
@@ -227,7 +227,7 @@ function update_text(el, objectList, mergeAdjacent=false, base_path){
 function update_image(image, objectList, base_path){
   // go over all image elements
   var url = image.getLinkUrl();
-  
+
   if (url != null) {
     if (url.includes(VALI_PARAMETER_STR)){
       objectName = url.split(VALI_PARAMETER_STR)[1]
