@@ -36,6 +36,13 @@ function update_all_values(objectList){
         if (el.getType() == DocumentApp.ElementType.TEXT) {
           update_text(el, objectList, mergeAdjacent, base_path)
         }
+
+        if (el.getType() == DocumentApp.ElementType.TEXT && el.getText() == '-') {
+          console.log(el.getText());
+          // TODO: Maybe this can be done outside the if, even though it only executes once inside the if
+          update_placeholder_to_image(el, objectList, base_path);
+        }
+
         if (el.getType() == DocumentApp.ElementType.INLINE_IMAGE &&
         update_images && el.asInlineImage() != NaN) {
           imgList.push(el.asInlineImage());
@@ -49,6 +56,31 @@ function update_all_values(objectList){
   verify_and_update_images(imgList, objectList, base_path);
 }
 
+// Replaces the '-' placeholder by an image
+function update_placeholder_to_image(placeholder, objectList, base_path) {
+
+  var imagesOnReq = objectList['files'].filter(x => x['mimetype'] !== null && x['mimetype'].includes("image/"))
+  linkUrl = placeholder.getLinkUrl()
+  console.log(linkUrl);
+  parent_element = placeholder.getParent();
+
+  for ( img in imagesOnReq ) {
+    textToInsert = generateFileURL(imagesOnReq[img]);
+    if(parent_element.getText() == '-') {
+      text = placeholder.replaceText(parent_element.getText(), textToInsert);
+    } else {
+      text = parent_element.appendText(textToInsert);
+    }
+    //if(parent_element.getText.indexOf('-') == 0) {
+    //  text = parent.replaceText('', textToInsert);
+    //}
+    //// TODO: Maybe it is faster to do this only at the end.
+    replaceImagesURLToFile(text)
+
+    //removeFromList(reqsInDoc[req], parseInt(imagesOnReq[img]['id']))
+  }
+}
+
 function verify_and_update_images(imgList, objectList, base_path){
   // TODO: CHeck if image needs to be update or not
   reqsInDoc = {} // Dictionary mapping an Req Id IN the document to its images, also in the document
@@ -58,6 +90,7 @@ function verify_and_update_images(imgList, objectList, base_path){
   // TODO: This can be done outside, direclty when the imgList is generated.
   for (img in imgList){
     imgURL = imgList[img].getLinkUrl()
+    console.log(imgURL)
     reqId = parseInt(imgURL.split('requirements/')[1].split('?')[0])
     // TODO: Insted of a simple split, split with & and search for "name"
     imgId = parseInt(imgURL.split('files_')[1])
@@ -89,7 +122,7 @@ function verify_and_update_images(imgList, objectList, base_path){
       } else {
         console.log('Doesnt exist in the Document but exist in the Requirement. INSERT')
         textToInsert = generateFileURL(imagesOnReq[img])
-        text = imgList[img - 1].getParent().appendText(textToInsert);
+        text = imgList[0].getParent().appendText(textToInsert);
         // TODO: Maybe it is faster to do this only at the end.
         replaceImagesURLToFile(text)
 
@@ -196,6 +229,7 @@ function update_text(el, objectList, mergeAdjacent=false, base_path){
           }
           else if (objProperty == 'images') {
             reqId = objId
+            console.log("THIS IS WORKING LIKE IT SHOULD")
             // TODO - It function here for the updater.
           }
           var new_data = text_to_insert;
