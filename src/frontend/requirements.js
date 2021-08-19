@@ -90,7 +90,7 @@ function getCursorIndex(body, cursor) {
 
 
 function getTextToInsert(all_data, object, property, projectId){
-  
+
   property = property=='rationale'?'comment':property;
 
   //Special patch to get vm_methods
@@ -109,8 +109,8 @@ function getTextToInsert(all_data, object, property, projectId){
     'images': [getImagesinFilesInRequirement, [all_data['files'], object]],
     'vm-methods':[replaceAttributesWithId, ['verification_methods', vm_methods, object, 'method']]
   }
-  
- 
+
+
   text_to_insert = '';
   if(substitution.hasOwnProperty(property)){
     var func, args
@@ -293,7 +293,7 @@ function insertRequirementsWithSpecGroups_asTable_fromTemplate(insertion_array, 
 
 
 function insertRequirementsInSpec_asTable_fromTemplate(projectId, requirements, all_data, previousTableIndex = null, individual_tables=false, numOfCells = 0) {
-  
+
   var individual_tables_setting = PropertiesCache('Document', 'IndividualInsertion')
   var base_path = PropertiesCache('User', 'deployment_url')
 
@@ -342,7 +342,7 @@ function insertRequirementsInSpec_asTable_fromTemplate(projectId, requirements, 
   // TODO: insertHeader property as UserProperty and add option on Options
   var insertHeader = true
 
-   
+
   for (req in requirements) {
     for (let rowIndex = 0; rowIndex < templateTableData.length; rowIndex++) {
       // Header
@@ -373,7 +373,7 @@ function insertRequirementsInSpec_asTable_fromTemplate(projectId, requirements, 
             const prop_regex = /\$\w+/gm;
             text_to_insert = cellText
             text_to_insert = cellText.replace(prop_regex, match => getTextToInsert(all_data, requirements[req], match.substring(1), projectId));
-            
+
             cellText = cellText.trim();
             subTableRow.push(text_to_insert)
             if (text_to_insert!= cellText){
@@ -412,7 +412,7 @@ function insertRequirementsInSpec_asTable_fromTemplate(projectId, requirements, 
   // console.log(tables_urlMapping)
   // console.log(tables_styleTableMapping[0].length)
   // console.log(tables_styleTableMapping[0][0].length)
-  
+
 
   // Inserting Tables
   for(i in tables){
@@ -438,7 +438,7 @@ function insertRequirementsInSpec_asTable_fromTemplate(projectId, requirements, 
 
     // var tableIndex = body.getChildIndex(docTable)
     // doc.saveAndClose()
-    
+
     // Formating Table
     tableLength = docTable.getNumRows()
     rowIndex = 0
@@ -480,7 +480,7 @@ function insertRequirementsInSpec_asTable_fromTemplate(projectId, requirements, 
     findAndReplaceImages(docTable)
     // var pos=doc.newPosition(docTable.getNextSibling(), 1);
     // doc.setCursor(pos);
-    
+
   }
 
   // doc.saveAndClose()
@@ -575,11 +575,15 @@ function getFilesInRequirement(filesList, requirement) {
 function getImagesinFilesInRequirement(filesList, requirement) {
   textToInsert = ''
   var filesOnReq = filesList.filter(x => x['object_id'] === requirement['id'] && x['mimetype'] !== null && x['mimetype'].includes("image/"))
-
-  for (fileIndex in filesOnReq) {
-    file = filesOnReq[fileIndex]
-    textToInsert += generateFileURL(file)
+  if (filesOnReq.length !== 0) {
+    for (fileIndex in filesOnReq) {
+      file = filesOnReq[fileIndex]
+      textToInsert += generateFileURL(file)
+    }
+  } else {
+    textToInsert = '-'
   }
+
 
   return textToInsert
 }
@@ -633,7 +637,7 @@ function replaceImagesURLToFile(element) {
         ratio = maxWidth/img.getWidth()
         img.setWidth(img.getWidth()*ratio)
         img.setHeight(img.getHeight()*ratio)
-        // TODO: 
+        // TODO:
       }
 
 
@@ -675,41 +679,41 @@ function formatingTable3(table, styleTableMapping, urlMapping, templateTableCell
       styleCellAttributes = templateTableCellAttributes[cellStyleLocation[0]][cellStyleLocation[1]]
       //      styleTextAttributes = templateTableTextAttributes[cellStyleLocation[0]][cellStyleLocation[1]]
 
-      
+
       // TODO: There might be a better way of doing this. This is needed because the Caching of the cellAtributes doesn't return the object of documentApp.alignment
       if ('VERTICAL_ALIGNMENT' in styleCellAttributes){
         if (styleCellAttributes['VERTICAL_ALIGNMENT']=="TOP"){
-          styleCellAttributes['VERTICAL_ALIGNMENT'] = DocumentApp.VerticalAlignment.TOP  
+          styleCellAttributes['VERTICAL_ALIGNMENT'] = DocumentApp.VerticalAlignment.TOP
         }
         else if (styleCellAttributes['VERTICAL_ALIGNMENT']=="CENTER"){
-          styleCellAttributes['VERTICAL_ALIGNMENT'] = DocumentApp.VerticalAlignment.CENTER  
+          styleCellAttributes['VERTICAL_ALIGNMENT'] = DocumentApp.VerticalAlignment.CENTER
         }
         else if (styleCellAttributes['VERTICAL_ALIGNMENT']=="BOTTOM"){
-          styleCellAttributes['VERTICAL_ALIGNMENT'] = DocumentApp.VerticalAlignment.BOTTOM  
+          styleCellAttributes['VERTICAL_ALIGNMENT'] = DocumentApp.VerticalAlignment.BOTTOM
         }
       }
 
       if ('HORIZONTAL_ALIGNMENT' in styleCellAttributes){
         if (styleCellAttributes['HORIZONTAL_ALIGNMENT']=="TOP"){
-          styleCellAttributes['HORIZONTAL_ALIGNMENT'] = DocumentApp.HorizontalAlignment.TOP  
+          styleCellAttributes['HORIZONTAL_ALIGNMENT'] = DocumentApp.HorizontalAlignment.TOP
         }
         else if (styleCellAttributes['HORIZONTAL_ALIGNMENT']=="CENTER"){
-          styleCellAttributes['HORIZONTAL_ALIGNMENT'] = DocumentApp.HorizontalAlignment.CENTER  
+          styleCellAttributes['HORIZONTAL_ALIGNMENT'] = DocumentApp.HorizontalAlignment.CENTER
         }
         else if (styleCellAttributes['VERTICAL_ALIGNMENT']=="BOTTOM"){
-          styleCellAttributes['HORIZONTAL_ALIGNMENT'] = DocumentApp.HorizontalAlignment.BOTTOM  
+          styleCellAttributes['HORIZONTAL_ALIGNMENT'] = DocumentApp.HorizontalAlignment.BOTTOM
         }
       }
 
       if ('TEXT_ALIGNMENT' in styleCellAttributes){
         if (styleCellAttributes['TEXT_ALIGNMENT']=="NORMAL"){
-          styleCellAttributes['TEXT_ALIGNMENT'] = DocumentApp.TextAlignment.NORMAL  
+          styleCellAttributes['TEXT_ALIGNMENT'] = DocumentApp.TextAlignment.NORMAL
         }
         else if (styleCellAttributes['TEXT_ALIGNMENT']=="SUPERSCRIPT"){
-          styleCellAttributes['TEXT_ALIGNMENT'] = DocumentApp.TextAlignment.SUPERSCRIPT  
+          styleCellAttributes['TEXT_ALIGNMENT'] = DocumentApp.TextAlignment.SUPERSCRIPT
         }
         else if (styleCellAttributes['TEXT_ALIGNMENT']=="SUBSCRIPT"){
-          styleCellAttributes['TEXT_ALIGNMENT'] = DocumentApp.TextAlignment.SUBSCRIPT  
+          styleCellAttributes['TEXT_ALIGNMENT'] = DocumentApp.TextAlignment.SUBSCRIPT
         }
       }
 
