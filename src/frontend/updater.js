@@ -59,9 +59,10 @@ function update_all_values(objectList){
 // Replaces the '-' placeholder by an image
 function update_placeholder_to_image(placeholder, objectList, base_path) {
 
-  var imagesOnReq = objectList['files'].filter(x => x['mimetype'] !== null && x['mimetype'].includes("image/"))
   linkUrl = placeholder.getLinkUrl()
-  console.log(linkUrl);
+  reqId = parseInt(linkUrl.split('requirements/')[1].split('?')[0])
+  var imagesOnReq = objectList['files'].filter(x => x['object_id'] === parseInt(reqId) && x['mimetype'] !== null && x['mimetype'].includes("image/"));
+
   parent_element = placeholder.getParent();
 
   for ( img in imagesOnReq ) {
@@ -131,6 +132,7 @@ function verify_and_update_images(imgList, objectList, base_path){
     }
 
     if (reqsInDoc[req].length>0){
+      console.log(req)
       console.log('Exist exist in the Document but doesnt in the Requirement. DELETE FROM DOC')
       //for (img in imgList.reverse()){
       for (var img=(imgList.length - 1); img>-1; img--) {
@@ -142,7 +144,7 @@ function verify_and_update_images(imgList, objectList, base_path){
           console.log(numChild)
           if (numChild <= 1){
             text = imgList[img].getParent().appendText('-');
-            text.setLinkUrl(base_path)
+            text.setLinkUrl(base_path + `${VALI_PARAMETER_STR}requirements_${req}__images`)
           }
           imgList[img].removeFromParent()
         }
