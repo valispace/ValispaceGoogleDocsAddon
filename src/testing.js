@@ -1,5 +1,5 @@
 
-function update_all_values(){
+function update_all_values2(){
     var mergeAdjacent=false;
     var doc = DocumentApp.openById('1bow842D02eRGwVdyVHZTJkoVKUW35s0aM9P-GGQwJs8');
     var images = [];
@@ -22,10 +22,10 @@ function update_all_values(){
         if (par.getNumChildren() == 0) {
           return;
         }
-  
+        
         // go over all text elements in paragraph / list-item
         for (var el=par.getChild(0); el!=null; el=el.getNextSibling()) {
-          //console.log(el.getType().name())
+          console.log(el.getType().name())
   //        if (el.getType() == DocumentApp.ElementType.TABLE ||
   //        el.getType() == DocumentApp.ElementType.TABLE_ROW ||
   //        el.getType() == DocumentApp.ElementType.TABLE_CELL ||
