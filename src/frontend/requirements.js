@@ -1,3 +1,5 @@
+//TODO: Replace all the getAuthenticatedValispaceUrl with the API functions (like requirementsData)
+
 function get_data(projectId, dataType) {
   switch (dataType) {
     case 'labelsData':
@@ -8,15 +10,8 @@ function get_data(projectId, dataType) {
       delete specificationData['Contenttype']
       return JSON.parse(specificationData);
     case 'requirementsData':
-      requirementsData = getAuthenticatedValispaceUrl('requirements/full_list/?project=' + projectId + '&clean_text=text,comment')
-      delete requirementsData['Contenttype']
-      delete requirementsData['vpermission']
-      delete requirementsData['Image_1024']
-      delete requirementsData['Image_512']
-      delete requirementsData['Image_256']
-      delete requirementsData['Image_128']
-      delete requirementsData['Image_64']
-      return JSON.parse(requirementsData);
+      requirementsData = types.requirements.get(projectId)
+      return requirementsData;
     case 'groupsData':
       groupData = getAuthenticatedValispaceUrl('requirements/groups/?project=' + projectId + '&clean_text=description')
       delete groupData['vpermission']
@@ -39,7 +34,6 @@ function get_data(projectId, dataType) {
   }
 }
 
-
 function getCursorIndex(body, cursor) {
 
   if (cursor) {
@@ -57,7 +51,6 @@ function getCursorIndex(body, cursor) {
   return index
 
 }
-
 
 function getTextToInsert(all_data, object, property, projectId){
 
@@ -96,7 +89,6 @@ function getTextToInsert(all_data, object, property, projectId){
 
   return text_to_insert;
 }
-
 
 function direct_insert(all_data, objectName, property, new_line=false){
   var insertion_type = property == 'images' ? 'image' : 'text';
@@ -148,7 +140,6 @@ function getTemplateTable(documentId) {
   return [templateTableData, templateTableCellAttributes]
 }
 
-
 function insertRequirementsWithSpecGroups_asTable_fromTemplate(insertion_array, all_data){
   CacheService.getScriptCache().remove('templateTableData')
   CacheService.getScriptCache().remove('templateTableCellAttributes')
@@ -159,25 +150,15 @@ function insertRequirementsWithSpecGroups_asTable_fromTemplate(insertion_array, 
   var reqs = []
   insertion_array.reverse();
 
-  // console.log(insertion_array)
-
   for(line of insertion_array){
-    // console.log(line)
     if(Array.isArray(line)){
       last_index = direct_insert(all_data, line[0], line[1], true);
       if(reqs.length>0){
         reqs.reverse();
         [tableIndex, tableIndex_, numOfCells] = insertRequirementsInSpec_asTable_fromTemplate(projectId, reqs, all_data, null, true, numOfCells);
-        // console.log(index_and_element)
-        // var txtOff=doc.getCursor().getOffset();
         reqs = []
       }
-      // console.log(line[0])
-      // var txtEl=doc.getCursor().getElement();
-      // var txtOff=doc.getCursor().getOffset();
-      // console.log
-      // var pos=doc.newPosition(txtEl, txtOff + 1);
-      // doc.setCursor(pos);
+
     }
     else{
       // console.log(line.identifier)
@@ -195,7 +176,6 @@ function insertRequirementsWithSpecGroups_asTable_fromTemplate(insertion_array, 
 
   console.log(new Date().getTime()-now);
 }
-
 
 function insertRequirementsInSpec_asTable_fromTemplate(projectId, requirements, all_data, previousTableIndex = null, individual_tables=false, numOfCells = 0) {
 
@@ -570,7 +550,6 @@ function findAndReplaceImages(origin) {
     }
   }
 }
-
 
 function formatingTable(table, styleTableMapping, urlMapping, templateTableCellAttributes, startingRow, cellLimit) {
   counter = 0

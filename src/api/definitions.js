@@ -131,7 +131,16 @@ types.groups.tree = function (data){
  * @return {[type]}      [description]
  */
 types.requirements.get = function (project_id){
-  return JSON.parse(getAuthenticatedValispaceUrl('requirements/full_list/?project='+project_id+'&clean_text=text,comment'));
+  requirementsData = getAuthenticatedValispaceUrl('requirements/full_list/?project='+project_id+'&clean_text=text,comment')
+  // TODO: Find a way to delete those prope
+    // delete requirementsData['Contenttype']
+    // delete requirementsData['vpermission']
+    // delete requirementsData['Image_1024']
+    // delete requirementsData['Image_512']
+    // delete requirementsData['Image_256']
+    // delete requirementsData['Image_128']
+    // delete requirementsData['Image_64']
+  return JSON.parse(requirementsData);
 }
 
 types.requirements.tree = function (data){

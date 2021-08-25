@@ -14,7 +14,6 @@ function get_workspaces() {
 function get_projects(workspaceID) {
   Projects = JSON.parse(getAuthenticatedValispaceUrl('project/?workspace=' + workspaceID));
   Projects.sort(sortNameAlphabeticaly);
-
   return Projects
 }
 
@@ -28,7 +27,6 @@ function sortNameAlphabeticaly(a, b) {
   if (a_ > b_)
     return 1;
 };
-
 
 function set_project(projectID) {
   PropertiesService.getUserProperties().setProperty('projectID', projectID);
