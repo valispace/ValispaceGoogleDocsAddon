@@ -59,7 +59,7 @@ function getTextToInsert(all_data, object, property, projectId){
   //Special patch to get vm_methods
   vm_methods = null
   if(property=='vm-methods'){
-    vm_methods = JSON.parse(getAuthenticatedValispaceUrl('requirements/requirement-vms/?project=' + projectId))
+    vm_methods = types.requirements.vms.get(projectId)
   }
 
   substitution = {
@@ -115,7 +115,6 @@ function direct_insert(all_data, objectName, property, new_line=false){
 function getTemplateTable(documentId) {
   templateTableData = []
   templateTableCellAttributes = []
-  //  templateTableTextAttributes = []
 
   var body = DocumentApp.openById(documentId).getBody()
   table = body.getTables()[0]
@@ -124,26 +123,21 @@ function getTemplateTable(documentId) {
   for (let rowIndex = 0; rowIndex < table.getNumRows(); rowIndex++) {
     rowData = []
     rowCellAttributes = []
-    //    rowTextAttributes = []
 
     for (let columnIndex = 0; columnIndex < numColumns; columnIndex++) {
       rowData.push(table.getCell(rowIndex, columnIndex).getText())
       rowCellAttributes.push(table.getCell(rowIndex, columnIndex).getAttributes())
-      //      rowTextAttributes.push(table.getCell(rowIndex, columnIndex).getAttributes())
     }
     templateTableData.push(rowData)
     templateTableCellAttributes.push(rowCellAttributes)
-    //    templateTableTextAttributes.push(rowTextAttributes)
   }
 
-  //  return [templateTableData, templateTableCellAttributes, templateTableTextAttributes]
   return [templateTableData, templateTableCellAttributes]
 }
 
 function insertRequirementsWithSpecGroups_asTable_fromTemplate(insertion_array, all_data){
   CacheService.getScriptCache().remove('templateTableData')
   CacheService.getScriptCache().remove('templateTableCellAttributes')
-  now = new Date().getTime();
   var projectId = PropertiesCache('User', 'projectID')
 
   numOfCells = 0
@@ -155,7 +149,7 @@ function insertRequirementsWithSpecGroups_asTable_fromTemplate(insertion_array, 
       last_index = direct_insert(all_data, line[0], line[1], true);
       if(reqs.length>0){
         reqs.reverse();
-        [tableIndex, tableIndex_, numOfCells] = insertRequirementsInSpec_asTable_fromTemplate(projectId, reqs, all_data, null, true, numOfCells);
+        [tableIndex, tableIndex_, numOfCells] = insertRequirementsInSpec_asTable_fromTemplate(projectId, reqs, all_data, null, numOfCells);
         reqs = []
       }
 
@@ -167,24 +161,17 @@ function insertRequirementsWithSpecGroups_asTable_fromTemplate(insertion_array, 
   }
 
   if(reqs.length>0){
-    [tableIndex, tableIndex_, numOfCells] = insertRequirementsInSpec_asTable_fromTemplate(projectId, reqs, all_data, null, true, numOfCells);
+    [tableIndex, tableIndex_, numOfCells] = insertRequirementsInSpec_asTable_fromTemplate(projectId, reqs, all_data, null, numOfCells);
     reqs = []
   }
 
   CacheService.getScriptCache().remove('templateTableData')
   CacheService.getScriptCache().remove('templateTableCellAttributes')
 
-  console.log(new Date().getTime()-now);
 }
 
-function insertRequirementsInSpec_asTable_fromTemplate(projectId, requirements, all_data, previousTableIndex = null, individual_tables=false, numOfCells = 0) {
-
-  var individual_tables_setting = PropertiesCache('Document', 'IndividualInsertion')
+function insertRequirementsInSpec_asTable_fromTemplate(projectId, requirements, all_data, previousTableIndex = null, numOfCells = 0) {
   var base_path = PropertiesCache('User', 'deployment_url')
-
-  if(individual_tables==false){
-    individual_tables = individual_tables_setting;
-  }
 
   specificationsData = all_data['specifications']
   labelsData = all_data['labels']
@@ -232,7 +219,7 @@ function insertRequirementsInSpec_asTable_fromTemplate(projectId, requirements, 
     for (let rowIndex = 0; rowIndex < templateTableData.length; rowIndex++) {
       // Header
 
-      if(insertHeader==true && rowIndex==0 && ((previousTableIndex == null && req==0) || individual_tables==true)){
+      if(insertHeader==true && rowIndex==0 && ((previousTableIndex == null && req==0))){
         header = []
         headerStyle = []
         headerUrl = []
@@ -276,22 +263,16 @@ function insertRequirementsInSpec_asTable_fromTemplate(projectId, requirements, 
           urlMapping.push(subUrlMapping)
         }
       }
-    if(individual_tables){
+    
       tables.push(table)
       tables_styleTableMapping.push(styleTableMapping)
       tables_urlMapping.push(urlMapping)
       table = []
       styleTableMapping=[]
       urlMapping = []
-    }
+    
   }
 
-
-  if (!individual_tables){
-      tables.push(table)
-      tables_styleTableMapping.push(styleTableMapping)
-      tables_urlMapping.push(urlMapping)
-  }
 
   // Inserting Tables
   for(i in tables){

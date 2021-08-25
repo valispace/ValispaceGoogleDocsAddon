@@ -386,8 +386,6 @@ toggle between hiding and showing the dropdown content */
 		var objects = document.querySelectorAll(".show-properties, .requirement-text");
 		for (i = 0; i < objects.length; i++) {
 			objects[i].addEventListener("click", function () {
-				console.log('Before')
-				console.log(this.parentElement.id)
 				toggleObjectProperties(this.parentElement.id)
 			});
 		}
@@ -395,64 +393,63 @@ toggle between hiding and showing the dropdown content */
 		// Listener to Plus Button - Add Element
 		var objects = document.getElementsByClassName("add-element");
 		for (i = 0; i < objects.length; i++) {
-			objects[i].addEventListener("click", function () {
-				var t0 = performance.now();
+			objects[i].addEventListener("click", addRequirement_PlusButton);
+		}
+	}
 
-				document.getElementById("updating-status").innerHTML = 'Inserting Requirements...'
+	// Improve Naming :)
+	function addRequirement_PlusButton() {
+		document.getElementById("updating-status").innerHTML = 'Inserting Requirements...'
 
-				var projectId = $("#options-projects").val();
-
-
-				// TODO: Try checking Input to download only the necessary data; Maybe do it on google script
-				var specifications = JSON.parse(document.getElementById(types.specifications.data).getAttribute('data'));
-				var labels = JSON.parse(document.getElementById(types.labels.data).getAttribute('data'));
-				var requirements = JSON.parse(document.getElementById(types.requirements.data).getAttribute('data'));
-				var groups = JSON.parse(document.getElementById(types.groups.data).getAttribute('data'));
-				var states = JSON.parse(document.getElementById(types.states.data).getAttribute('data'));
-				var tags = JSON.parse(document.getElementById(types.tags.data).getAttribute('data'));
-				var files = JSON.parse(document.getElementById(types.files.data).getAttribute('data'));
-				var users = JSON.parse(document.getElementById(types.users.data).getAttribute('data'));
-				var user_groups = JSON.parse(document.getElementById(types.user_groups.data).getAttribute('data'));
-				var all_data = {
-					'specifications': specifications,
-					'labels': labels,
-					'requirements': requirements,
-					'groups': groups,
-					'states': states,
-					'tags': tags,
-					'files': files,
-					'users': users,
-					'user_groups': user_groups
-				}	
+		var projectId = $("#options-projects").val();
 
 
-				var parent = this.parentElement.id.split("_");
-				var parentType = parent[0].toString();
-				var parentId = parseInt(parent[1]);
-				var requirementsToInsert = requirements
-					.filter(x => x[types[parentType].filter] === parentId)
-					.sort(function (a, b) {
-						if (a.identifier == b.identifier)
-							return 0;
-						if (a.identifier < b.identifier)
-							return -1;
-						if (a.identifier > b.identifier)
-							return 1;
-					})
+		// TODO: Try checking Input to download only the necessary data; Maybe do it on google script
+		var specifications = JSON.parse(document.getElementById(types.specifications.data).getAttribute('data'));
+		var labels = JSON.parse(document.getElementById(types.labels.data).getAttribute('data'));
+		var requirements = JSON.parse(document.getElementById(types.requirements.data).getAttribute('data'));
+		var groups = JSON.parse(document.getElementById(types.groups.data).getAttribute('data'));
+		var states = JSON.parse(document.getElementById(types.states.data).getAttribute('data'));
+		var tags = JSON.parse(document.getElementById(types.tags.data).getAttribute('data'));
+		var files = JSON.parse(document.getElementById(types.files.data).getAttribute('data'));
+		var users = JSON.parse(document.getElementById(types.users.data).getAttribute('data'));
+		var user_groups = JSON.parse(document.getElementById(types.user_groups.data).getAttribute('data'));
+		var all_data = {
+			'specifications': specifications,
+			'labels': labels,
+			'requirements': requirements,
+			'groups': groups,
+			'states': states,
+			'tags': tags,
+			'files': files,
+			'users': users,
+			'user_groups': user_groups
+		}	
 
-				var insertion = recursive_insertion(all_data, this.parentElement)
-				if(!Array.isArray(insertion)){
-					insertion = [insertion];
-				}
 
-				google.script.run
-				.withFailureHandler(function () { document.getElementById("updating-status").innerHTML = 'Error Inserting '})
-				.withSuccessHandler(function () { document.getElementById("updating-status").innerHTML = ''})
-				.insertRequirementsWithSpecGroups_asTable_fromTemplate(insertion, all_data, null);
+		var parent = this.parentElement.id.split("_");
+		var parentType = parent[0].toString();
+		var parentId = parseInt(parent[1]);
+		var requirementsToInsert = requirements
+			.filter(x => x[types[parentType].filter] === parentId)
+			.sort(function (a, b) {
+				if (a.identifier == b.identifier)
+					return 0;
+				if (a.identifier < b.identifier)
+					return -1;
+				if (a.identifier > b.identifier)
+					return 1;
+			})
 
-			});
+		var insertion = recursive_insertion(all_data, this.parentElement)
+		if(!Array.isArray(insertion)){
+			insertion = [insertion];
 		}
 
+		google.script.run
+		.withFailureHandler(function () { document.getElementById("updating-status").innerHTML = 'Error Inserting '})
+		.withSuccessHandler(function () { document.getElementById("updating-status").innerHTML = ''})
+		.insertRequirementsWithSpecGroups_asTable_fromTemplate(insertion, all_data, null);
 
 	}
 

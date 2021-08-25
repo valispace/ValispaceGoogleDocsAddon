@@ -142,6 +142,10 @@ types.requirements.get = function (project_id){
   return JSON.parse(requirementsData);
 }
 
+types.requirements.vms.get = function(project_id){
+  return JSON.parse(getAuthenticatedValispaceUrl('requirements/requirement-vms/?project=' + project_id))
+}
+
 types.requirements.tree = function (data){
   var subhtml = ''
   if (data.title == '-') {
