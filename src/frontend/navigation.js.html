@@ -121,9 +121,6 @@ toggle between hiding and showing the dropdown content */
 	function expandRequirementTree() {
 		if (!document.getElementById("myDropdown").classList.contains('show')) {
 			document.getElementById("updating-status").innerHTML = 'Building Tree';
-			// buildRequirementsTree_browser();
-			// getRequirements();
-			// addTreeListener();
 			document.getElementById("myDropdown").classList.add("show");
 			document.getElementById("updating-status").innerHTML = '';
 		} else {
@@ -394,6 +391,7 @@ toggle between hiding and showing the dropdown content */
 			});
 		}
 		// Listener to Object Name
+		// TODO: Combine with the upper function
 		var objects = document.querySelectorAll(".truncated-text");
 		for (i = 0; i < objects.length; i++) {
 			objects[i].addEventListener("click", function () {
@@ -401,8 +399,7 @@ toggle between hiding and showing the dropdown content */
 				expandObjectChildren('children_' + this.parentElement.id);
 			});
 		}
-
-		// Listener to Text Area
+		// Listener for Opening the Requirement and show the Properties
 		var objects = document.querySelectorAll(".show-properties, .requirement-text");
 		for (i = 0; i < objects.length; i++) {
 			objects[i].addEventListener("click", function () {
@@ -522,24 +519,6 @@ toggle between hiding and showing the dropdown content */
 			//Logger.log(error);
 		}
 
-	}
-
-
-
-	function updateTree(id, name) {
-		$('#projectTree').html("Loading tree " + name + "....");
-		google.script.run.withSuccessHandler(
-			function (newHtml) {
-				$('#projectTree').html(newHtml);
-				addTreeListener();
-			}
-
-		)
-			.withFailureHandler(
-				function (error) {
-					$('#projectTree').html("Failed to load project tree. Please try again, if the problem persist contact support@valispace.com");
-				})
-			.getProjectTree(id);
 	}
 
 
