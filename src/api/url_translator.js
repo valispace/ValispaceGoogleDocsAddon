@@ -1,6 +1,3 @@
-
-
-
 var urlTranslator = function(item_data, type, base_path){
   var rel_path = type.url
   base_path += base_path.endsWith("/") ? "" : "/"

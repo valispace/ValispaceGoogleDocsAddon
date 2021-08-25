@@ -39,36 +39,6 @@ function get_data(projectId, dataType) {
   }
 }
 
-// TODO: Move this to a more Generic
-function get_tag(tag_id) {
-  return JSON.parse(getAuthenticatedValispaceUrl('tag/' + tag_id + '/'));
-}
-
-function get_requirement(req_id) {
-  return JSON.parse(getAuthenticatedValispaceUrl('requirements/' + req_id + '/'));
-}
-
-function get_specification(spec_id) {
-  return JSON.parse(getAuthenticatedValispaceUrl('requirements/specifications/' + spec_id));
-}
-
-
-function insertRequirementsInSpec_asText(requirements, spec_id) {
-  var spec_id = spec_id.split("_")
-  spec_id = parseInt(spec_id[spec_id.length - 1])
-
-  var reqsInSpec = requirements.filter(x => x['specification'] === spec_id)
-
-  var doc = DocumentApp.getActiveDocument()
-  var body = doc.getBody();
-
-  var text = ''
-  for (req in reqsInSpec) {
-    text += reqsInSpec[req]['identifier'] + ': ' + reqsInSpec[req]['text'] + '\n'
-  }
-  body.appendParagraph(text)
-}
-
 
 function getCursorIndex(body, cursor) {
 
@@ -390,7 +360,7 @@ function insertRequirementsInSpec_asTable_fromTemplate(projectId, requirements, 
       }
 
 
-      rowIndex = formatingTable3(docTable, styleTableMapping, urlMapping, templateTableCellAttributes, rowIndex, cellLimit)
+      rowIndex = formatingTable(docTable, styleTableMapping, urlMapping, templateTableCellAttributes, rowIndex, cellLimit)
       findAndReplaceImages(docTable)
 
       for (row = 0; row < docTable.getNumRows(); row++) {
@@ -602,7 +572,7 @@ function findAndReplaceImages(origin) {
 }
 
 
-function formatingTable3(table, styleTableMapping, urlMapping, templateTableCellAttributes, startingRow, cellLimit) {
+function formatingTable(table, styleTableMapping, urlMapping, templateTableCellAttributes, startingRow, cellLimit) {
   counter = 0
 
 
