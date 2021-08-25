@@ -59,7 +59,8 @@ function getTextToInsert(all_data, object, property, projectId){
   //Special patch to get vm_methods
   vm_methods = null
   if(property=='vm-methods'){
-    vm_methods = types.requirements.vms.get(projectId)
+    //TODO: Pass to API call
+    vm_methods = JSON.parse(getAuthenticatedValispaceUrl('requirements/requirement-vms/?project=' + projectId))
   }
 
   substitution = {
