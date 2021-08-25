@@ -15,9 +15,9 @@ var types = {
               data:'specificationsData',
               properties:["name", "description", "owner"],
               filter: 'specification'},
-  folders:{name:'folders',
+  labels:{name:'labels',
               url: ['project','%project','specifications','groups','%id','requirements'],
-              data:'foldersData'},
+              data:'labelsData'},
   groups:{name:'groups',
               url: ['project','%project','specifications','requirements','groups','%id','requirements'],
               data:'groupsData',
@@ -95,15 +95,15 @@ types.specifications.tree = function (data){
 }
 
 /**
- * Returns a list of folders (folders) within a project.
+ * Returns a list of labels (folders) within a project.
  * @param  {int} project_id - Project ID
  * @return {[type]}      [description]
  */
-types.folders.get = function (project_id){
-  return JSON.parse(getAuthenticatedValispaceUrl('requirements/specifications/folders/?project='+project_id));
+types.labels.get = function (project_id){
+  return JSON.parse(getAuthenticatedValispaceUrl('requirements/specifications/labels/?project='+project_id));
 }
 
-types.folders.tree = function (data){
+types.labels.tree = function (data){
   var subhtml = ''
   subhtml = subhtml.concat('<li class="reqSearcheableObj ', this.name,'" id="', this.name,'_', data.id, '">', expandIcon, folderIcon, '<div class="truncated-text">', 'Folder: ', String(data.name), '</div>', plusIcon, '</li>');
 

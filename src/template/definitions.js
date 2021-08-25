@@ -30,5 +30,5 @@ var templates = {
 
 types.requirements.template = templates.requirement
 types.specifications.template = templates.specification
-types.folders.template = templates.folder
+types.labels.template = templates.folder
 types.groups.template = templates.section
