@@ -204,19 +204,6 @@ toggle between hiding and showing the dropdown content */
 		})
 	};
 
-
-
-	// Rename and Repurpose
-	// IN this function the real Requirement Tree will be called and html generated
-	// function replaceRequirementsTreeHtml() {
-	// 	document.getElementById("updating-status").innerHTML = 'Updating Tree...';
-	// 	google.script.run.withSuccessHandler(function (htmlToWrite) {
-	// 		document.getElementById('requirementTreeInsertButton').innerHTML = htmlToWrite;
-	// 		addTreeListener()
-	// 		document.getElementById("updating-status").innerHTML = ''
-	// 	}).buildRequirementTreeHtml();
-	// }
-
 	function filterFunction() {
 		var input, filter, ul, li, a, i;
 
@@ -606,14 +593,6 @@ toggle between hiding and showing the dropdown content */
 	function getRequirements() {
 		var requirements = JSON.parse(document.getElementById("requirementsData").getAttribute('data'));
 		requirements.sort((a, b) => a.identifier.toString().localeCompare(b.identifier.toString(), navigator.languages[0] || navigator.language, {numeric: true, ignorePunctuation: true}))
-//		requirements.sort(function (a, b) {
-//						if (a.identifier == b.identifier)
-//							return 0;
-//						if (a.identifier < b.identifier)
-//							return -1;
-//						if (a.identifier > b.identifier)
-//							return 1;
-//					})
 
 		for (index in requirements) {
 			var requirement = requirements[index]
@@ -625,12 +604,6 @@ toggle between hiding and showing the dropdown content */
 			// If Not in a Group ['group'] = null, it is in a specificaiton only
 			if (requirement['group'] == null) {
 				var parentId = 'children_' + types.specifications.name + '_' + requirement['specification'].toString()
-				// var htmlToWrite = document.getElementById(parentId).innerHTML
-
-				// liNode.innerHTML = reqIcon+ '<div class="requirement-text">'+ displayName+ '</div>'+ plusIcon+ propertiesIcon
-				// liNode.class
-				// htmlToWrite = '<li class="reqSearcheableObj requirement" id="'+ reqName+ '">'+ ;
-				//document.getElementById(parentId).innerHTML = htmlToWrite
 			} else {
 				var parentId = 'children_' + types.groups.name + '_' + requirement['group'].toString()
 			}

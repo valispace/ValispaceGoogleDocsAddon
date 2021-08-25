@@ -293,12 +293,6 @@ function insertRequirementsInSpec_asTable_fromTemplate(projectId, requirements, 
       tables_urlMapping.push(urlMapping)
   }
 
-  // console.log(tables_styleTableMapping)
-  // console.log(tables_urlMapping)
-  // console.log(tables_styleTableMapping[0].length)
-  // console.log(tables_styleTableMapping[0][0].length)
-
-
   // Inserting Tables
   for(i in tables){
     table = tables[i];
@@ -321,8 +315,6 @@ function insertRequirementsInSpec_asTable_fromTemplate(projectId, requirements, 
     var paragraph = body.insertParagraph(indexCursor, "")
     var tableIndex = body.getChildIndex(docTable)
 
-    // var tableIndex = body.getChildIndex(docTable)
-    // doc.saveAndClose()
 
     // Formating Table
     tableLength = docTable.getNumRows()
@@ -363,14 +355,11 @@ function insertRequirementsInSpec_asTable_fromTemplate(projectId, requirements, 
     var body = doc.getBody();
     var docTable = body.getChild(tableIndex)
     findAndReplaceImages(docTable)
-    // var pos=doc.newPosition(docTable.getNextSibling(), 1);
-    // doc.setCursor(pos);
+
 
   }
 
-  // doc.saveAndClose()
   return [tableIndex, DocumentApp.getActiveDocument().getChild(tableIndex), numOfCells]
-  // return [table, styleTableMapping]
 }
 
 function PropertiesCache(local, propertyName){
@@ -496,22 +485,16 @@ function replaceImagesURLToFile(element) {
     var meta = image_metas[index]
     if (meta.includes('$START_IMG_URL')) {
 
-      // console.log(meta)
       url = meta.split('$START_IMG_URL=')[1].split('$END_IMG_URL')[0]
       meta_url = meta_url_base + 'name=' + meta.split('$START_IMG_ID=')[1].split('$END_IMG_ID')[0]
-      // console.log(meta_url)
-      //      Logger.log(url)
 
       var imgBlob = UrlFetchApp.fetch(url).getBlob();
 
       var searchText = image_metas[index] + '$END_IMG_META'
       searchText = escapeRegExp(searchText)
 
-      // var element = body.findText(searchText);
-      // var text = element.getParent().asParagraph().insertText(0, ' ')
       var img = element.getParent().asParagraph().insertInlineImage(0, imgBlob);
 
-      // var text = imgPosition.insertText('---')
       element.replaceText(searchText, '');
       img.setLinkUrl(meta_url)
 
@@ -522,7 +505,6 @@ function replaceImagesURLToFile(element) {
         ratio = maxWidth/img.getWidth()
         img.setWidth(img.getWidth()*ratio)
         img.setHeight(img.getHeight()*ratio)
-        // TODO:
       }
 
 
@@ -531,14 +513,6 @@ function replaceImagesURLToFile(element) {
 }
 
 function findAndReplaceImages(origin) {
-  // if(origin == undefined || origin == null){
-  //   origin = DocumentApp.getActiveDocument().getBody();
-  // }
-  // element = origin.findText('$START_IMG_URL=')
-  // while(element != null){
-  //   replaceImagesURLToFile(element.getElement())
-  //   element = origin.findText('$START_IMG_URL=')
-  // }
   table = origin
   body = DocumentApp.getActiveDocument().getBody();
   for (let rowIndex = 0; rowIndex < table.getNumRows(); rowIndex++) {

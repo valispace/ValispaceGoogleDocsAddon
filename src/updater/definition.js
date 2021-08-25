@@ -71,13 +71,9 @@ function update_placeholder_to_image(placeholder, objectList, base_path) {
     } else {
       text = parent_element.appendText(textToInsert);
     }
-    //if(parent_element.getText.indexOf('-') == 0) {
-    //  text = parent.replaceText('', textToInsert);
-    //}
     //// TODO: Maybe it is faster to do this only at the end.
     replaceImagesURLToFile(text)
 
-    //removeFromList(reqsInDoc[req], parseInt(imagesOnReq[img]['id']))
   }
 }
 
@@ -177,8 +173,6 @@ function update_text(el, objectList, mergeAdjacent=false, base_path){
       // we hit a link
       var endOffsetInclusive = (i+1 < attributeIndices.length?
         attributeIndices[i+1] : el.getText().length);
-      // console.log(attributeIndices_top)
-      // console.log(startOffset,endOffsetInclusive, el.getText())
       var text = el.getText().substring(startOffset, endOffsetInclusive)
       // check if this and the last found link are continuous
       if (mergeAdjacent && lastLink != null && lastLink.url == url &&
@@ -197,7 +191,6 @@ function update_text(el, objectList, mergeAdjacent=false, base_path){
         var objType = objectName[0].toString();
         var objId = parseInt(objectName[1]);
         var objData = objectList[objType].find(x => x['id'] === objId);
-        // console.log(objData[objProperty])
         text_to_insert = "-"
         if(objData){
           if (objData[objProperty]) {
@@ -215,12 +208,10 @@ function update_text(el, objectList, mergeAdjacent=false, base_path){
           }
           // Replacing Parent Name
           else if (objProperty == 'parents') {
-            //            textToInsert = replaceParents(requirements, req, 'identifier')
             text_to_insert = replaceAttributesWithId('parents', objectList[types.requirements.name], objData, 'identifier')
           }
           // Replacing Children Name
           else if (objProperty == 'children') {
-            //            textToInsert = replaceParents(requirements, req, 'identifier')
             text_to_insert = replaceAttributesWithId('children', objectList[types.requirements.name], objData, 'identifier')
           }
           // Replacing Files Names
@@ -237,8 +228,6 @@ function update_text(el, objectList, mergeAdjacent=false, base_path){
           var new_url =  urlTranslator(objData, types[objType], base_path);
           var attributes = el.getAttributes(startOffset)
           delete attributes[DocumentApp.Attribute.LINK_URL]
-          //console.log(`Updated: ${objId} ${new_data}`)
-          //console.log(text, new_data, url)
           if(text !== new_data) {el.replaceText(text, new_data)}
           var new_length = new_data.length - text.length
           el.setLinkUrl(startOffset,endOffsetInclusive-1+new_length,new_url + `${VALI_PARAMETER_STR}${urlName}`)
