@@ -331,9 +331,9 @@ toggle between hiding and showing the dropdown content */
 		// console.log(insertion)
 		google.script.run
 		.withFailureHandler(function () { document.getElementById("updating-status").innerHTML = 'Error Inserting '})
-		//.withSuccessHandler(console.log(insertion))
+		.withSuccessHandler(function () { document.getElementById("updating-status").innerHTML = ''})
 		.insertRequirementsWithSpecGroups_asTable_fromTemplate(insertion, all_data, null);
-		document.getElementById("updating-status").innerHTML = '';
+		;
 	}
 
 	function recursive_insertion(all_data, node){

@@ -172,7 +172,7 @@
     google.script.run
       .withUserObject(this)
       .withSuccessHandler()
-      .withFailureHandler(errorMessage).goToMainPage()
+      .goToMainPage()
   };
 
   function disconnectValispaceScript() {
