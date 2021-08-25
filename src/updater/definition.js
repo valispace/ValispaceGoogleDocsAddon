@@ -55,7 +55,6 @@ function update_all_values(objectList){
 
   verify_and_update_images(imgList, objectList, base_path);
 }
-
 // Replaces the '-' placeholder by an image
 function update_placeholder_to_image(placeholder, objectList, base_path) {
 

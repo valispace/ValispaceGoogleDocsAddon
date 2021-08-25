@@ -52,7 +52,6 @@ types.user_groups.get = function (){
 // ****************************************************************************************
 // Valispace REST - Workspaces
 // ****************************************************************************************
-
 types.workspaces.get = function (){
   return JSON.parse(getAuthenticatedValispaceUrl('workspace'));
 }

@@ -6,7 +6,6 @@ function openOptionDialog() {
   var dialog = DocumentApp.getUi().showModalDialog(page_options, 'Options');
 }
 
-
 function changeReqTableTemplate(TemplateDocumentId){
   try{
     PropertiesService.getDocumentProperties().setProperty('TemplateDocumentId', TemplateDocumentId);

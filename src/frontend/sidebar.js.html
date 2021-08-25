@@ -179,15 +179,11 @@
     google.script.run.disconnect();
   };
 
-  function errorMessage(error) {
-    console.log(error);
-  };
 
   function OptionsScript() {
     google.script.run
       .withUserObject(this)
       .withSuccessHandler()
-      .withFailureHandler(errorMessage)
       .openOptionDialog();
   }
 </script>
