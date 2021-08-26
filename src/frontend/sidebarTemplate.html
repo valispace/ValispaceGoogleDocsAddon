@@ -9,17 +9,36 @@
   <script src="https://kit.fontawesome.com/0863e97891.js" crossorigin="anonymous"></script>
   <!-- The CSS package above applies Google styling to buttons and other elements. -->
   
-  <?!=HtmlService.createHtmlOutputFromFile('frontend/navigation').getContent()?>
-
-  <?!=HtmlService.createHtmlOutputFromFile('frontend/navigation.css').getContent()?>
-
   
+  <?!=HtmlService.createHtmlOutputFromFile('frontend/requirements.css').getContent()?>
+
   <?!=HtmlService.createHtmlOutputFromFile('frontend/sidebar.js').getContent()?>
-  <?!=HtmlService.createHtmlOutputFromFile('frontend/navigation.js').getContent()?>
+  <?!=HtmlService.createHtmlOutputFromFile('frontend/requirements.js').getContent()?>
 
 </head>
 
 <body>
+
+  <div id="updating-status">
+    <span id="updating-status"></span>
+  </div>
+  
+  <div class="sidebarLine">
+    <p class="selectionTitle">Workspaces:</p>
+    <select class="valiButton selecionList" id="options-workspaces"></select>
+    <button mat-raised-button class="valiButton refreshButton" title="Refresh the Workspaces list."
+      id="update-workspaces"><i class="fas fa-sync-alt"></i></button>
+  </div>
+  
+  <div class="sidebarLine">
+    <p class="selectionTitle">Project:</p>
+    <select class="valiButton selecionList" id="options-projects"></select>
+    <button mat-raised-button class="valiButton refreshButton" title="Refresh the Projects list." id="update-projects"><i
+        class="fas fa-sync-alt"></i></button>
+  </div>
+
+  <?!=HtmlService.createHtmlOutputFromFile('frontend/requirements').getContent()?>
+
 <div id="footer">
 <p id="version-footer"> Version <?= getCurrentVersion()?>  </p>
 </div>
