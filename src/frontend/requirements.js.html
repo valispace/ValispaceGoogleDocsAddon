@@ -154,6 +154,7 @@ toggle between hiding and showing the dropdown content */
 			document.getElementById(objectId).insertAdjacentHTML('beforeend', subhtml);
 			var properties = document.getElementById(objectId).getElementsByClassName("property");
 			for (i = 0; i < properties.length; i++) {
+				// TODO: This function should be defined outside
 				properties[i].addEventListener("click", function () {
 					document.getElementById("updating-status").innerHTML = 'Inserting Element';
 					htmlElementId = this.id.split('_property_');
@@ -320,46 +321,9 @@ toggle between hiding and showing the dropdown content */
 		google.script.run
 		.withFailureHandler(function () { document.getElementById("updating-status").innerHTML = 'Error Inserting '})
 		.withSuccessHandler(function () { document.getElementById("updating-status").innerHTML = ''})
-		.insertRequirementsWithSpecGroups_asTable_fromTemplate(insertion, all_data, null);
-		;
+		.insert_spec_or_group_using_template(insertion, all_data, null);
 	}
 
-	function recursive_insertion(all_data, node){
-		if(node.classList.contains('requirement')){
-			var projectId = $("#options-projects").val();
-			var parent = node.id.split("_");
-			var parentType = parent[0].toString();
-			var parentId = parseInt(parent[1]);
-			var requirementsToInsert = all_data['requirements']
-					.filter(x => x[types[parentType].filter] === parentId)
-					.sort((a, b) => a.identifier.toString().localeCompare(b.identifier.toString(), navigator.languages[0] || navigator.language, {numeric: true, ignorePunctuation: true}))
-			return requirementsToInsert[0];
-		}
-		else{
-			var children = document.getElementById("children_"+node.id).childNodes
-			var reqs = []
-			if(node.classList.contains('specification') || node.classList.contains('group')){
-				// directInsertPromise(all_data, node.id, 'name');
-				reqs.push([node.id, 'name'])
-			}
-
-			// TODO: THis can definately be optimized. I'm currently going through the requirements first just to have them at the top of the tree, and greoups would be below.
-			for (var i = 0; i < children.length; i++) {
-				if (children.item(i).tagName == "LI" && children.item(i).classList.contains('requirement')){
-					var result = recursive_insertion(all_data, children.item(i));
-					if(result){reqs = reqs.concat(result)}
-				}
-			}
-			for (var i = 0; i < children.length; i++) {
-				if (children.item(i).tagName == "LI" && !children.item(i).classList.contains('requirement')){
-					var result = recursive_insertion(all_data, children.item(i));
-					if(result){reqs = reqs.concat(result)}
-				}
-			}
-
-			return reqs;
-		}
-	}
 
 	// TODO: The listeners should be for the div, not for the LI
 	// Once I separate the div and the Icont, they need to ahve different listeners, sicne they will have different actions
@@ -450,10 +414,46 @@ toggle between hiding and showing the dropdown content */
 		google.script.run
 		.withFailureHandler(function () { document.getElementById("updating-status").innerHTML = 'Error Inserting '})
 		.withSuccessHandler(function () { document.getElementById("updating-status").innerHTML = ''})
-		.insertRequirementsWithSpecGroups_asTable_fromTemplate(insertion, all_data, null);
+		.insert_spec_or_group_using_template(insertion, all_data, null);
 
 	}
 
+	function recursive_insertion(all_data, node){
+		if(node.classList.contains('requirement')){
+			var projectId = $("#options-projects").val();
+			var parent = node.id.split("_");
+			var parentType = parent[0].toString();
+			var parentId = parseInt(parent[1]);
+			var requirementsToInsert = all_data['requirements']
+					.filter(x => x[types[parentType].filter] === parentId)
+					.sort((a, b) => a.identifier.toString().localeCompare(b.identifier.toString(), navigator.languages[0] || navigator.language, {numeric: true, ignorePunctuation: true}))
+			return requirementsToInsert[0];
+		}
+		else{
+			var children = document.getElementById("children_"+node.id).childNodes
+			var reqs = []
+			if(node.classList.contains('specification') || node.classList.contains('group')){
+				// directInsertPromise(all_data, node.id, 'name');
+				reqs.push([node.id, 'name'])
+			}
+
+			// TODO: THis can definately be optimized. I'm currently going through the requirements first just to have them at the top of the tree, and greoups would be below.
+			for (var i = 0; i < children.length; i++) {
+				if (children.item(i).tagName == "LI" && children.item(i).classList.contains('requirement')){
+					var result = recursive_insertion(all_data, children.item(i));
+					if(result){reqs = reqs.concat(result)}
+				}
+			}
+			for (var i = 0; i < children.length; i++) {
+				if (children.item(i).tagName == "LI" && !children.item(i).classList.contains('requirement')){
+					var result = recursive_insertion(all_data, children.item(i));
+					if(result){reqs = reqs.concat(result)}
+				}
+			}
+
+			return reqs;
+		}
+	}
 
 
 	function updateAllTrees(projectId, projectName) {

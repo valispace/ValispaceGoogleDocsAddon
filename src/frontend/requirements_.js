@@ -136,34 +136,32 @@ function getTemplateTable(documentId) {
   return [templateTableData, templateTableCellAttributes]
 }
 
-function insertRequirementsWithSpecGroups_asTable_fromTemplate(insertion_array, all_data){
-  CacheService.getScriptCache().remove('templateTableData')
-  CacheService.getScriptCache().remove('templateTableCellAttributes')
-  var projectId = PropertiesCache('User', 'projectID')
+function insert_spec_or_group_using_template(insertion_array, all_data){
+  CacheService.getScriptCache().remove('templateTableData');
+  CacheService.getScriptCache().remove('templateTableCellAttributes');
+  var projectId = PropertiesCache('User', 'projectID');
 
-  numOfCells = 0
-  var reqs = []
+  numOfCells = 0;
+  var reqs = [];
   insertion_array.reverse();
 
+  console.log(insertion_array);
   for(line of insertion_array){
+    // If this is a Group
     if(Array.isArray(line)){
+
+      // Add Specification or Section Name Name
       last_index = direct_insert(all_data, line[0], line[1], true);
+
       if(reqs.length>0){
         reqs.reverse();
         [tableIndex, tableIndex_, numOfCells] = insertRequirementsInSpec_asTable_fromTemplate(projectId, reqs, all_data, null, numOfCells);
-        reqs = []
+        reqs = [];
       }
-
     }
     else{
-      // console.log(line.identifier)
       reqs.push(line);
     }
-  }
-
-  if(reqs.length>0){
-    [tableIndex, tableIndex_, numOfCells] = insertRequirementsInSpec_asTable_fromTemplate(projectId, reqs, all_data, null, numOfCells);
-    reqs = []
   }
 
   CacheService.getScriptCache().remove('templateTableData')
@@ -171,6 +169,7 @@ function insertRequirementsWithSpecGroups_asTable_fromTemplate(insertion_array, 
 
 }
 
+// TODO: Why are the functions insertRequirementsInSpec_asTable_fromTemplate and insert_spec_or_group_using_template separated? There is no clear distinction/
 function insertRequirementsInSpec_asTable_fromTemplate(projectId, requirements, all_data, previousTableIndex = null, numOfCells = 0) {
   var base_path = PropertiesCache('User', 'deployment_url')
 
@@ -337,7 +336,6 @@ function insertRequirementsInSpec_asTable_fromTemplate(projectId, requirements, 
     var body = doc.getBody();
     var docTable = body.getChild(tableIndex)
     findAndReplaceImages(docTable)
-
 
   }
 
