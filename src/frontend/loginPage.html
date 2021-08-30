@@ -3,7 +3,8 @@
 
 <head>
   <base target="_top">
-
+<!-- TODO: Fix and refactor CSS Files-->
+  <?!=HtmlService.createHtmlOutputFromFile('frontend/sidebar.css').getContent()?>
   <?!=HtmlService.createHtmlOutputFromFile('frontend/requirements.css').getContent()?>
   <?!=HtmlService.createHtmlOutputFromFile('frontend/loginPage.js').getContent()?>
 
@@ -33,7 +34,7 @@
         <input class="input-field" type="password" id="pass" name="password">
       </div>
       <div class="buttons-container">
-        <input type="submit" value="Connect" class="valiButton" onclick="connect()">
+        <input type="submit" value="Connect" class="actionButton" onclick="connect()">
       </div>
       <div id="conectionOutput"></div>
     </form>

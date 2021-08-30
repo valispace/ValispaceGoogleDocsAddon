@@ -117,10 +117,10 @@ toggle between hiding and showing the dropdown content */
 	function expandRequirementTree() {
 		if (!document.getElementById("myDropdown").classList.contains('show')) {
 			document.getElementById("updating-status").innerHTML = 'Building Tree';
-			document.getElementById("myDropdown").classList.add("show");
+			// document.getElementById("myDropdown").classList.add("show");
 			document.getElementById("updating-status").innerHTML = '';
 		} else {
-			document.getElementById("myDropdown").classList.remove("show");
+			// document.getElementById("myDropdown").classList.remove("show");
 		}
 	}
 
@@ -281,6 +281,7 @@ toggle between hiding and showing the dropdown content */
 		return identifiers
 	}
 
+	// TODO: This function is currently not used. But it might be used soon.
 	function insertAll(){
 		document.getElementById("updating-status").innerHTML = 'Inserting Requirements...'
 

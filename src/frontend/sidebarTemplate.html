@@ -10,6 +10,7 @@
   <!-- The CSS package above applies Google styling to buttons and other elements. -->
   
   
+  <?!=HtmlService.createHtmlOutputFromFile('frontend/sidebar.css').getContent()?>
   <?!=HtmlService.createHtmlOutputFromFile('frontend/requirements.css').getContent()?>
 
   <?!=HtmlService.createHtmlOutputFromFile('frontend/sidebar.js').getContent()?>
@@ -25,15 +26,15 @@
   
   <div class="sidebarLine">
     <p class="selectionTitle">Workspaces:</p>
-    <select class="valiButton selecionList" id="options-workspaces"></select>
-    <button mat-raised-button class="valiButton refreshButton" title="Refresh the Workspaces list."
+    <select class="actionButton selecionList" id="options-workspaces"></select>
+    <button mat-raised-button class="actionButton refreshButton" title="Refresh the Workspaces list."
       id="update-workspaces"><i class="fas fa-sync-alt"></i></button>
   </div>
   
   <div class="sidebarLine">
     <p class="selectionTitle">Project:</p>
-    <select class="valiButton selecionList" id="options-projects"></select>
-    <button mat-raised-button class="valiButton refreshButton" title="Refresh the Projects list." id="update-projects"><i
+    <select class="actionButton selecionList" id="options-projects"></select>
+    <button mat-raised-button class="actionButton refreshButton" title="Refresh the Projects list." id="update-projects"><i
         class="fas fa-sync-alt"></i></button>
   </div>
 

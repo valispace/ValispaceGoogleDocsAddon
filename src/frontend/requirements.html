@@ -8,10 +8,7 @@
 <script id="usersData" style="display: none"></script>
 <script id="user_groupsData" style="display: none"></script>
 
-
-
-
-
+<!-- This will be converted to a dropdown where the user can select which module they want to work on -->
 <div id="navigationList">
   <div class="treeContainer">
     <div class="treeTitle"><i class="fas fa-clipboard-check"></i> Requirements</div>
@@ -20,15 +17,10 @@
 </div>
 
 <div class="sidebarLine buttonContainer">
-
-
-  <button class="valiButton" id="update-all" title="Update all references in the document.">Update All References</button>
-  <button mat-raised-button class="valiButton refreshButton" title="Re-download Requirement Data." id="redownload-requirements"><i
-    class="fas fa-sync-alt"></i></button>
-
+  <button class="actionButton" id="update-all" title="Update all references in the document.">Update References</button>
+  <button mat-raised-button class="actionButton refreshButton" title="Re-download Requirement Data." id="redownload-requirements">Download Data</button>
+  
   <div class="dropdown">
-    <button id="viewRequirementsTree" class="valiButton">View Requirements Tree</button>
-    <button id="insertAll" class="valiButton">Insert all from template</button>
     <div id="myDropdown" class="dropdown-content-main">
       <input type="text" placeholder="Search.." id="myInput" onkeyup="filterFunction()">
       <p class="requirementTreeInsertButton" id="requirementTreeInsertButton"></p>
@@ -40,6 +32,6 @@
 </div>
 
 <div class="buttonContainer sidebarLine">
-  <button class="valiButton" id="valispace-options"><i class="fas fa-cog"></i></button>
-  <button class="valiButton" id="valispace-disconnect">Disconnect</button>
+  <button class="actionButton" id="valispace-options"><i class="fas fa-cog"></i></button>
+  <button class="actionButton" id="valispace-disconnect">Disconnect</button>
 </div>
