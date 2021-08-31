@@ -42,8 +42,7 @@
       .withSuccessHandler(function(result){
         types = result
       })
-      .withFailureHandler()
-      .returnTypes()
+      .get_types()
     
 
   });
@@ -190,4 +189,32 @@
       .withSuccessHandler()
       .openOptionDialog();
   }
+
+  function getDataFromHTML(){
+    console.log('spec')
+    var specifications = JSON.parse(document.getElementById(types.specifications.data).getAttribute('data'));
+    console.log('folder')
+    var folders = JSON.parse(document.getElementById(types.folders.data).getAttribute('data'));
+    console.log('req')
+    var requirements = JSON.parse(document.getElementById(types.requirements.data).getAttribute('data'));
+    console.log('group')
+    var groups = JSON.parse(document.getElementById(types.groups.data).getAttribute('data'));
+    console.log('states')
+    var states = JSON.parse(document.getElementById(types.states.data).getAttribute('data'));
+    var tags = JSON.parse(document.getElementById(types.tags.data).getAttribute('data'));
+    var files = JSON.parse(document.getElementById(types.files.data).getAttribute('data'));
+    var users = JSON.parse(document.getElementById(types.users.data).getAttribute('data'));
+    var all_data = {
+      'specifications': specifications,
+      'folders': folders,
+      'requirements': requirements,
+      'groups': groups,
+      'states': states,
+      'tags': tags,
+      'files': files,
+      'users': users
+    }
+    return all_data
+  }
+
 </script>

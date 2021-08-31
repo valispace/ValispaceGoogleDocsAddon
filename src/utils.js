@@ -83,3 +83,9 @@ function iterateSections(doc, func) {
     func(section, i, isFirstPageSection);
   }
 }
+
+			
+			
+function capitalizeFirstLetter(string) {
+  return string.charAt(0).toUpperCase() + string.slice(1);
+}

@@ -20,10 +20,8 @@
 	function updateAllReferences() {
 
 		return new Promise(function (resolve, reject) {
-			// TODO: Update Flag, write as a Promise.
-			// document.getElementById("updating-status").innerHTML = 'Updating All References...';
-			// TODO: Try checking INput to download only the necessary data; Maybe do it on google script
-			// TODO: Use the dataList
+			
+			// Gets Data from HTML
 			var specifications = JSON.parse(document.getElementById(types.specifications.data).getAttribute('data'));
 			var folders = JSON.parse(document.getElementById(types.folders.data).getAttribute('data'));
 			var requirements = JSON.parse(document.getElementById(types.requirements.data).getAttribute('data'));
@@ -49,25 +47,11 @@
 		})
 	}
 
-	/* When the user clicks on the button,
-toggle between hiding and showing the dropdown content */
-	function expandRequirementTree() {
-		if (!document.getElementById("myDropdown").classList.contains('show')) {
-			document.getElementById("updating-status").innerHTML = 'Building Tree';
-			// document.getElementById("myDropdown").classList.add("show");
-			document.getElementById("updating-status").innerHTML = '';
-		} else {
-			// document.getElementById("myDropdown").classList.remove("show");
-		}
-	}
-
-
 	function expandObjectChildren(objectId) {
 		document.getElementById(objectId).classList.toggle("show");
 	}
 
 	
-
 	function toggleObjectProperties(objectId) {
 		console.log(objectId)
 		if (document.contains(document.getElementById(objectId + '_properties'))) {
@@ -79,9 +63,6 @@ toggle between hiding and showing the dropdown content */
 			var parentId = parseInt(parent[1]);
 			subhtml = subhtml.concat('<ul id="', objectId, '_properties" class="dropdown-content show">');
 
-			function capitalizeFirstLetter(string) {
-				return string.charAt(0).toUpperCase() + string.slice(1);
-			}
 
 			// TODO: Automatically get allowable properties;
 			for (property of types[parentType].properties) {
@@ -100,26 +81,8 @@ toggle between hiding and showing the dropdown content */
 					var reqType = parent[0].toString();
 					var reqId = parseInt(parent[1]);
 					propertyName = htmlElementId[1];
-					// console.log(reqId, propertyName);
-					// TODO: Try checking INput to download only the necessary data; Maybe do it on google script
-					var specifications = JSON.parse(document.getElementById(types.specifications.data).getAttribute('data'));
-					var folders = JSON.parse(document.getElementById(types.folders.data).getAttribute('data'));
-					var requirements = JSON.parse(document.getElementById(types.requirements.data).getAttribute('data'));
-					var groups = JSON.parse(document.getElementById(types.groups.data).getAttribute('data'));
-					var states = JSON.parse(document.getElementById(types.states.data).getAttribute('data'));
-					var tags = JSON.parse(document.getElementById(types.tags.data).getAttribute('data'));
-					var files = JSON.parse(document.getElementById(types.files.data).getAttribute('data'));
-					var users = JSON.parse(document.getElementById(types.users.data).getAttribute('data'));
-					var all_data = {
-						'specifications': specifications,
-						'folders': folders,
-						'requirements': requirements,
-						'groups': groups,
-						'states': states,
-						'tags': tags,
-						'files': files,
-						'users': users
-					}
+
+					all_data = getDataFromHTML()
 					directInsertPromise(all_data, reqName, propertyName);
 				});
 			}
@@ -307,32 +270,13 @@ toggle between hiding and showing the dropdown content */
 
 
 		// TODO: Try checking Input to download only the necessary data; Maybe do it on google script
-		var specifications = JSON.parse(document.getElementById(types.specifications.data).getAttribute('data'));
-		var folders = JSON.parse(document.getElementById(types.folders.data).getAttribute('data'));
-		var requirements = JSON.parse(document.getElementById(types.requirements.data).getAttribute('data'));
-		var groups = JSON.parse(document.getElementById(types.groups.data).getAttribute('data'));
-		var states = JSON.parse(document.getElementById(types.states.data).getAttribute('data'));
-		var tags = JSON.parse(document.getElementById(types.tags.data).getAttribute('data'));
-		var files = JSON.parse(document.getElementById(types.files.data).getAttribute('data'));
-		var users = JSON.parse(document.getElementById(types.users.data).getAttribute('data'));
-		var user_groups = JSON.parse(document.getElementById(types.user_groups.data).getAttribute('data'));
-		var all_data = {
-			'specifications': specifications,
-			'folders': folders,
-			'requirements': requirements,
-			'groups': groups,
-			'states': states,
-			'tags': tags,
-			'files': files,
-			'users': users,
-			'user_groups': user_groups
-		}	
+		var all_data = getDataFromHTML();
 
 
 		var parent = this.parentElement.id.split("_");
 		var parentType = parent[0].toString();
 		var parentId = parseInt(parent[1]);
-		var requirementsToInsert = requirements
+		var requirementsToInsert = all_data['requirements']
 			.filter(x => x[types[parentType].filter] === parentId)
 			.sort(function (a, b) {
 				if (a.identifier == b.identifier)

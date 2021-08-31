@@ -4,7 +4,6 @@ function update_all_values(objectList){
   var update_images=true;
 
   var imgList = []
-  var imgListNamedRange = doc.newRange();
 
   var base_path = PropertiesService.getUserProperties().getProperty('deployment_url')
   iterateSections(doc, function(section, sectionIndex, isFirstPageSection) {

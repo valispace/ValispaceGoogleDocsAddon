@@ -174,7 +174,7 @@ function insertRequirementsInSpec_asTable_fromTemplate(projectId, requirements, 
   var base_path = PropertiesCache('User', 'deployment_url')
 
   specificationsData = all_data['specifications']
-  foldersData = all_data['folders']
+  foldersData = all_data['folder']
   requirementsData = all_data['requirements']
   groupsData = all_data['groups']
   statesData = all_data['states']

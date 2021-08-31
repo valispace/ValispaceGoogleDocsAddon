@@ -23,6 +23,9 @@ var types = {
               data:'groupsData',
               properties:["name", "description", "owner"],
               filter: 'group'},
+  states: {name: 'states',
+            url: '',
+            data: 'statesData'},
   users:{name:'users',
               url: '',
               data:'usersData'},
@@ -37,8 +40,8 @@ var types = {
               data:'filesData'}
 }
 
-function returnTypes(){
-  return types
+function get_types(){
+  return types;
 }
 // ****************************************************************************************
 // Valispace REST - Users Groups
