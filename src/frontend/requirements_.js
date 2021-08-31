@@ -145,7 +145,6 @@ function insert_spec_or_group_using_template(insertion_array, all_data){
   var reqs = [];
   insertion_array.reverse();
 
-  console.log(insertion_array);
   for(line of insertion_array){
     // If this is a Group
     if(Array.isArray(line)){
@@ -163,6 +162,13 @@ function insert_spec_or_group_using_template(insertion_array, all_data){
       reqs.push(line);
     }
   }
+
+    // Insert Single Requirement
+    if(reqs.length>0){
+      [tableIndex, tableIndex_, numOfCells] = insertRequirementsInSpec_asTable_fromTemplate(projectId, reqs, all_data, null, numOfCells);
+      reqs = []
+    }
+  
 
   CacheService.getScriptCache().remove('templateTableData')
   CacheService.getScriptCache().remove('templateTableCellAttributes')
@@ -183,7 +189,7 @@ function insertRequirementsInSpec_asTable_fromTemplate(projectId, requirements, 
   usersData = all_data['users']
   user_groupsData = all_data['user_groups']
 
-
+  individual_tables = true;
 
   var cache = CacheService.getScriptCache();
   if (cache.get('templateTableCellAttributes') == null || cache.get('templateTableData') == null) {
@@ -219,7 +225,7 @@ function insertRequirementsInSpec_asTable_fromTemplate(projectId, requirements, 
     for (let rowIndex = 0; rowIndex < templateTableData.length; rowIndex++) {
       // Header
 
-      if(insertHeader==true && rowIndex==0 && ((previousTableIndex == null && req==0))){
+      if(insertHeader==true && rowIndex==0 && ((previousTableIndex == null && req==0) || individual_tables==true)){
         header = []
         headerStyle = []
         headerUrl = []
@@ -263,14 +269,21 @@ function insertRequirementsInSpec_asTable_fromTemplate(projectId, requirements, 
           urlMapping.push(subUrlMapping)
         }
       }
-    
-      tables.push(table)
-      tables_styleTableMapping.push(styleTableMapping)
-      tables_urlMapping.push(urlMapping)
-      table = []
-      styleTableMapping=[]
-      urlMapping = []
-    
+      if(individual_tables){
+        tables.push(table);
+        tables_styleTableMapping.push(styleTableMapping);
+        tables_urlMapping.push(urlMapping);
+        table = [];
+        styleTableMapping=[];
+        urlMapping = [];
+      };
+
+      if (!individual_tables){
+        tables.push(table);
+        tables_styleTableMapping.push(styleTableMapping);
+        tables_urlMapping.push(urlMapping);
+    };
+  
   }
 
 

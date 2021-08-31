@@ -186,38 +186,17 @@
 	function insertAll(){
 		document.getElementById("updating-status").innerHTML = 'Inserting Requirements...'
 
+		var all_data = getDataFromHTML();
 
-		// TODO: Try checking Input to download only the necessary data; Maybe do it on google script
-
-		var specifications = JSON.parse(document.getElementById(types.specifications.data).getAttribute('data'));
-		var folders = JSON.parse(document.getElementById(types.folders.data).getAttribute('data'));
-		var requirements = JSON.parse(document.getElementById(types.requirements.data).getAttribute('data'));
-		var groups = JSON.parse(document.getElementById(types.groups.data).getAttribute('data'));
-		var states = JSON.parse(document.getElementById(types.states.data).getAttribute('data'));
-		var tags = JSON.parse(document.getElementById(types.tags.data).getAttribute('data'));
-		var files = JSON.parse(document.getElementById(types.files.data).getAttribute('data'));
-		var users = JSON.parse(document.getElementById(types.users.data).getAttribute('data'));
-		var all_data = {
-			'specifications': specifications,
-			'folders': folders,
-			'requirements': requirements,
-			'groups': groups,
-			'states': states,
-			'tags': tags,
-			'files': files,
-			'users': users
-		}
-
-
-		// Order Requirements by Identifier - TODO: Function to Select what to order by
+		// Requirements by Identifier Odentifier - TODO: Function to Select what to order by (UI needed)
 		var root = document.getElementById("reqTreeMain")
 		var children = root.getElementsByClassName("specification");
-		// console.log(children.length);
+
 		var insertion = []
 		for (var i = 0; i < children.length; i++) {
 			insertion = insertion.concat(recursive_insertion(all_data, children.item(i)));
 		}
-		// console.log(insertion)
+
 		google.script.run
 		.withFailureHandler(function () { document.getElementById("updating-status").innerHTML = 'Error Inserting '})
 		.withSuccessHandler(function () { document.getElementById("updating-status").innerHTML = ''})
@@ -226,7 +205,7 @@
 
 
 	// TODO: The listeners should be for the div, not for the LI
-	// Once I separate the div and the Icont, they need to ahve different listeners, sicne they will have different actions
+	// Once I separate the div and the Icon, they need to have different listeners, since they will have different actions
 
 	function addTreeListener() {
 
@@ -268,10 +247,7 @@
 
 		var projectId = $("#options-projects").val();
 
-
-		// TODO: Try checking Input to download only the necessary data; Maybe do it on google script
 		var all_data = getDataFromHTML();
-
 
 		var parent = this.parentElement.id.split("_");
 		var parentType = parent[0].toString();

@@ -85,7 +85,19 @@ function iterateSections(doc, func) {
 }
 
 			
-			
-function capitalizeFirstLetter(string) {
-  return string.charAt(0).toUpperCase() + string.slice(1);
+function getSavedDeployment(){
+  return PropertiesService.getUserProperties().getProperty('savedDeployment')
+}
+function setSavedDeployment(deployment){
+  PropertiesService.getUserProperties().setProperty('savedDeployment', deployment)
+}
+function getSavedUsername(){
+  return PropertiesService.getUserProperties().getProperty('savedUsername')
+}
+function setSavedUsername(savedusername){
+  PropertiesService.getUserProperties().setProperty('savedUsername', savedusername)
+}
+
+function getCurrentVersion(){
+  return releaseVersion
 }

@@ -2,6 +2,10 @@ var releaseVersion = "1.0.0"
 var TemplateDocumentId_original = '1ta4E39lwjjB8sVk2UPRBPZiy-rH9P_cmhCpLyyIQbXE';
 var defaultDeployment = 'https://demo.valispace.com';
 
+function onInstall(e) {
+  onOpen(e);
+}
+
 function onOpen(e) {
   DocumentApp.getUi().createAddonMenu()
   .addItem('Show sidebar', 'showSidebar')
@@ -9,7 +13,6 @@ function onOpen(e) {
 }
 
 function showSidebar() {
-  // TODO: Maybe we can start downloading data here to speed up
   if (PropertiesService.getDocumentProperties().getProperty('TemplateDocumentId') === null) {
     PropertiesService.getDocumentProperties().setProperty('TemplateDocumentId', TemplateDocumentId_original);
   };
@@ -32,6 +35,13 @@ function showSidebar() {
 
 }
 
+function goToMainPage() {
+  var template = HtmlService.createTemplateFromFile('frontend/sidebarTemplate');
+  var page = template.evaluate();
+  page.setTitle('Valispace on Google Docs');
+  DocumentApp.getUi().showSidebar(page);
+}
+
 function disconnect() {
   response = PropertiesService.getUserProperties().deleteProperty('access_token');
   var template = HtmlService.createTemplateFromFile('frontend/loginPage');
@@ -40,35 +50,3 @@ function disconnect() {
   DocumentApp.getUi().showSidebar(page);
 }
 
-
-
-function goToMainPage() {
-  // TODO : Remove this if not necessary
-  var template = HtmlService.createTemplateFromFile('frontend/sidebarTemplate');
-  var page = template.evaluate();
-  page.setTitle('Valispace on Google Docs');
-
-  DocumentApp.getUi().showSidebar(page);
-}
-
-function onInstall(e) {
-  onOpen(e);
-}
-
-
-function getSavedDeployment(){
-  return PropertiesService.getUserProperties().getProperty('savedDeployment')
-}
-function setSavedDeployment(deployment){
-  PropertiesService.getUserProperties().setProperty('savedDeployment', deployment)
-}
-function getSavedUsername(){
-  return PropertiesService.getUserProperties().getProperty('savedUsername')
-}
-function setSavedUsername(savedusername){
-  PropertiesService.getUserProperties().setProperty('savedUsername', savedusername)
-}
-
-function getCurrentVersion(){
-  return releaseVersion
-}
