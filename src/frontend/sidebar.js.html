@@ -14,6 +14,8 @@
     'user_groupsData'
   ]
 
+  var types
+
   /**
    * On document load, assign click handlers to each button and try to load the
    * user's origin and destination language preferences if previously set.
@@ -36,6 +38,13 @@
 
     $('#update-all').click(updateAllPromise);
 
+    types = google.script.run
+      .withSuccessHandler(function(result){
+        types = result
+      })
+      .withFailureHandler()
+      .returnTypes()
+    
 
   });
 
