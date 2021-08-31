@@ -2,8 +2,8 @@
 
 function get_data(projectId, dataType) {
   switch (dataType) {
-    case 'labelsData':
-      return JSON.parse(getAuthenticatedValispaceUrl('requirements/specifications/labels/?project=' + projectId));
+    case 'foldersData':
+      return JSON.parse(getAuthenticatedValispaceUrl('requirements/specifications/folders/?project=' + projectId));
     case 'specificationsData':
       specificationData = getAuthenticatedValispaceUrl('requirements/specifications/full_list/?project=' + projectId + '&clean_text=description')
       delete specificationData['vpermission']
@@ -174,7 +174,7 @@ function insertRequirementsInSpec_asTable_fromTemplate(projectId, requirements, 
   var base_path = PropertiesCache('User', 'deployment_url')
 
   specificationsData = all_data['specifications']
-  labelsData = all_data['labels']
+  foldersData = all_data['folders']
   requirementsData = all_data['requirements']
   groupsData = all_data['groups']
   statesData = all_data['states']
