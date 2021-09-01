@@ -333,7 +333,6 @@ function insertRequirementsInSpec_asTable_fromTemplate(projectId, requirements, 
         numOfCells += docTable.getRow(row).getNumCells();
       }
 
-      // Logger.log(numOfCells)
       if (numOfCells > cellLimit){
         doc.saveAndClose()
         numOfCells = 0

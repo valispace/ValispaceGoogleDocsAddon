@@ -22,24 +22,7 @@
 		return new Promise(function (resolve, reject) {
 			
 			// Gets Data from HTML
-			var specifications = JSON.parse(document.getElementById(types.specifications.data).getAttribute('data'));
-			var folders = JSON.parse(document.getElementById(types.folders.data).getAttribute('data'));
-			var requirements = JSON.parse(document.getElementById(types.requirements.data).getAttribute('data'));
-			var groups = JSON.parse(document.getElementById(types.groups.data).getAttribute('data'));
-			var tags = JSON.parse(document.getElementById(types.tags.data).getAttribute('data'));
-			var files = JSON.parse(document.getElementById(types.files.data).getAttribute('data'));
-			var users = JSON.parse(document.getElementById(types.users.data).getAttribute('data'));
-			var user_groups = JSON.parse(document.getElementById(types.user_groups.data).getAttribute('data'));
-			var all_data = {
-				'specifications': specifications,
-				'folders': folders,
-				'requirements': requirements,
-				'groups': groups,
-				'tags': tags,
-				'files': files,
-				'users': users,
-				'user_groups': user_groups
-			}
+			var all_data = getDataFromHTML()
 			google.script.run
 				.withFailureHandler(function () { reject("Error Updating References") })
 				.withSuccessHandler(function () { resolve("References Updated") })
@@ -53,7 +36,6 @@
 
 	
 	function toggleObjectProperties(objectId) {
-		console.log(objectId)
 		if (document.contains(document.getElementById(objectId + '_properties'))) {
 			document.getElementById(objectId + '_properties').remove();
 		} else {
@@ -125,7 +107,6 @@
 		if (filter[0].includes(':')) {
 			filter = getSpecificFilter(filter[0]);
 		}
-		// console.log(filter)
 		filterHTMLtree(filter)
 
 		// If Filter Empty, close all
@@ -163,12 +144,7 @@
 		var filter = filter.split(':')
 		var property = filter[0].toLowerCase()
 		var value = filter[1]
-		// console.log(property, value)
-		var specifications = JSON.parse(document.getElementById(types.specifications.data).getAttribute('data'));
-		var folders = JSON.parse(document.getElementById(types.folders.data).getAttribute('data'));
-		var requirements = JSON.parse(document.getElementById(types.requirements.data).getAttribute('data'));
-		var groups = JSON.parse(document.getElementById(types.groups.data).getAttribute('data'));
-		var all_data = [specifications, folders, requirements, groups]
+		var all_data = getDataFromHTML() // Here we just user [specifications, folders, requirements, groups], 
 		var identifiers = []
 		for (data of all_data) {
 			data.filter(x => {
@@ -178,7 +154,6 @@
 				return false
 			}).forEach(x => identifiers.push(x['identifier'].toUpperCase()))
 		}
-		// console.log(identifiers)
 		return identifiers
 	}
 
@@ -327,24 +302,14 @@
 	}
 
 	function buildRequirementsTree_browser() {
-		// console.log('Inside  Building Tree')
-		// document.getElementById("updating-status").innerHTML = 'Building Tree...'
-
 		var folders = JSON.parse(document.getElementById(types.folders.data).getAttribute('data'));
 		var specifications = JSON.parse(document.getElementById(types.specifications.data).getAttribute('data'));
 		var groups = JSON.parse(document.getElementById(types.groups.data).getAttribute('data'));
 
 		// Order groups
-
-
-		// console.log(specifications)
-		// groups.sort(function (a, b ): number {
-// 			return a.toString().localeCompare(b.toString(), 'en', { numeric: true });
-// 					})
 		folders.sort((a, b) => a.name.toString().localeCompare(b.name.toString(), navigator.languages[0] || navigator.language, {numeric: true, ignorePunctuation: true}))
 		groups.sort((a, b) => a.name.toString().localeCompare(b.name.toString(), navigator.languages[0] || navigator.language, {numeric: true, ignorePunctuation: true}))
 		specifications.sort((a, b) => a.name.toString().localeCompare(b.name.toString(), navigator.languages[0] || navigator.language, {numeric: true, ignorePunctuation: true}))
-		console.log(specifications)
 
 		// HTML Initial
 		var htmlToWrite = '<ul class="reqTreeMain" id="reqTreeMain">'

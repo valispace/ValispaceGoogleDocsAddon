@@ -129,11 +129,9 @@
     document.getElementById("updating-status").innerHTML = 'Downloading Data...';
 
     return Promise.all(dataList.map(function (data, i) {
-      console.log('download started')
       return promiseRun('get_data', projectId, data)
         .then(function (result) {
           document.getElementById(data).setAttribute('data', JSON.stringify(result));
-          console.log('download finished')
         })
     })).then(function () {
       document.getElementById("updating-status").innerHTML = 'Building Tree';
@@ -191,15 +189,10 @@
   }
 
   function getDataFromHTML(){
-    console.log('spec')
     var specifications = JSON.parse(document.getElementById(types.specifications.data).getAttribute('data'));
-    console.log('folder')
     var folders = JSON.parse(document.getElementById(types.folders.data).getAttribute('data'));
-    console.log('req')
     var requirements = JSON.parse(document.getElementById(types.requirements.data).getAttribute('data'));
-    console.log('group')
     var groups = JSON.parse(document.getElementById(types.groups.data).getAttribute('data'));
-    console.log('states')
     var states = JSON.parse(document.getElementById(types.states.data).getAttribute('data'));
     var tags = JSON.parse(document.getElementById(types.tags.data).getAttribute('data'));
     var files = JSON.parse(document.getElementById(types.files.data).getAttribute('data'));
