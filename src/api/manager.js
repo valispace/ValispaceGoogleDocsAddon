@@ -20,6 +20,11 @@
 function valispaceAskToken(deployment_url, username, passwd){
   //  var dialog = DocumentApp.getUi()
 
+
+  if (deployment_url[deployment_url.length-1] === "/"){
+    deployment_url = deployment_url.slice(0,-1);
+  }
+
   deployment = deployment_url
 
   PropertiesService.getUserProperties().setProperty('deployment_url', deployment);

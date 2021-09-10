@@ -1,3 +1,8 @@
+ /**
+   * @OnlyCurrentDoc
+   */
+
+
 var releaseVersion = "1.0.0"
 var TemplateDocumentId_original = '1ta4E39lwjjB8sVk2UPRBPZiy-rH9P_cmhCpLyyIQbXE';
 var defaultDeployment = 'https://demo.valispace.com';
