@@ -21,15 +21,12 @@ function resetReqTableTemplate(){
 function clearUserProperties(){
   var userProperties = PropertiesService.getUserProperties();
   userProperties.deleteAllProperties();
-  console.log("cleared user properties");
 } 
 function clearDocumentProperties(){
   var documentProperties = PropertiesService.getDocumentProperties();
   documentProperties.deleteAllProperties();
-  console.log("cleared user properties");
 } 
 
 function printCurrentTemplateID(){
   currentTemplateId = PropertiesService.getDocumentProperties().getProperty('TemplateDocumentId')
-  Logger.log(currentTemplateId)
 }

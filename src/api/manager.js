@@ -44,8 +44,6 @@ function valispaceAskToken(deployment_url, username, passwd){
     PropertiesService.getUserProperties().setProperty('access_token',accessToken);
     PropertiesService.getUserProperties().setProperty('connectionStatus', 'true');
     PropertiesService.getUserProperties().setProperty('connectionAttemptDone', 'true');
-    //Logger.log("Connected");
-
   } else {
     PropertiesService.getUserProperties().setProperty('connectionStatus', 'false');
     PropertiesService.getUserProperties().setProperty('connectionAttemptDone', 'true');

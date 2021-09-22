@@ -83,3 +83,21 @@ function iterateSections(doc, func) {
     func(section, i, isFirstPageSection);
   }
 }
+
+			
+function getSavedDeployment(){
+  return PropertiesService.getUserProperties().getProperty('savedDeployment')
+}
+function setSavedDeployment(deployment){
+  PropertiesService.getUserProperties().setProperty('savedDeployment', deployment)
+}
+function getSavedUsername(){
+  return PropertiesService.getUserProperties().getProperty('savedUsername')
+}
+function setSavedUsername(savedusername){
+  PropertiesService.getUserProperties().setProperty('savedUsername', savedusername)
+}
+
+function getCurrentVersion(){
+  return releaseVersion
+}

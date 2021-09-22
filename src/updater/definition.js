@@ -4,7 +4,6 @@ function update_all_values(objectList){
   var update_images=true;
 
   var imgList = []
-  var imgListNamedRange = doc.newRange();
 
   var base_path = PropertiesService.getUserProperties().getProperty('deployment_url')
   iterateSections(doc, function(section, sectionIndex, isFirstPageSection) {
@@ -26,7 +25,6 @@ function update_all_values(objectList){
 
       // go over all text elements in paragraph / list-item
       for (var el=par.getChild(0); el!=null; el=el.getNextSibling()) {
-        // console.log(el.getType().name())
         if (el.getType() == DocumentApp.ElementType.TABLE ||
         el.getType() == DocumentApp.ElementType.TABLE_ROW ||
         el.getType() == DocumentApp.ElementType.TABLE_CELL ||
@@ -38,7 +36,6 @@ function update_all_values(objectList){
         }
 
         if (el.getType() == DocumentApp.ElementType.TEXT && el.getText() == '-') {
-          console.log(el.getText());
           // TODO: Maybe this can be done outside the if, even though it only executes once inside the if
           update_placeholder_to_image(el, objectList, base_path);
         }
@@ -98,25 +95,19 @@ function verify_and_update_images(imgList, objectList, base_path){
     imgMap[imgId] = img
   }
 
-  // console.log(reqsInDoc)
   for (var req in reqsInDoc){
     // All images existing in the Requirement (in Valispace DB)
     var imagesOnReq = objectList['files'].filter(x => x['object_id'] === parseInt(req) && x['mimetype'] !== null && x['mimetype'].includes("image/"))
-    console.log("Images on Document: ")
-    console.log(reqsInDoc[req])
-    console.log("Images on Requirement: ")
-    console.log(imagesOnReq)
-
 
     for (img in imagesOnReq){
       var imgID = parseInt(imagesOnReq[img]['id'])
 
       if (reqsInDoc[req].includes(imgID)){
-        console.log('Exists in the Document and in the Requirement. UPDATE ON DOC')
+        // Exists in the Document and in the Requirement. UPDATE ON DOC
         toUpdate.push(imgID)
         removeFromList(reqsInDoc[req], parseInt(imagesOnReq[img]['id']))
       } else {
-        console.log('Doesnt exist in the Document but exist in the Requirement. INSERT')
+        // Doesnt exist in the Document but exist in the Requirement. INSERT
         textToInsert = generateFileURL(imagesOnReq[img])
         text = imgList[0].getParent().appendText(textToInsert);
         // TODO: Maybe it is faster to do this only at the end.
@@ -127,16 +118,12 @@ function verify_and_update_images(imgList, objectList, base_path){
     }
 
     if (reqsInDoc[req].length>0){
-      console.log(req)
-      console.log('Exist exist in the Document but doesnt in the Requirement. DELETE FROM DOC')
-      //for (img in imgList.reverse()){
+      // Exist exist in the Document but doesnt in the Requirement. DELETE FROM DOC
       for (var img=(imgList.length - 1); img>-1; img--) {
-        console.log(img);
         imgURL = imgList[img].getLinkUrl()
         imgId = parseInt(imgURL.split('files_')[1])
         if (reqsInDoc[req].includes(imgId)){
           numChild = imgList[img].getParent().getNumChildren();
-          console.log(numChild)
           if (numChild <= 1){
             text = imgList[img].getParent().appendText('-');
             text.setLinkUrl(base_path + `${VALI_PARAMETER_STR}requirements_${req}__images`)
@@ -161,7 +148,6 @@ function verify_and_update_images(imgList, objectList, base_path){
 }
 
 function update_text(el, objectList, mergeAdjacent=false, base_path){
-  // console.log(el.getText(), el.getLinkUrl())
   // go over all styling segments in text element
   var attributeIndices_top = el.getTextAttributeIndices();
   var lastLink = null;
@@ -221,7 +207,6 @@ function update_text(el, objectList, mergeAdjacent=false, base_path){
           }
           else if (objProperty == 'images') {
             reqId = objId
-            console.log("THIS IS WORKING LIKE IT SHOULD")
             // TODO - It function here for the updater.
           }
           var new_data = text_to_insert;
@@ -235,7 +220,7 @@ function update_text(el, objectList, mergeAdjacent=false, base_path){
           el.setAttributes(startOffset,endOffsetInclusive-1+new_length,attributes)
           attributeIndices_top = el.getTextAttributeIndices();
         }
-        else{//console.log(`Not updated: ${objectName} ${new_data}`)
+        else{//(`Not updated: ${objectName} ${new_data}`)
         }
       }
 
@@ -267,7 +252,6 @@ function update_image(image, objectList, base_path){
         var new_data = objData['download_url']
         var attributes = image.getAttributes()
         delete attributes[DocumentApp.Attribute.LINK_URL]
-        //console.log(`Updated: ${objectName} ${new_data}`)
         var new_img = UrlFetchApp.fetch(new_data).getBlob();
         var new_url =  url.split(VALI_PARAMETER_STR)[0]//urlTranslator(objData, types[objType], base_path);
         var parent = image.getParent();
@@ -276,7 +260,7 @@ function update_image(image, objectList, base_path){
         image.setLinkUrl(new_url + `${VALI_PARAMETER_STR}${urlName}`)
         new_image_element.setAttributes(attributes);
       }
-      else{//console.log(`Not updated: ${objectName} ${new_data}`)
+      else{//(`Not updated: ${objectName} ${new_data}`)
     }
     }
   }
