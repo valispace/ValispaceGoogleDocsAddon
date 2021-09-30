@@ -8,13 +8,6 @@
 <script id="usersData" style="display: none"></script>
 <script id="user_groupsData" style="display: none"></script>
 
-<!-- This will be converted to a dropdown where the user can select which module they want to work on -->
-<div id="navigationList">
-  <div class="treeContainer">
-    <div class="treeTitle"><i class="fas fa-clipboard-check"></i> Requirements</div>
-    <div id="requirementTree"></div>
-  </div>
-</div>
 
 <div class="sidebarLine buttonContainer">
   <button class="actionButton" id="update-all" title="Update all references in the document.">Update References</button>
@@ -23,10 +16,9 @@
   <div class="dropdown">
     <div id="myDropdown" class="dropdown-content-main">
       <input type="text" placeholder="Search.." id="myInput" onkeyup="filterFunction()">
-      <p class="requirementTreeInsertButton" id="requirementTreeInsertButton"></p>
+      <p class="dataTreeInsertButton" id="dataTreeInsertButton"></p>
       <!-- TODO: Rename this class and id -->
     </div>
-
   </div>
 
 </div>

@@ -290,12 +290,12 @@
 
 	function updateAllTrees(projectId, projectName) {
 		$('#projectTree').html("Loading components for " + name + "....");
-		$('#requirementTree').html("Loading requirements for " + name + "....");
+		$('#dataTree').html("Loading requirements for " + name + "....");
 		google.script.run
 			.withSuccessHandler()
 			.withFailureHandler(
 				function (error) {
-					$('#requirementTree').html("Failed to load requirements. Please try again, if the problem persist contact support@valispace.com");
+					$('#dataTree').html("Failed to load requirements. Please try again, if the problem persist contact support@valispace.com");
 				})
 			.getRequirementTree(projectId);
 
@@ -406,7 +406,7 @@
 
 		htmlToWrite = htmlToWrite.concat('</ul>')
 
-		document.getElementById('requirementTreeInsertButton').innerHTML = htmlToWrite;
+		document.getElementById('dataTreeInsertButton').innerHTML = htmlToWrite;
 
 	}
 

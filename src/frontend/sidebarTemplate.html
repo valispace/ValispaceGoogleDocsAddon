@@ -39,6 +39,17 @@
         class="fas fa-sync-alt"></i></button>
   </div>
 
+  <div id="navigationList">
+    <div class="treeContainer">
+      <select class="actionButton selecionList" id="options-modules">
+        <option disabled selected hidden>Select Module</option>
+        <option value="requirements">Requirements</option>
+        <option value="files">Files</option>
+      </select>
+      <div id="dataTree"></div>
+    </div>
+  </div>
+
   <?!=HtmlService.createHtmlOutputFromFile('frontend/requirements').getContent()?>
 
 <div id="footer">
