@@ -20,7 +20,7 @@
 	function updateAllReferences() {
 
 		return new Promise(function (resolve, reject) {
-			
+
 			// Gets Data from HTML
 			var all_data = getDataFromHTML()
 			google.script.run
@@ -34,7 +34,7 @@
 		document.getElementById(objectId).classList.toggle("show");
 	}
 
-	
+
 	function toggleObjectProperties(objectId) {
 		if (document.contains(document.getElementById(objectId + '_properties'))) {
 			document.getElementById(objectId + '_properties').remove();

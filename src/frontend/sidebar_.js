@@ -12,3 +12,10 @@ function get_projects(workspaceID) {
 function set_project(projectID) {
   PropertiesService.getUserProperties().setProperty('projectID', projectID);
 }
+
+function loadModule(module) {
+  var template = HtmlService.createTemplateFromFile('frontend/' + module + '/' + module);
+  var page = template.evaluate();
+  page.setTitle('Valispace on Google Docs');
+  DocumentApp.getUi().showSidebar(page);
+}

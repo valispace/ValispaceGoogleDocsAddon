@@ -45,7 +45,7 @@
     $('#update-projects').click(updateProjectOptionsScript);
 
     // Function Triggered when module is selected
-    //$('#options-modules').change(updateSelectedProjectScript);
+    $('#options-modules').change(selectModuleOption);
 
     $('#valispace-disconnect').click(disconnectValispaceScript);
     $('#valispace-options').click(OptionsScript);
@@ -57,8 +57,6 @@
         types = result
       })
       .get_types()
-    
-
   });
 
   function updateAllPromise() {
@@ -122,28 +120,26 @@
 
 
   function updateSelectedProjectScript() {
-    document.getElementById("updating-status").innerHTML = 'Downloading Data...'
-    
+
     // Disable View Requirements Tree Button and Closes DropDown Div
     document.getElementById("myDropdown").classList.remove("show");
 
-
-    clearTreeHtml();
     var projectId = $("#options-projects").val();
     var module = document.getElementById('treeTitle').innerText.toLowerCase().trim();
     console.log(module)
     google.script.run.set_project(projectId)
     var projectName = $("#options-projects option:selected").text();
 
-    orchestrateDownload(projectId, module);
+
   }
 
 
   function orchestrateDownload(projectId, module) {
-    
+
     document.getElementById("updating-status").innerHTML = 'Downloading Data...';
     dataList = dataDict[module];
-    clearData()
+    clearData()<
+    clearTreeHtml();
     return Promise.all(dataList.map(function (data, i) {
       return promiseRun('get_data', projectId, data)
         .then(function (result) {
@@ -192,6 +188,12 @@
       .withSuccessHandler()
       .goToMainPage()
   };
+
+  function selectModuleOption() {
+    let module = $("#options-modules").val();
+    var projectId = $("#options-projects").val();
+    google.script.run.withSuccessHandler(orchestrateDownload(projectId, module)).loadModule(module);
+  }
 
   function disconnectValispaceScript() {
     google.script.run.disconnect();

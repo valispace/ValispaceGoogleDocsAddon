@@ -1,12 +1,22 @@
-<!DOCTYPE html>
 <html>
   <head>
-    <?!=HtmlService.createHtmlOutputFromFile('frontend/header').getContent()?>
+    <base target="_top">
+    <!--<link rel="stylesheet" href="https://ssl.gstatic.com/docs/script/css/add-ons1.css"> -->
+    <link href="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.css" rel="stylesheet">
+    <script src="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.js"></script>
+    <script src="https://kit.fontawesome.com/0863e97891.js" crossorigin="anonymous"></script>
+    <!-- The CSS package above applies Google styling to buttons and other elements. -->
+
+    <?!=HtmlService.createHtmlOutputFromFile('frontend/sidebar.css').getContent()?>
+    <?!=HtmlService.createHtmlOutputFromFile('frontend/sidebar.js').getContent()?>
+    <?!=HtmlService.createHtmlOutputFromFile('frontend/utils.js').getContent()?>
     <?!=HtmlService.createHtmlOutputFromFile('frontend/requirements/requirements.css').getContent()?>
     <?!=HtmlService.createHtmlOutputFromFile('frontend/requirements/requirements.js').getContent()?>
   </head>
   <body>
-    <?!= HtmlService.createHtmlOutputFromFile('frontend/sidebarTemplateHeader').getContent()?>
+
+    <?!=HtmlService.createHtmlOutputFromFile('frontend/sidebarTemplateHeader').getContent()?>
+
     <script id="foldersData" style="display: none"></script>
     <script id="specificationsData" style="display: none"></script>
     <script id="requirementsData" style="display: none"></script>
@@ -17,16 +27,11 @@
     <script id="usersData" style="display: none"></script>
     <script id="user_groupsData" style="display: none"></script>
 
-    <div id="navigationList">
-      <div class="treeContainer">
-        <div class="treeTitle" id="treeTitle"><i class="fas fa-clipboard-check"></i> Requirements</div>
-        <div id="dataTree"></div>
-      </div>
-    </div>
 
     <div class="sidebarLine buttonContainer">
       <button class="actionButton" id="update-all" title="Update all references in the document.">Update References</button>
-      <button mat-raised-button class="actionButton refreshButton" title="Re-download Requirement Data." id="redownload-requirements">Download Data</button>
+      <button mat-raised-button class="actionButton refreshButton" title="Re-download Requirement Data."
+        id="redownload-requirements">Download Data</button>
 
       <div class="dropdown">
         <div id="myDropdown" class="dropdown-content-main">
@@ -35,12 +40,7 @@
           <!-- TODO: Rename this class and id -->
         </div>
       </div>
-    
     </div>
-
-    <div class="buttonContainer sidebarLine">
-      <button class="actionButton" id="valispace-options"><i class="fas fa-cog"></i></button>
-      <button class="actionButton" id="valispace-disconnect">Disconnect</button>
-    </div>
-  </body>
+    <?!=HtmlService.createHtmlOutputFromFile('frontend/sidebarTemplateFooter').getContent()?>
+  </body> 
 </html>
