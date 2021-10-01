@@ -39,13 +39,13 @@
     $('#update-workspaces').click(updateWorkspacesOptionsScript);
 
     // Function Triggered when A Project is selected Commented to test new Functionalitty
-    // $('#options-projects').change(updateSelectedProjectScript);
+    $('#options-projects').change(updateSelectedProjectScript);
 
     // Updates List of Projects when Refresh button is pressed
     $('#update-projects').click(updateProjectOptionsScript);
 
     // Function Triggered when module is selected
-    $('#options-module').change(updateSelectedProjectScript);
+    //$('#options-modules').change(updateSelectedProjectScript);
 
     $('#valispace-disconnect').click(disconnectValispaceScript);
     $('#valispace-options').click(OptionsScript);
@@ -123,15 +123,15 @@
 
   function updateSelectedProjectScript() {
     document.getElementById("updating-status").innerHTML = 'Downloading Data...'
-    clearData()
+    
     // Disable View Requirements Tree Button and Closes DropDown Div
     document.getElementById("myDropdown").classList.remove("show");
 
 
     clearTreeHtml();
     var projectId = $("#options-projects").val();
-    var module = $('#options-modules').val();
-
+    var module = document.getElementById('treeTitle').innerText.toLowerCase().trim();
+    console.log(module)
     google.script.run.set_project(projectId)
     var projectName = $("#options-projects option:selected").text();
 
@@ -140,10 +140,10 @@
 
 
   function orchestrateDownload(projectId, module) {
-
+    
     document.getElementById("updating-status").innerHTML = 'Downloading Data...';
-    dataList = datadict[module];
-    clearDataTags()
+    dataList = dataDict[module];
+    clearData()
     return Promise.all(dataList.map(function (data, i) {
       return promiseRun('get_data', projectId, data)
         .then(function (result) {
@@ -156,16 +156,6 @@
       addTreeListener();
       document.getElementById("updating-status").innerHTML = '';
     })
-  }
-
-  // Clears all the data Tags before setting data for the selected module
-  function clearDataTags() {
-    for ( var key in dataDict ) {
-      dataDict[key].forEach(function() {
-        console.log(this)
-        document.getElementById(this).removeAttribute('data');
-      });
-    }
   }
 
   function promiseRun(func) {
@@ -187,6 +177,7 @@
 
   function clearData() {
     for (index in dataList) {
+      console.log(dataList[index]);
       document.getElementById(dataList[index]).removeAttribute('data')
     }
   }
