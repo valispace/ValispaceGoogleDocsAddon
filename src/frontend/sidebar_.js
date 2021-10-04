@@ -14,8 +14,6 @@ function set_project(projectID) {
 }
 
 function loadModule(module) {
-  var template = HtmlService.createTemplateFromFile('frontend/' + module + '/' + module);
-  var page = template.evaluate();
-  page.setTitle('Valispace on Google Docs');
-  DocumentApp.getUi().showSidebar(page);
+  let data = HtmlService.createHtmlOutputFromFile('frontend/' + module + '/' + module + '.js');
+  return data.getContent()
 }

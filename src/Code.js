@@ -31,7 +31,7 @@ function showSidebar() {
   };
   // Check if Connection is still valid and skip login page if valid.
   if (checkValispaceConnexion()) {
-    var template = HtmlService.createTemplateFromFile('frontend/requirements/requirements');
+    var template = HtmlService.createTemplateFromFile('frontend/sidebarTemplate');
   } else {
     var template = HtmlService.createTemplateFromFile('frontend/loginPage');
   }
