@@ -12,3 +12,8 @@ function get_projects(workspaceID) {
 function set_project(projectID) {
   PropertiesService.getUserProperties().setProperty('projectID', projectID);
 }
+
+function loadModule(module) {
+  let data = HtmlService.createHtmlOutputFromFile('frontend/' + module + '/' + module + '.js');
+  return data.getContent()
+}

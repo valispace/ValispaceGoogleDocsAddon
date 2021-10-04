@@ -3,7 +3,7 @@
 
 
   var dataDict = {
-    'requirements' : [
+    'requirements': [
       'foldersData',
       'specificationsData',
       'requirementsData',
@@ -13,8 +13,8 @@
       'filesData',
       'usersData',
       'user_groupsData'
-    ], 
-    'files' : [
+    ],
+    'files': [
       'filesData',
       'folderData',
       'versionsData',
@@ -45,7 +45,7 @@
     $('#update-projects').click(updateProjectOptionsScript);
 
     // Function Triggered when module is selected
-    //$('#options-modules').change(updateSelectedProjectScript);
+    $('#options-modules').change(updateSelectedProjectScript);
 
     $('#valispace-disconnect').click(disconnectValispaceScript);
     $('#valispace-options').click(OptionsScript);
@@ -53,19 +53,17 @@
     $('#update-all').click(updateAllPromise);
 
     types = google.script.run
-      .withSuccessHandler(function(result){
+      .withSuccessHandler(function (result) {
         types = result
       })
       .get_types()
-    
-
   });
 
   function updateAllPromise() {
     document.getElementById("updating-status").innerHTML = "Updating References"
     updateAllReferences().then(function (response) {
       document.getElementById("updating-status").innerHTML = response
-      setTimeout(function(){
+      setTimeout(function () {
         document.getElementById("updating-status").innerHTML = ""
       }, 3000)
     }, function (error) {
@@ -122,28 +120,41 @@
 
 
   function updateSelectedProjectScript() {
-    document.getElementById("updating-status").innerHTML = 'Downloading Data...'
-    
-    // Disable View Requirements Tree Button and Closes DropDown Div
-    document.getElementById("myDropdown").classList.remove("show");
+    let module = $("#options-modules").val();
+    let projectId = $("#options-projects").val();
 
-
-    clearTreeHtml();
-    var projectId = $("#options-projects").val();
-    var module = document.getElementById('treeTitle').innerText.toLowerCase().trim();
+    console.log('updateSelectedProjectScript')
     console.log(module)
-    google.script.run.set_project(projectId)
-    var projectName = $("#options-projects option:selected").text();
+    console.log(projectId)
 
-    orchestrateDownload(projectId, module);
+    // If Module and Project are selected.
+    if (module && projectId) {
+      console.log('inside')
+      google.script.run.set_project(projectId);
+      google.script.run
+      .withSuccessHandler(function (data) {
+        // Remove Previous Module's Javascript Code (is this needed?)
+        if (document.getElementById('ModuleScript')) {
+          document.getElementById('ModuleScript').remove()
+        }
+        // Add new Module Javascript code.
+        $('head').append(data)
+        orchestrateDownload(projectId, module)
+      })
+      .loadModule(module);
+    }
+
   }
 
 
   function orchestrateDownload(projectId, module) {
-    
     document.getElementById("updating-status").innerHTML = 'Downloading Data...';
     dataList = dataDict[module];
-    clearData()
+    if (document.getElementById('data')) {
+      console.log('Cleared Data')
+      clearData();
+      clearTreeHtml();
+    }
     return Promise.all(dataList.map(function (data, i) {
       return promiseRun('get_data', projectId, data)
         .then(function (result) {
@@ -205,7 +216,7 @@
       .openOptionDialog();
   }
 
-  function getDataFromHTML(){
+  function getDataFromHTML() {
     var specifications = JSON.parse(document.getElementById(types.specifications.data).getAttribute('data'));
     var folders = JSON.parse(document.getElementById(types.folders.data).getAttribute('data'));
     var requirements = JSON.parse(document.getElementById(types.requirements.data).getAttribute('data'));

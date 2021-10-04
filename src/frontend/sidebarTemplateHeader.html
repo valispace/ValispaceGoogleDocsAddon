@@ -1,18 +1,28 @@
+<div id="updating-status">
+  <span id="updating-status"></span>
+</div>
 
-  <div id="updating-status">
-    <span id="updating-status"></span>
+<div class="sidebarLine">
+  <p class="selectionTitle">Workspaces:</p>
+  <select class="actionButton selecionList" id="options-workspaces"></select>
+  <button mat-raised-button class="actionButton refreshButton" title="Refresh the Workspaces list."
+    id="update-workspaces"><i class="fas fa-sync-alt"></i></button>
+</div>
+
+<div class="sidebarLine">
+  <p class="selectionTitle">Project:</p>
+  <select class="actionButton selecionList" id="options-projects"></select>
+  <button mat-raised-button class="actionButton refreshButton" title="Refresh the Projects list."
+    id="update-projects"><i class="fas fa-sync-alt"></i></button>
+</div>
+
+<div id="navigationList">
+  <div class="treeContainer">
+    <select class="actionButton selecionList" id="options-modules">
+      <option disabled hidden selected>Select Module</option>
+      <option value="requirements">Requirements</option>
+      <option value="files">Files</option>
+    </select>
+    <div id="dataTree"></div>
   </div>
-  
-  <div class="sidebarLine">
-    <p class="selectionTitle">Workspaces:</p>
-    <select class="actionButton selecionList" id="options-workspaces"></select>
-    <button mat-raised-button class="actionButton refreshButton" title="Refresh the Workspaces list."
-      id="update-workspaces"><i class="fas fa-sync-alt"></i></button>
-  </div>
-  
-  <div class="sidebarLine">
-    <p class="selectionTitle">Project:</p>
-    <select class="actionButton selecionList" id="options-projects"></select>
-    <button mat-raised-button class="actionButton refreshButton" title="Refresh the Projects list." id="update-projects"><i
-        class="fas fa-sync-alt"></i></button>
-  </div>
+</div>
