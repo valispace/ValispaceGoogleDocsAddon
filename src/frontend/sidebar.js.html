@@ -16,9 +16,8 @@
     ],
     'files': [
       'filesData',
-      'folderData',
+      'fileFoldersData',
       'versionsData',
-      'groupsData',
       'usersData',
       'user_groupsData'
     ]
@@ -123,13 +122,8 @@
     let module = $("#options-modules").val();
     let projectId = $("#options-projects").val();
 
-    console.log('updateSelectedProjectScript')
-    console.log(module)
-    console.log(projectId)
-
     // If Module and Project are selected.
     if (module && projectId) {
-      console.log('inside')
       google.script.run.set_project(projectId);
       google.script.run
       .withSuccessHandler(function (data) {
@@ -151,7 +145,6 @@
     document.getElementById("updating-status").innerHTML = 'Downloading Data...';
     dataList = dataDict[module];
     if (document.getElementById('data')) {
-      console.log('Cleared Data')
       clearData();
       clearTreeHtml();
     }
@@ -162,8 +155,12 @@
         })
     })).then(function () {
       document.getElementById("updating-status").innerHTML = 'Building Tree';
-      buildRequirementsTree_browser();
-      getRequirements();
+      buildTree_browser();
+      if (module === "requirements") {
+        getRequirements()
+      } else if (module === "files") {
+        getFiles()
+      }
       addTreeListener();
       document.getElementById("updating-status").innerHTML = '';
     })
@@ -214,28 +211,6 @@
       .withUserObject(this)
       .withSuccessHandler()
       .openOptionDialog();
-  }
-
-  function getDataFromHTML() {
-    var specifications = JSON.parse(document.getElementById(types.specifications.data).getAttribute('data'));
-    var folders = JSON.parse(document.getElementById(types.folders.data).getAttribute('data'));
-    var requirements = JSON.parse(document.getElementById(types.requirements.data).getAttribute('data'));
-    var groups = JSON.parse(document.getElementById(types.groups.data).getAttribute('data'));
-    var states = JSON.parse(document.getElementById(types.states.data).getAttribute('data'));
-    var tags = JSON.parse(document.getElementById(types.tags.data).getAttribute('data'));
-    var files = JSON.parse(document.getElementById(types.files.data).getAttribute('data'));
-    var users = JSON.parse(document.getElementById(types.users.data).getAttribute('data'));
-    var all_data = {
-      'specifications': specifications,
-      'folders': folders,
-      'requirements': requirements,
-      'groups': groups,
-      'states': states,
-      'tags': tags,
-      'files': files,
-      'users': users
-    }
-    return all_data
   }
 
 </script>
