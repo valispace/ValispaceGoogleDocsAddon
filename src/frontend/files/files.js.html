@@ -61,8 +61,12 @@
 				var parentId_html = types.fileFolders.name + '_' + parent['id']
 
 				// Add to html
-				htmlToWrite = htmlToWrite.concat('<li class="searcheableObj folder" id="', parentId_html, '">', expandIcon, folderIcon, '<div class="truncated-text">', String(parent['name']), '</div></li>')
-				// subHtml.concat(parent['name'])
+				if("children" in parent) {
+					htmlToWrite = htmlToWrite.concat('<li class="reqSearcheableObj folder" id="', parentId_html, '">', expandIcon, folderIcon, '<div class="truncated-text">', String(parent['name']), '</div>', plusIcon, propertiesIcon, '</li>')
+				} else {
+					htmlToWrite = htmlToWrite.concat('<li class="reqSearcheableObj folder" id="', parentId_html, '">', expandIcon, folderIcon, '<div class="truncated-text">', String(parent['name']), '</div>', propertiesIcon, '</li>')
+				}
+					// subHtml.concat(parent['name'])
 
 				var foldersInside = folders.filter(x => x['parent'] === parent['id'])
 
@@ -92,7 +96,7 @@
 	function getFiles() {
 		var files = JSON.parse(document.getElementById("filesData").getAttribute('data'));
 		files.sort((a, b) => a.name.toString().localeCompare(b.name.toString(), navigator.languages[0] || navigator.language, { numeric: true, ignorePunctuation: true }))
-
+		files = files.filter(x => x['file_type'] !== 3)
 		for (index in files) {
 
 			var file = files[index]
@@ -165,21 +169,14 @@
 		}
 
 		var parent = this.parentElement.id.split("_");
-		console.log(parent);
+
 		var parentType = parent[0].toString();
 		var parentId = parseInt(parent[1]);
-		var filesToInsertt = all_data['files']
-			.filter(x => x[types[parentType].filter] === parentId)
-			.sort(function (a, b) {
-				if (a.identifier == b.identifier)
-					return 0;
-				if (a.identifier < b.identifier)
-					return -1;
-				if (a.identifier > b.identifier)
-					return 1;
-			})
+		var filesToInsert = all_data['files']
+			.filter(x => x['id'] === parentId)
 
 		var insertion = recursive_insertion(all_data, this.parentElement)
+
 		if (!Array.isArray(insertion)) {
 			insertion = [insertion];
 		}
@@ -187,7 +184,23 @@
 		google.script.run
 			.withFailureHandler(function () { document.getElementById("updating-status").innerHTML = 'Error Inserting ' })
 			.withSuccessHandler(function () { document.getElementById("updating-status").innerHTML = '' })
-			.insert_spec_or_group_using_template(insertion, all_data, null);
+			.insert_files_using_template(insertion, all_data, null);
 
 	}
+
+	function recursive_insertion(all_data, node) {
+
+		if (node.classList.contains('file')) {
+			var projectId = $("#options-projects").val();
+			var parent = node.id.split("_");
+			var parentType = parent[0].toString();
+			var parentId = parseInt(parent[1]);
+			var filesToInsert = all_data['files']
+				.filter(x => x['id'] === parentId)
+				.sort((a, b) => a.name.toString().localeCompare(b.name.toString(), navigator.languages[0] || navigator.language, { numeric: true, ignorePunctuation: true }))
+			return filesToInsert[0];
+		}
+	}
+
+
 </script>
