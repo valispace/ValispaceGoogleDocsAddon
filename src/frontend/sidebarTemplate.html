@@ -12,7 +12,7 @@
 
     <?!=HtmlService.createHtmlOutputFromFile('frontend/sidebar.css').getContent()?>
     <?!=HtmlService.createHtmlOutputFromFile('frontend/requirements/requirements.css').getContent()?>
-    <?!=HtmlService.createHtmlOutputFromFile('frontend/sidebar.js').getContent()?>
+    <?!=HtmlService.createHtmlOutputFromFile('frontend/sidebar.js').getContent()?> 
     <?!=HtmlService.createHtmlOutputFromFile('frontend/utils.js').getContent()?>
 
 </head>
@@ -75,6 +75,11 @@
         </div>
     </div>
 
+    <div class="buttonContainer sidebarLine">
+        <button class="actionButton" id="valispace-options"><i class="fas fa-cog"></i></button>
+        <button class="actionButton" id="valispace-disconnect">Disconnect</button>
+    </div>
+    
     <div id="footer">
         <p id="version-footer"> Version
             <?= getCurrentVersion()?>
