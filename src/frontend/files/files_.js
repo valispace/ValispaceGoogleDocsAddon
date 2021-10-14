@@ -7,12 +7,15 @@ function insert_files_using_template(insertion_array, all_data) {
   var files = [];
   insertion_array.reverse();
 
+
   for (line of insertion_array) {
+
+
     // If this is a Group
     if (Array.isArray(line)) {
 
-      // Add Folderor Section Name Name
-      last_index = direct_insert(all_data, line[0], line[1], true);
+      // Add Folder or Section Name Name
+      last_index = files_direct_insert(all_data, line[0], line[1], true);
 
       if (files.length > 0) {
         files.reverse();
@@ -38,38 +41,104 @@ function insert_files_using_template(insertion_array, all_data) {
 
 }
 
-function direct_insert(all_data, objectName, property, new_line = false) {
+function files_direct_insert(all_data, objectName, property, new_line = false) {
+
   var insertion_type = property == 'images' ? 'image' : 'text';
   var parentType = objectName.split("_")[0].toString();
   var parentId = parseInt(objectName.split("_")[1]);
 
-  var base_path = PropertiesService.getUserProperties().getProperty('deployment_url')
+  var base_path = PropertiesService.getUserProperties().getProperty('deployment_url');
 
   var object = all_data[types[parentType].name].find(x => x['id'] === parentId);
   //var url_meta = urlTranslator(object, types[parentType], base_path);
 
   projectId = PropertiesService.getUserProperties().getProperty('projectID');
-  var text_to_insert = getTextToInsert(all_data, object, property, projectId);
+  var text_to_insert = getFilesTextToInsert(all_data, object, property, projectId);
+
 
   var insertion_data = new InsertionData(
     text_to_insert,
-    url_meta,
     objectName,
     property
   );
   return Inserter.insert(insertion_data, insertion_type, new_line);
 }
 
+function files_replaceAttributesWithId(attribute, objectsList, objectToSearch, attributeToInsert) {
+
+  if (objectToSearch[attribute] === null) {
+    return '0';
+  }
+  objectId = objectToSearch[attribute];
+  objectAttributes = objectsList.find(x => x['id'] === objectId)[attributeToInsert];
+  if (objectAttributes) {
+    return objectAttributes
+  }
+  else {
+    return '0';
+  }
+}
+
+function files_replaceReferencesWithObject(attribute, objectList, objectToSearch) {
+  let content_types = [
+    {
+      'id': 21,
+      'url': 'components/',
+      'property': 'name'
+    },
+    {
+      'id': 120,
+      'url': 'requirements/',
+      'property': 'identifier'
+    },
+    {
+      'id': 38,
+      'url': 'valis/',
+      'property': '?'
+    },
+    {
+      'id': 13,
+      'url': 'project/',
+      'property': 'name'
+    }
+  ]
+
+  //reference_files = objectList.filter(x => x['file_type'] == 3);
+  referenced_files = objectList.filter(x => x['reference_file'] == objectToSearch['id']);
+
+  referenced_files.push(objectToSearch);
+
+  reference_objects = '';
+  referenced_files.forEach(function (file) {
+    if (file[attribute] == null) {
+      reference_objects = reference_objects + ' ';
+    } else {
+      object_id = file[attribute];
+      request_url = content_types.find(x => x['id'] == file['content_type'])['url'];
+      request_url = request_url + object_id + '/';
+      object = JSON.parse(getAuthenticatedValispaceUrl(request_url));
+      reference = object[content_types.find(x => x['id'] == file['content_type'])['property']]
+      if (reference_objects.length == 0) {
+        reference_objects = reference_objects + reference;
+      } else {
+        reference_objects = reference_objects + ', ' + reference
+      }
+    }
+  });
+
+  if (reference_objects) {
+    return reference_objects;
+  }
+}
+
 function getFilesTextToInsert(all_data, object, property, projectId) {
 
   property = property == 'rationale' ? 'comment' : property;
-  console.log("PROPERTY")
-  console.log(property);
-  console.log(object);
   substitution = {
-    'files': [getFilesInRequirement, [all_data['files'], object]],
+    'files': [getFilesInFolder, [all_data['files'], object]],
+    'current_version': [files_replaceAttributesWithId, ['current_version', all_data['versions'], object, 'version']],
+    'object_id': [files_replaceReferencesWithObject, ['object_id', all_data['files'], object]]
   }
-
 
   text_to_insert = '';
   if (substitution.hasOwnProperty(property)) {
@@ -79,12 +148,29 @@ function getFilesTextToInsert(all_data, object, property, projectId) {
 
 
     text_to_insert = func.apply(this, args);
-  }
-  else if (object.hasOwnProperty(property)) {
+
+  } else if (object.hasOwnProperty(property)) {
     text_to_insert = object[property] ? object[property] : '-';
   }
 
   return text_to_insert;
+}
+
+function getFilesInFolder(filesList, folder) {
+
+  textToInsert = ''
+  var files = filesList.filter(x => x['folder'] === folder['id'])
+
+
+  for (fileIndex in files) {
+
+    if (files[fileIndex]['file_type'] === 1) {
+      textToInsert += files[fileIndex]['name'] + ", "
+    } else if (files[fileIndex]['file_type'] === 2) {
+      textToInsert += files[fileIndex]['name'] + ", "
+    }
+  }
+  return textToInsert
 }
 
 // TODO: Why are the functions insertRequirementsInSpec_asTable_fromTemplate and insert_spec_or_group_using_template separated? There is no clear distinction/
