@@ -12,7 +12,7 @@
 
 	$(function () {
 		// ReDownloads Requirement Data when refresh button is pressed
-		$('#redownload-files').click(updateSelectedProjectScript);
+		$('#redownload-data').click(updateSelectedProjectScript);
 	});
 
 	function updateAllReferences() {
@@ -189,7 +189,6 @@
 	}
 
 	function recursive_insertion(all_data, node) {
-		console.log(node.classList);
 		if (node.classList.contains('file')) {
 
 			var projectId = $("#options-projects").val();
