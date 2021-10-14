@@ -37,7 +37,13 @@ var types = {
               data:'tagsData'},
   files:{name:'files',
               url: '',
-              data:'filesData'}
+              data:'filesData'},
+  fileFolders:{name:'fileFolders',
+              url:'',
+              data:'fileFoldersData'},
+  versions:{name:'versions',
+              url:'',
+              data:'versionsData'}
 }
 
 function get_types(){
