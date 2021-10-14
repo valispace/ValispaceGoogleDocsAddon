@@ -22,7 +22,7 @@
 			// Gets Data from HTML
 			var all_data = {
 				'fileFolders': JSON.parse(document.getElementById(types.fileFolders.data).getAttribute('data')),
-				'versions': JSON.parse(document.getElementById(types.requirements.data).getAttribute('data')),
+				'versions': JSON.parse(document.getElementById(types.versions.data).getAttribute('data')),
 				'files': JSON.parse(document.getElementById(types.files.data).getAttribute('data')),
 				'users': JSON.parse(document.getElementById(types.users.data).getAttribute('data'))
 			}
@@ -157,13 +157,13 @@
 	}
 
 	function addFile_PlusButton() {
-		document.getElementById("updating-status").innerHTML = 'Inserting Requirements...'
+		document.getElementById("updating-status").innerHTML = 'Inserting Files...'
 
 		var projectId = $("#options-projects").val();
 
 		var all_data = {
 			'fileFolders': JSON.parse(document.getElementById(types.fileFolders.data).getAttribute('data')),
-			'versions': JSON.parse(document.getElementById(types.requirements.data).getAttribute('data')),
+			'versions': JSON.parse(document.getElementById(types.versions.data).getAttribute('data')),
 			'files': JSON.parse(document.getElementById(types.files.data).getAttribute('data')),
 			'users': JSON.parse(document.getElementById(types.users.data).getAttribute('data'))
 		}
@@ -189,8 +189,9 @@
 	}
 
 	function recursive_insertion(all_data, node) {
-
+		console.log(node.classList);
 		if (node.classList.contains('file')) {
+
 			var projectId = $("#options-projects").val();
 			var parent = node.id.split("_");
 			var parentType = parent[0].toString();
@@ -199,6 +200,22 @@
 				.filter(x => x['id'] === parentId)
 				.sort((a, b) => a.name.toString().localeCompare(b.name.toString(), navigator.languages[0] || navigator.language, { numeric: true, ignorePunctuation: true }))
 			return filesToInsert[0];
+
+		} else if (node.classList.contains('folder')) {
+
+			var children = document.getElementById("children_" + node.id).childNodes
+			var files = [];
+			if (node.classList.contains('folder')) {
+				files.push([node.id, 'name'])
+			}
+
+			for (var i = 0; i < children.length; i++) {
+				if (children.item(i).classList.contains('file')) {
+					var result = recursive_insertion(all_data, children.item(i));
+					if (result) { files = files.concat(result) }
+				}
+			}
+			return files
 		}
 	}
 
