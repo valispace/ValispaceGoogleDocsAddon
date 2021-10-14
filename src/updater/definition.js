@@ -83,7 +83,6 @@ function verify_and_update_images(imgList, objectList, base_path){
   // TODO: This can be done outside, direclty when the imgList is generated.
   for (img in imgList){
     imgURL = imgList[img].getLinkUrl()
-    console.log(imgURL)
     reqId = parseInt(imgURL.split('requirements/')[1].split('?')[0])
     // TODO: Insted of a simple split, split with & and search for "name"
     imgId = parseInt(imgURL.split('files_')[1])
