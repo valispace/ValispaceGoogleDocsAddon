@@ -58,9 +58,7 @@
     };
 
     function changeTable(module) {
-      console.log(module);
       var TemplateDocumentId = $('#' + module + '_TemplateDocumentId').val();
-      console.log(TemplateDocumentId);
       google.script.run.withSuccessHandler(closeIt).changeReqTableTemplate(TemplateDocumentId, module);
     };
 
