@@ -187,8 +187,8 @@ function insertFiles_asTable_fromTemplate(projectId, files, all_data, previousTa
 
   var cache = CacheService.getScriptCache();
   if (cache.get('templateTableCellAttributes') == null || cache.get('templateTableData') == null) {
-    documentId = PropertiesService.getDocumentProperties().getProperty('TemplateDocumentId')
-    values = getTemplateTable(documentId)
+    documentId = PropertiesService.getDocumentProperties().getProperty('files_TemplateDocumentId')
+    values = getFilesTemplateTable(documentId)
     templateTableData = values[0]
     templateTableCellAttributes = values[1]
     cache.put('templateTableData', JSON.stringify(templateTableData))
@@ -337,4 +337,27 @@ function insertFiles_asTable_fromTemplate(projectId, files, all_data, previousTa
   }
 
   return [tableIndex, DocumentApp.getActiveDocument().getChild(tableIndex), numOfCells]
+}
+
+function getFilesTemplateTable(documentId) {
+  templateTableData = []
+  templateTableCellAttributes = []
+
+  var body = DocumentApp.openById(documentId).getBody()
+  table = body.getTables()[0]
+
+  numColumns = table.getRow(0).getNumCells()
+  for (let rowIndex = 0; rowIndex < table.getNumRows(); rowIndex++) {
+    rowData = []
+    rowCellAttributes = []
+
+    for (let columnIndex = 0; columnIndex < numColumns; columnIndex++) {
+      rowData.push(table.getCell(rowIndex, columnIndex).getText())
+      rowCellAttributes.push(table.getCell(rowIndex, columnIndex).getAttributes())
+    }
+    templateTableData.push(rowData)
+    templateTableCellAttributes.push(rowCellAttributes)
+  }
+
+  return [templateTableData, templateTableCellAttributes]
 }

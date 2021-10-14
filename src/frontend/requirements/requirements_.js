@@ -197,7 +197,7 @@ function insertRequirementsInSpec_asTable_fromTemplate(projectId, requirements, 
 
   var cache = CacheService.getScriptCache();
   if (cache.get('templateTableCellAttributes') == null || cache.get('templateTableData') == null) {
-    documentId = PropertiesService.getDocumentProperties().getProperty('TemplateDocumentId')
+    documentId = PropertiesService.getDocumentProperties().getProperty('requirements_TemplateDocumentId')
     values = getTemplateTable(documentId)
     templateTableData = values[0]
     templateTableCellAttributes = values[1]
@@ -497,7 +497,6 @@ function replaceImagesURLToFile(element) {
       maxWidth = 500
       maxHeight = 500
       if (img.getWidth() > maxWidth | img.getHeight() > maxHeight) {
-        console.log("Rescale Image")
         ratio = maxWidth / img.getWidth()
         img.setWidth(img.getWidth() * ratio)
         img.setHeight(img.getHeight() * ratio)

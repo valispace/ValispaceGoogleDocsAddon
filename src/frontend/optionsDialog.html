@@ -14,14 +14,32 @@
       <label for="TemplateDocumentId">Requirement Table Template ID: </label>
     </div>
     <div>
-      <input type="text" class="input-field" id="TemplateDocumentId" name="TemplateDocumentId">
+      <input type="text" class="input-field" id="requirements_TemplateDocumentId" name="TemplateDocumentId">
     </div>
   </div>
 
 
   <div id="RequirementsTemplate">
-    <input type="submit" value="Modify Template Table" class="action button" onclick="changeReqTable()">
-    <input type="submit" value="Reset to Default Table" class="action button" onclick="resetTableID()">
+    <input type="submit" value="Modify Template Table" class="action button" onclick="changeTable('requirements')">
+    <input type="submit" value="Reset to Default Table" class="action button" onclick="resetTable('requirements')">
+  </div>
+  <br>
+
+  <br>
+
+  <div class="filesInputContainer">
+    <div class="input-label">
+      <label for="TemplateDocumentId">Files Table Template ID: </label>
+    </div>
+    <div>
+      <input type="text" class="input-field" id="files_TemplateDocumentId" name="TemplateDocumentId">
+    </div>
+  </div>
+
+
+  <div id="FilesTemplate">
+    <input type="submit" value="Modify Template Table" class="action button" onclick="changeTable('files')">
+    <input type="submit" value="Reset to Default Table" class="action button" onclick="resetTable('files')">
   </div>
   <br>
 
@@ -39,13 +57,15 @@
       google.script.host.close()
     };
 
-    function changeReqTable() {
-      var TemplateDocumentId = $('#TemplateDocumentId').val();
-      google.script.run.withSuccessHandler(closeIt).changeReqTableTemplate(TemplateDocumentId);
+    function changeTable(module) {
+      console.log(module);
+      var TemplateDocumentId = $('#' + module + '_TemplateDocumentId').val();
+      console.log(TemplateDocumentId);
+      google.script.run.withSuccessHandler(closeIt).changeReqTableTemplate(TemplateDocumentId, module);
     };
 
-    function resetTableID() {
-      google.script.run.withSuccessHandler(closeIt).resetReqTableTemplate();
+    function resetTable(module) {
+      google.script.run.withSuccessHandler(closeIt).resetReqTableTemplate(module);
     };
 
 
