@@ -94,7 +94,7 @@ function files_replaceReferencesWithObject(attribute, objectList, objectToSearch
     {
       'id': 38,
       'url': 'valis/',
-      'property': '?'
+      'property': 'name'
     },
     {
       'id': 13,
