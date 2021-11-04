@@ -85,7 +85,7 @@
 			}
 		}
 
-		getFolders(foldersRoot)
+		getFolders(folders)
 
 		htmlToWrite = htmlToWrite.concat('</ul>')
 
@@ -95,8 +95,10 @@
 
 	function getFiles() {
 		var files = JSON.parse(document.getElementById("filesData").getAttribute('data'));
+
 		files.sort((a, b) => a.name.toString().localeCompare(b.name.toString(), navigator.languages[0] || navigator.language, { numeric: true, ignorePunctuation: true }))
 		files = files.filter(x => x['file_type'] !== 3)
+
 		for (index in files) {
 
 			var file = files[index]
@@ -106,7 +108,7 @@
 			displayName = fileTitle
 			var fileName = types.files.name + '_' + file['id']
 			// If Not in a Group ['group'] = null, it is in a specificaiton only
-			if (file['folder'] !== null) {
+			if (file.hasOwnProperty('folder') && file['folder'] !== null) {
 				var parentId = 'children_' + types.fileFolders.name + '_' + file['folder'].toString()
 			} else {
 				var parentId = 'treeMain'

@@ -66,10 +66,11 @@ function files_direct_insert(all_data, objectName, property, new_line = false) {
 
 function files_replaceAttributesWithId(attribute, objectsList, objectToSearch, attributeToInsert) {
 
-  if (objectToSearch[attribute] === null) {
+  if (!objectToSearch.hasOwnProperty(attribute) || objectToSearch[attribute] === null) {
     return '0';
   }
   objectId = objectToSearch[attribute];
+
   objectAttributes = objectsList.find(x => x['id'] === objectId)[attributeToInsert];
   if (objectAttributes) {
     return objectAttributes

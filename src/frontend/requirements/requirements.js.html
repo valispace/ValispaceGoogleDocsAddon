@@ -361,12 +361,12 @@
 
 		// Root
 		if (folders != null) {
-			var foldersRoot = folders.filter(x => x['parent'] === null)
+			var foldersRoot = folders.filter(x => !x.hasOwnProperty('parent') || x['parent'] === null)
 		} else {
 			foldersRoot = []
 		}
 		if (specifications != null) {
-			var specificationsRoot = specifications.filter(x => x['folder'] === null)
+			var specificationsRoot = specifications.filter(x => !x.hasOwnProperty('folder') || ['folder'] === null)
 		} else {
 			specificationsRoot = []
 		}
@@ -375,9 +375,8 @@
 
 			for (index in parents) {
 				var parent = parents[index]
-
 				// If Parent is a Specification, it has "requirement_groups"
-				if ("requirement_groups" in parent) {
+				if (parent.hasOwnProperty('requirement_groups')) {
 					var parentId_html = types.specifications.name + '_' + parent['id']
 
 					htmlToWrite = htmlToWrite.concat('<li class="reqSearcheableObj specification" id="', parentId_html, '">', expandIcon, specificationIcon, '<div class="truncated-text">', String(parent['name']), '</div>', plusIcon, propertiesIcon, '</li>')
@@ -385,9 +384,10 @@
 
 					var parentId = parent['id']
 
-					var groupsInside
+					var groupsInside;
 					if (groups != null) {
-						groupsInside = groups.filter(x => x['specification'] === parentId & x['parent'] === null)
+						filtered_groups = groups.filter(x => x['specification'] === parentId)
+						groupsInside = filtered_groups.filter(x => !x.hasOwnProperty('parent') || x['parent'] === null)
 						htmlToWrite = htmlToWrite.concat('<div class="nested dropdown-content" id="children_', parentId_html, '">')
 						getSpecificationsAndGroups(groupsInside)
 						htmlToWrite = htmlToWrite.concat('</div>')
@@ -397,7 +397,7 @@
 
 				}
 				// If Parent is a Another Group, it has "children"
-				if ("children" in parent) {
+				if (parent.hasOwnProperty('children')) {
 					var parentId_html = types.groups.name + '_' + parent['id']
 
 					htmlToWrite = htmlToWrite.concat('<li class="reqSearcheableObj group" id="', parentId_html, '">', expandIcon, sectionIcon, '<div class="truncated-text">', String(parent['name']), '</div>', plusIcon, propertiesIcon, '</li>')
@@ -472,7 +472,6 @@
 			} else {
 				var parentId = 'children_' + types.groups.name + '_' + requirement['group'].toString()
 			}
-
 			var liNode = document.createElement("li");
 			liNode.innerHTML = reqIcon + '<div class="requirement-text">' + displayName + '</div>' + plusIcon + propertiesIcon
 			liNode.classList.add("reqSearcheableObj");
