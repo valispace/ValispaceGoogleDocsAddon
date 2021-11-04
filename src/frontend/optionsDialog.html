@@ -11,10 +11,10 @@
 
   <div class="requirementInputContainer">
     <div class="input-label">
-      <label for="TemplateDocumentId">Requirement Table Template ID: </label>
+      <label for="TemplateDocumentId_requirements">Requirement Table Template ID: </label>
     </div>
     <div>
-      <input type="text" class="input-field" id="requirements_TemplateDocumentId" name="TemplateDocumentId">
+      <input type="text" class="input-field" id="requirements_TemplateDocumentId_requirements" name="TemplateDocumentId_requirements">
     </div>
   </div>
 
@@ -29,10 +29,10 @@
 
   <div class="filesInputContainer">
     <div class="input-label">
-      <label for="TemplateDocumentId">Files Table Template ID: </label>
+      <label for="TemplateDocumentId_files">Files Table Template ID: </label>
     </div>
     <div>
-      <input type="text" class="input-field" id="files_TemplateDocumentId" name="TemplateDocumentId">
+      <input type="text" class="input-field" id="TemplateDocumentId_files" name="TemplateDocumentId_requirements">
     </div>
   </div>
 
@@ -58,8 +58,8 @@
     };
 
     function changeTable(module) {
-      var TemplateDocumentId = $('#' + module + '_TemplateDocumentId').val();
-      google.script.run.withSuccessHandler(closeIt).changeReqTableTemplate(TemplateDocumentId, module);
+      var TemplateDocumentId_requirements = $('#' + module + '_TemplateDocumentId_requirements').val();
+      google.script.run.withSuccessHandler(closeIt).changeReqTableTemplate(TemplateDocumentId_requirements, module);
     };
 
     function resetTable(module) {

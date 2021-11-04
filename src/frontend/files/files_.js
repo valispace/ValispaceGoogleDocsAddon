@@ -188,7 +188,7 @@ function insertFiles_asTable_fromTemplate(projectId, files, all_data, previousTa
 
   var cache = CacheService.getScriptCache();
   if (cache.get('templateTableCellAttributes') == null || cache.get('templateTableData') == null) {
-    documentId = PropertiesService.getDocumentProperties().getProperty('files_TemplateDocumentId')
+    documentId = PropertiesService.getDocumentProperties().getProperty('TemplateDocumentId_files')
     values = getFilesTemplateTable(documentId)
     templateTableData = values[0]
     templateTableCellAttributes = values[1]
