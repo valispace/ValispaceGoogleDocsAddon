@@ -12,7 +12,7 @@
 
     <?!=HtmlService.createHtmlOutputFromFile('frontend/sidebar.css').getContent()?>
     <?!=HtmlService.createHtmlOutputFromFile('frontend/requirements/requirements.css').getContent()?>
-    <?!=HtmlService.createHtmlOutputFromFile('frontend/sidebar.js').getContent()?> 
+    <?!=HtmlService.createHtmlOutputFromFile('frontend/sidebar.js').getContent()?>
     <?!=HtmlService.createHtmlOutputFromFile('frontend/utils.js').getContent()?>
 
 </head>
@@ -65,21 +65,20 @@
             References</button>
         <button mat-raised-button class="actionButton refreshButton" title="Re-download Requirement Data."
             id="redownload-data">Download Data</button>
-
-        <div class="dropdown">
-            <div id="myDropdown" class="dropdown-content-main">
-                <input type="text" placeholder="Search.." id="myInput" onkeyup="filterFunction()">
-                <p class="dataTreeInsertButton" id="dataTreeInsertButton"></p>
-                <!-- TODO: Rename this class and id -->
-            </div>
-        </div>
     </div>
+
+    <div id="myDropdown" class="dropdown-content-main">
+        <input type="text" placeholder="Search.." id="myInput" onkeyup="filterFunction()">
+        <p class="dataTreeInsertButton" id="dataTreeInsertButton"></p>
+        <!-- TODO: Rename this class and id -->
+    </div>
+
 
     <div class="buttonContainer sidebarLine">
         <button class="actionButton" id="valispace-options"><i class="fas fa-cog"></i></button>
         <button class="actionButton" id="valispace-disconnect">Disconnect</button>
     </div>
-    
+
     <div id="footer">
         <p id="version-footer"> Version
             <?= getCurrentVersion()?>
