@@ -15,7 +15,7 @@ var Inserter = {
     index = getCursorIndex(body, cursor)
 
     var el
-    
+
     var text_to_insert = object.data
     if (text_to_insert == ''){
       text_to_insert = '-'
@@ -31,7 +31,7 @@ var Inserter = {
     if (new_line){
       el.insertText(0,'\n')
     }
-    
+
     if(type=='image'){
       replaceImagesURLToFile(el)
     }

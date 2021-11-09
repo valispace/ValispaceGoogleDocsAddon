@@ -1,5 +1,5 @@
-<script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
-<script>
+<!-- All Modules Javascript file need to have this id = Modulescript -->
+<script id='ModuleScript'>
 
 	// The variable types that was defined here is now downloaded from Google Script at sidebar.js.html
 
@@ -14,15 +14,24 @@
 
 	$(function () {
 		// ReDownloads Requirement Data when refresh button is pressed
-		$('#redownload-requirements').click(updateSelectedProjectScript);
+		$('#redownload-data').click(updateSelectedProjectScript);
 	});
 
 	function updateAllReferences() {
 
 		return new Promise(function (resolve, reject) {
-			
+
 			// Gets Data from HTML
-			var all_data = getDataFromHTML()
+			var all_data = {
+				'specifications': JSON.parse(document.getElementById(types.specifications.data).getAttribute('data')),
+				'folders': JSON.parse(document.getElementById(types.folders.data).getAttribute('data')),
+				'requirements': JSON.parse(document.getElementById(types.requirements.data).getAttribute('data')),
+				'groups': JSON.parse(document.getElementById(types.groups.data).getAttribute('data')),
+				'states': JSON.parse(document.getElementById(types.states.data).getAttribute('data')),
+				'tags': JSON.parse(document.getElementById(types.tags.data).getAttribute('data')),
+				'files': JSON.parse(document.getElementById(types.files.data).getAttribute('data')),
+				'users': JSON.parse(document.getElementById(types.users.data).getAttribute('data'))
+			}
 			google.script.run
 				.withFailureHandler(function () { reject("Error Updating References") })
 				.withSuccessHandler(function () { resolve("References Updated") })
@@ -34,7 +43,7 @@
 		document.getElementById(objectId).classList.toggle("show");
 	}
 
-	
+
 	function toggleObjectProperties(objectId) {
 		if (document.contains(document.getElementById(objectId + '_properties'))) {
 			document.getElementById(objectId + '_properties').remove();
@@ -64,7 +73,16 @@
 					var reqId = parseInt(parent[1]);
 					propertyName = htmlElementId[1];
 
-					all_data = getDataFromHTML()
+					var all_data = {
+						'specifications': JSON.parse(document.getElementById(types.specifications.data).getAttribute('data')),
+						'folders': JSON.parse(document.getElementById(types.folders.data).getAttribute('data')),
+						'requirements': JSON.parse(document.getElementById(types.requirements.data).getAttribute('data')),
+						'groups': JSON.parse(document.getElementById(types.groups.data).getAttribute('data')),
+						'states': JSON.parse(document.getElementById(types.states.data).getAttribute('data')),
+						'tags': JSON.parse(document.getElementById(types.tags.data).getAttribute('data')),
+						'files': JSON.parse(document.getElementById(types.files.data).getAttribute('data')),
+						'users': JSON.parse(document.getElementById(types.users.data).getAttribute('data'))
+					}
 					directInsertPromise(all_data, reqName, propertyName);
 				});
 			}
@@ -144,7 +162,16 @@
 		var filter = filter.split(':')
 		var property = filter[0].toLowerCase()
 		var value = filter[1]
-		var all_data = getDataFromHTML() // Here we just user [specifications, folders, requirements, groups], 
+		var all_data = {
+			'specifications': JSON.parse(document.getElementById(types.specifications.data).getAttribute('data')),
+			'folders': JSON.parse(document.getElementById(types.folders.data).getAttribute('data')),
+			'requirements': JSON.parse(document.getElementById(types.requirements.data).getAttribute('data')),
+			'groups': JSON.parse(document.getElementById(types.groups.data).getAttribute('data')),
+			'states': JSON.parse(document.getElementById(types.states.data).getAttribute('data')),
+			'tags': JSON.parse(document.getElementById(types.tags.data).getAttribute('data')),
+			'files': JSON.parse(document.getElementById(types.files.data).getAttribute('data')),
+			'users': JSON.parse(document.getElementById(types.users.data).getAttribute('data'))
+		} // Here we just user [specifications, folders, requirements, groups], 
 		var identifiers = []
 		for (data of all_data) {
 			data.filter(x => {
@@ -158,10 +185,19 @@
 	}
 
 	// TODO: This function is currently not used. But it might be used soon.
-	function insertAll(){
+	function insertAll() {
 		document.getElementById("updating-status").innerHTML = 'Inserting Requirements...'
 
-		var all_data = getDataFromHTML();
+		var all_data = {
+			'specifications': JSON.parse(document.getElementById(types.specifications.data).getAttribute('data')),
+			'folders': JSON.parse(document.getElementById(types.folders.data).getAttribute('data')),
+			'requirements': JSON.parse(document.getElementById(types.requirements.data).getAttribute('data')),
+			'groups': JSON.parse(document.getElementById(types.groups.data).getAttribute('data')),
+			'states': JSON.parse(document.getElementById(types.states.data).getAttribute('data')),
+			'tags': JSON.parse(document.getElementById(types.tags.data).getAttribute('data')),
+			'files': JSON.parse(document.getElementById(types.files.data).getAttribute('data')),
+			'users': JSON.parse(document.getElementById(types.users.data).getAttribute('data'))
+		}
 
 		// Requirements by Identifier Odentifier - TODO: Function to Select what to order by (UI needed)
 		var root = document.getElementById("reqTreeMain")
@@ -173,9 +209,9 @@
 		}
 
 		google.script.run
-		.withFailureHandler(function () { document.getElementById("updating-status").innerHTML = 'Error Inserting '})
-		.withSuccessHandler(function () { document.getElementById("updating-status").innerHTML = ''})
-		.insert_spec_or_group_using_template(insertion, all_data, null);
+			.withFailureHandler(function () { document.getElementById("updating-status").innerHTML = 'Error Inserting ' })
+			.withSuccessHandler(function () { document.getElementById("updating-status").innerHTML = '' })
+			.insert_spec_or_group_using_template(insertion, all_data, null);
 	}
 
 
@@ -222,7 +258,16 @@
 
 		var projectId = $("#options-projects").val();
 
-		var all_data = getDataFromHTML();
+		var all_data = {
+			'specifications': JSON.parse(document.getElementById(types.specifications.data).getAttribute('data')),
+			'folders': JSON.parse(document.getElementById(types.folders.data).getAttribute('data')),
+			'requirements': JSON.parse(document.getElementById(types.requirements.data).getAttribute('data')),
+			'groups': JSON.parse(document.getElementById(types.groups.data).getAttribute('data')),
+			'states': JSON.parse(document.getElementById(types.states.data).getAttribute('data')),
+			'tags': JSON.parse(document.getElementById(types.tags.data).getAttribute('data')),
+			'files': JSON.parse(document.getElementById(types.files.data).getAttribute('data')),
+			'users': JSON.parse(document.getElementById(types.users.data).getAttribute('data'))
+		}
 
 		var parent = this.parentElement.id.split("_");
 		var parentType = parent[0].toString();
@@ -239,47 +284,47 @@
 			})
 
 		var insertion = recursive_insertion(all_data, this.parentElement)
-		if(!Array.isArray(insertion)){
+		if (!Array.isArray(insertion)) {
 			insertion = [insertion];
 		}
 
 		google.script.run
-		.withFailureHandler(function () { document.getElementById("updating-status").innerHTML = 'Error Inserting '})
-		.withSuccessHandler(function () { document.getElementById("updating-status").innerHTML = ''})
-		.insert_spec_or_group_using_template(insertion, all_data, null);
+			.withFailureHandler(function () { document.getElementById("updating-status").innerHTML = 'Error Inserting ' })
+			.withSuccessHandler(function () { document.getElementById("updating-status").innerHTML = '' })
+			.insert_spec_or_group_using_template(insertion, all_data, null);
 
 	}
 
-	function recursive_insertion(all_data, node){
-		if(node.classList.contains('requirement')){
+	function recursive_insertion(all_data, node) {
+		if (node.classList.contains('requirement')) {
 			var projectId = $("#options-projects").val();
 			var parent = node.id.split("_");
 			var parentType = parent[0].toString();
 			var parentId = parseInt(parent[1]);
 			var requirementsToInsert = all_data['requirements']
-					.filter(x => x[types[parentType].filter] === parentId)
-					.sort((a, b) => a.identifier.toString().localeCompare(b.identifier.toString(), navigator.languages[0] || navigator.language, {numeric: true, ignorePunctuation: true}))
+				.filter(x => x[types[parentType].filter] === parentId)
+				.sort((a, b) => a.identifier.toString().localeCompare(b.identifier.toString(), navigator.languages[0] || navigator.language, { numeric: true, ignorePunctuation: true }))
 			return requirementsToInsert[0];
 		}
-		else{
-			var children = document.getElementById("children_"+node.id).childNodes
+		else {
+			var children = document.getElementById("children_" + node.id).childNodes
 			var reqs = []
-			if(node.classList.contains('specification') || node.classList.contains('group')){
+			if (node.classList.contains('specification') || node.classList.contains('group')) {
 				// directInsertPromise(all_data, node.id, 'name');
 				reqs.push([node.id, 'name'])
 			}
 
 			// TODO: THis can definately be optimized. I'm currently going through the requirements first just to have them at the top of the tree, and greoups would be below.
 			for (var i = 0; i < children.length; i++) {
-				if (children.item(i).tagName == "LI" && children.item(i).classList.contains('requirement')){
+				if (children.item(i).tagName == "LI" && children.item(i).classList.contains('requirement')) {
 					var result = recursive_insertion(all_data, children.item(i));
-					if(result){reqs = reqs.concat(result)}
+					if (result) { reqs = reqs.concat(result) }
 				}
 			}
 			for (var i = 0; i < children.length; i++) {
-				if (children.item(i).tagName == "LI" && !children.item(i).classList.contains('requirement')){
+				if (children.item(i).tagName == "LI" && !children.item(i).classList.contains('requirement')) {
 					var result = recursive_insertion(all_data, children.item(i));
-					if(result){reqs = reqs.concat(result)}
+					if (result) { reqs = reqs.concat(result) }
 				}
 			}
 
@@ -290,38 +335,38 @@
 
 	function updateAllTrees(projectId, projectName) {
 		$('#projectTree').html("Loading components for " + name + "....");
-		$('#requirementTree').html("Loading requirements for " + name + "....");
+		$('#dataTree').html("Loading requirements for " + name + "....");
 		google.script.run
 			.withSuccessHandler()
 			.withFailureHandler(
 				function (error) {
-					$('#requirementTree').html("Failed to load requirements. Please try again, if the problem persist contact support@valispace.com");
+					$('#dataTree').html("Failed to load requirements. Please try again, if the problem persist contact support@valispace.com");
 				})
 			.getRequirementTree(projectId);
 
 	}
 
-	function buildRequirementsTree_browser() {
+	function buildTree_browser() {
 		var folders = JSON.parse(document.getElementById(types.folders.data).getAttribute('data'));
 		var specifications = JSON.parse(document.getElementById(types.specifications.data).getAttribute('data'));
 		var groups = JSON.parse(document.getElementById(types.groups.data).getAttribute('data'));
 
 		// Order groups
-		folders.sort((a, b) => a.name.toString().localeCompare(b.name.toString(), navigator.languages[0] || navigator.language, {numeric: true, ignorePunctuation: true}))
-		groups.sort((a, b) => a.name.toString().localeCompare(b.name.toString(), navigator.languages[0] || navigator.language, {numeric: true, ignorePunctuation: true}))
-		specifications.sort((a, b) => a.name.toString().localeCompare(b.name.toString(), navigator.languages[0] || navigator.language, {numeric: true, ignorePunctuation: true}))
+		folders.sort((a, b) => a.name.toString().localeCompare(b.name.toString(), navigator.languages[0] || navigator.language, { numeric: true, ignorePunctuation: true }))
+		groups.sort((a, b) => a.name.toString().localeCompare(b.name.toString(), navigator.languages[0] || navigator.language, { numeric: true, ignorePunctuation: true }))
+		specifications.sort((a, b) => a.name.toString().localeCompare(b.name.toString(), navigator.languages[0] || navigator.language, { numeric: true, ignorePunctuation: true }))
 
 		// HTML Initial
 		var htmlToWrite = '<ul class="reqTreeMain" id="reqTreeMain">'
 
 		// Root
 		if (folders != null) {
-			var foldersRoot = folders.filter(x => x['parent'] === null)
+			var foldersRoot = folders.filter(x => !x.hasOwnProperty('parent') || x['parent'] === null)
 		} else {
 			foldersRoot = []
 		}
 		if (specifications != null) {
-			var specificationsRoot = specifications.filter(x => x['folder'] === null)
+			var specificationsRoot = specifications.filter(x => !x.hasOwnProperty('folder') || ['folder'] === null)
 		} else {
 			specificationsRoot = []
 		}
@@ -330,9 +375,8 @@
 
 			for (index in parents) {
 				var parent = parents[index]
-
 				// If Parent is a Specification, it has "requirement_groups"
-				if ("requirement_groups" in parent) {
+				if (parent.hasOwnProperty('requirement_groups')) {
 					var parentId_html = types.specifications.name + '_' + parent['id']
 
 					htmlToWrite = htmlToWrite.concat('<li class="reqSearcheableObj specification" id="', parentId_html, '">', expandIcon, specificationIcon, '<div class="truncated-text">', String(parent['name']), '</div>', plusIcon, propertiesIcon, '</li>')
@@ -340,9 +384,10 @@
 
 					var parentId = parent['id']
 
-					var groupsInside
+					var groupsInside;
 					if (groups != null) {
-						groupsInside = groups.filter(x => x['specification'] === parentId & x['parent'] === null)
+						filtered_groups = groups.filter(x => x['specification'] === parentId)
+						groupsInside = filtered_groups.filter(x => !x.hasOwnProperty('parent') || x['parent'] === null)
 						htmlToWrite = htmlToWrite.concat('<div class="nested dropdown-content" id="children_', parentId_html, '">')
 						getSpecificationsAndGroups(groupsInside)
 						htmlToWrite = htmlToWrite.concat('</div>')
@@ -352,7 +397,7 @@
 
 				}
 				// If Parent is a Another Group, it has "children"
-				if ("children" in parent) {
+				if (parent.hasOwnProperty('children')) {
 					var parentId_html = types.groups.name + '_' + parent['id']
 
 					htmlToWrite = htmlToWrite.concat('<li class="reqSearcheableObj group" id="', parentId_html, '">', expandIcon, sectionIcon, '<div class="truncated-text">', String(parent['name']), '</div>', plusIcon, propertiesIcon, '</li>')
@@ -406,13 +451,13 @@
 
 		htmlToWrite = htmlToWrite.concat('</ul>')
 
-		document.getElementById('requirementTreeInsertButton').innerHTML = htmlToWrite;
+		document.getElementById('dataTreeInsertButton').innerHTML = htmlToWrite;
 
 	}
 
 	function getRequirements() {
 		var requirements = JSON.parse(document.getElementById("requirementsData").getAttribute('data'));
-		requirements.sort((a, b) => a.identifier.toString().localeCompare(b.identifier.toString(), navigator.languages[0] || navigator.language, {numeric: true, ignorePunctuation: true}))
+		requirements.sort((a, b) => a.identifier.toString().localeCompare(b.identifier.toString(), navigator.languages[0] || navigator.language, { numeric: true, ignorePunctuation: true }))
 
 		for (index in requirements) {
 			var requirement = requirements[index]
@@ -427,9 +472,8 @@
 			} else {
 				var parentId = 'children_' + types.groups.name + '_' + requirement['group'].toString()
 			}
-
 			var liNode = document.createElement("li");
-			liNode.innerHTML = reqIcon+ '<div class="requirement-text">'+ displayName+ '</div>'+ plusIcon+ propertiesIcon
+			liNode.innerHTML = reqIcon + '<div class="requirement-text">' + displayName + '</div>' + plusIcon + propertiesIcon
 			liNode.classList.add("reqSearcheableObj");
 			liNode.classList.add("requirement");
 			liNode.id = reqName

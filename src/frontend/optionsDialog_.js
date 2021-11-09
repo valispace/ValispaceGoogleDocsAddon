@@ -6,16 +6,16 @@ function openOptionDialog() {
   var dialog = DocumentApp.getUi().showModalDialog(page_options, 'Options');
 }
 
-function changeReqTableTemplate(TemplateDocumentId){
+function changeReqTableTemplate(TemplateDocumentId_requirements, module){
   try{
-    PropertiesService.getDocumentProperties().setProperty('TemplateDocumentId', TemplateDocumentId);
+    PropertiesService.getDocumentProperties().setProperty(module + '_TemplateDocumentId_requirements', TemplateDocumentId_requirements);
   } catch (error) {
     DocumentApp.getUi().alert("Could not find the document. Confirm it was not deleted and that anyone have read access with the link.");
   } 
 }
 
-function resetReqTableTemplate(){
-  PropertiesService.getDocumentProperties().setProperty('TemplateDocumentId', TemplateDocumentId_original);
+function resetReqTableTemplate(module){
+  PropertiesService.getDocumentProperties().setProperty(module + '_TemplateDocumentId_requirements', TemplateDocumentId_requirements_original);
 }
 
 function clearUserProperties(){
@@ -28,5 +28,5 @@ function clearDocumentProperties(){
 } 
 
 function printCurrentTemplateID(){
-  currentTemplateId = PropertiesService.getDocumentProperties().getProperty('TemplateDocumentId')
+  currentTemplateId = PropertiesService.getDocumentProperties().getProperty('TemplateDocumentId_requirements')
 }

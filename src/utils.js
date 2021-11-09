@@ -23,7 +23,7 @@ var urlTranslator = function(item_data, type, base_path){
   })
   return base_path + rel_path.join('/')
 }
-  
+
 var VALI_PARAMETER_STR = "?from=valispace&name="
 
 // TODO : !!! Review possible usage !!!

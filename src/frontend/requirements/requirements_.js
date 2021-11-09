@@ -31,6 +31,10 @@ function get_data(projectId, dataType) {
       return JSON.parse(getAuthenticatedValispaceUrl('user'));
     case 'user_groupsData':
       return JSON.parse(getAuthenticatedValispaceUrl('group'));
+    case 'fileFoldersData':
+        return JSON.parse(getAuthenticatedValispaceUrl('files/folders/?project=' + projectId));
+    case 'versionsData':
+        return JSON.parse(getAuthenticatedValispaceUrl('files/versions/?project='+projectId))
   }
 }
 
@@ -52,13 +56,13 @@ function getCursorIndex(body, cursor) {
 
 }
 
-function getTextToInsert(all_data, object, property, projectId){
+function getTextToInsert(all_data, object, property, projectId) {
 
-  property = property=='rationale'?'comment':property;
+  property = property == 'rationale' ? 'comment' : property;
 
   //Special patch to get vm_methods
   vm_methods = null
-  if(property=='vm-methods'){
+  if (property == 'vm-methods') {
     //TODO: Pass to API call
     vm_methods = JSON.parse(getAuthenticatedValispaceUrl('requirements/requirement-vms/?project=' + projectId))
   }
@@ -66,23 +70,23 @@ function getTextToInsert(all_data, object, property, projectId){
   substitution = {
     'owner': [getUserFrom, [object[property], all_data['users'], all_data['user_groups']]],
     'tags': [replaceAttributesWithId, ['tags', all_data['tags'], object, 'name']],
-    'section':[replaceAttributesWithId, ['group', all_data['groups'], object, 'name']],
-    'parents':[replaceAttributesWithId, ['parents', all_data['requirements'], object, 'identifier']],
-    'children':[replaceAttributesWithId, ['children', all_data['requirements'], object, 'identifier']],
+    'section': [replaceAttributesWithId, ['group', all_data['groups'], object, 'name']],
+    'parents': [replaceAttributesWithId, ['parents', all_data['requirements'], object, 'identifier']],
+    'children': [replaceAttributesWithId, ['children', all_data['requirements'], object, 'identifier']],
     'files': [getFilesInRequirement, [all_data['files'], object]],
     'images': [getImagesinFilesInRequirement, [all_data['files'], object]],
-    'vm-methods':[replaceAttributesWithId, ['verification_methods', vm_methods, object, 'method']]
+    'vm-methods': [replaceAttributesWithId, ['verification_methods', vm_methods, object, 'method']]
   }
 
 
   text_to_insert = '';
-  if(substitution.hasOwnProperty(property)){
+  if (substitution.hasOwnProperty(property)) {
     var func, args
 
     [func, args] = substitution[property];
 
 
-    text_to_insert = func.apply( this, args );
+    text_to_insert = func.apply(this, args);
   }
   else if (object.hasOwnProperty(property)) {
     text_to_insert = object[property] ? object[property] : '-';
@@ -91,7 +95,7 @@ function getTextToInsert(all_data, object, property, projectId){
   return text_to_insert;
 }
 
-function direct_insert(all_data, objectName, property, new_line=false){
+function direct_insert(all_data, objectName, property, new_line = false) {
   var insertion_type = property == 'images' ? 'image' : 'text';
   var parentType = objectName.split("_")[0].toString();
   var parentId = parseInt(objectName.split("_")[1]);
@@ -136,7 +140,7 @@ function getTemplateTable(documentId) {
   return [templateTableData, templateTableCellAttributes]
 }
 
-function insert_spec_or_group_using_template(insertion_array, all_data){
+function insert_spec_or_group_using_template(insertion_array, all_data) {
   CacheService.getScriptCache().remove('templateTableData');
   CacheService.getScriptCache().remove('templateTableCellAttributes');
   var projectId = PropertiesCache('User', 'projectID');
@@ -145,30 +149,30 @@ function insert_spec_or_group_using_template(insertion_array, all_data){
   var reqs = [];
   insertion_array.reverse();
 
-  for(line of insertion_array){
+  for (line of insertion_array) {
     // If this is a Group
-    if(Array.isArray(line)){
+    if (Array.isArray(line)) {
 
       // Add Specification or Section Name Name
       last_index = direct_insert(all_data, line[0], line[1], true);
 
-      if(reqs.length>0){
+      if (reqs.length > 0) {
         reqs.reverse();
         [tableIndex, tableIndex_, numOfCells] = insertRequirementsInSpec_asTable_fromTemplate(projectId, reqs, all_data, null, numOfCells);
         reqs = [];
       }
     }
-    else{
+    else {
       reqs.push(line);
     }
   }
 
-    // Insert Single Requirement
-    if(reqs.length>0){
-      [tableIndex, tableIndex_, numOfCells] = insertRequirementsInSpec_asTable_fromTemplate(projectId, reqs, all_data, null, numOfCells);
-      reqs = []
-    }
-  
+  // Insert Single Requirement
+  if (reqs.length > 0) {
+    [tableIndex, tableIndex_, numOfCells] = insertRequirementsInSpec_asTable_fromTemplate(projectId, reqs, all_data, null, numOfCells);
+    reqs = []
+  }
+
 
   CacheService.getScriptCache().remove('templateTableData')
   CacheService.getScriptCache().remove('templateTableCellAttributes')
@@ -193,7 +197,7 @@ function insertRequirementsInSpec_asTable_fromTemplate(projectId, requirements, 
 
   var cache = CacheService.getScriptCache();
   if (cache.get('templateTableCellAttributes') == null || cache.get('templateTableData') == null) {
-    documentId = PropertiesService.getDocumentProperties().getProperty('TemplateDocumentId')
+    documentId = PropertiesService.getDocumentProperties().getProperty('requirements_TemplateDocumentId_requirements')
     values = getTemplateTable(documentId)
     templateTableData = values[0]
     templateTableCellAttributes = values[1]
@@ -207,13 +211,13 @@ function insertRequirementsInSpec_asTable_fromTemplate(projectId, requirements, 
   // This number limits the amount of cells that will be created and formated before closing and saving the requirement.
   // Smaller numbers saves more often but makes execution slower; Higher numbers stack too many changes before saving and returns and error
   // This number was "found empirically" and it needs to scale with the number of cells on the template table.
-  cellLimit = 12000/(templateTableData.length*templateTableData[0].length)
+  cellLimit = 12000 / (templateTableData.length * templateTableData[0].length)
 
 
   var table = []
   var tables = []
   var styleTableMapping = []
-  var tables_styleTableMapping=[]
+  var tables_styleTableMapping = []
   var urlMapping = []
   var tables_urlMapping = []
 
@@ -225,7 +229,7 @@ function insertRequirementsInSpec_asTable_fromTemplate(projectId, requirements, 
     for (let rowIndex = 0; rowIndex < templateTableData.length; rowIndex++) {
       // Header
 
-      if(insertHeader==true && rowIndex==0 && ((previousTableIndex == null && req==0) || individual_tables==true)){
+      if (insertHeader == true && rowIndex == 0 && ((previousTableIndex == null && req == 0) || individual_tables == true)) {
         header = []
         headerStyle = []
         headerUrl = []
@@ -239,56 +243,56 @@ function insertRequirementsInSpec_asTable_fromTemplate(projectId, requirements, 
         styleTableMapping.push(headerStyle)
         urlMapping.push(headerUrl)
       }
-        if(rowIndex>0){
-          subTableRow = []
-          subTableStyleRow = []
-          subUrlMapping = []
-          for (let cellIndex = 0; cellIndex < templateTableData[rowIndex].length; cellIndex++) {
-            // cellValue = templateTableData[rowIndex][cellIndex]
-            cellText = templateTableData[rowIndex][cellIndex]
+      if (rowIndex > 0) {
+        subTableRow = []
+        subTableStyleRow = []
+        subUrlMapping = []
+        for (let cellIndex = 0; cellIndex < templateTableData[rowIndex].length; cellIndex++) {
+          // cellValue = templateTableData[rowIndex][cellIndex]
+          cellText = templateTableData[rowIndex][cellIndex]
 
-            //NEW MATCHING VIA REGEX SUBSTITUTION
-            const prop_regex = /\$\w+/gm;
-            text_to_insert = cellText
-            text_to_insert = cellText.replace(prop_regex, match => getTextToInsert(all_data, requirements[req], match.substring(1), projectId));
+          //NEW MATCHING VIA REGEX SUBSTITUTION
+          const prop_regex = /\$\w+/gm;
+          text_to_insert = cellText
+          text_to_insert = cellText.replace(prop_regex, match => getTextToInsert(all_data, requirements[req], match.substring(1), projectId));
 
-            cellText = cellText.trim();
-            subTableRow.push(text_to_insert)
-            if (text_to_insert!= cellText){
-              subUrlMapping.push(urlTranslator(requirements[req], types['requirements'], base_path) + `${VALI_PARAMETER_STR}requirements_${requirements[req].id}__${cellText.replace('$', '')}`);
-            }
-            else{
-              subUrlMapping.push([])
-            }
-
-            subTableStyleRow.push([[rowIndex], [cellIndex]])
-
+          cellText = cellText.trim();
+          subTableRow.push(text_to_insert)
+          if (text_to_insert != cellText) {
+            subUrlMapping.push(urlTranslator(requirements[req], types['requirements'], base_path) + `${VALI_PARAMETER_STR}requirements_${requirements[req].id}__${cellText.replace('$', '')}`);
           }
-          table.push(subTableRow)
-          styleTableMapping.push(subTableStyleRow)
-          urlMapping.push(subUrlMapping)
-        }
-      }
-      if(individual_tables){
-        tables.push(table);
-        tables_styleTableMapping.push(styleTableMapping);
-        tables_urlMapping.push(urlMapping);
-        table = [];
-        styleTableMapping=[];
-        urlMapping = [];
-      };
+          else {
+            subUrlMapping.push([])
+          }
 
-      if (!individual_tables){
-        tables.push(table);
-        tables_styleTableMapping.push(styleTableMapping);
-        tables_urlMapping.push(urlMapping);
+          subTableStyleRow.push([[rowIndex], [cellIndex]])
+
+        }
+        table.push(subTableRow)
+        styleTableMapping.push(subTableStyleRow)
+        urlMapping.push(subUrlMapping)
+      }
+    }
+    if (individual_tables) {
+      tables.push(table);
+      tables_styleTableMapping.push(styleTableMapping);
+      tables_urlMapping.push(urlMapping);
+      table = [];
+      styleTableMapping = [];
+      urlMapping = [];
     };
-  
+
+    if (!individual_tables) {
+      tables.push(table);
+      tables_styleTableMapping.push(styleTableMapping);
+      tables_urlMapping.push(urlMapping);
+    };
+
   }
 
 
   // Inserting Tables
-  for(i in tables){
+  for (i in tables) {
     table = tables[i];
     styleTableMapping = tables_styleTableMapping[i];
     urlMapping = tables_urlMapping[i];
@@ -333,7 +337,7 @@ function insertRequirementsInSpec_asTable_fromTemplate(projectId, requirements, 
         numOfCells += docTable.getRow(row).getNumCells();
       }
 
-      if (numOfCells > cellLimit){
+      if (numOfCells > cellLimit) {
         doc.saveAndClose()
         numOfCells = 0
       }
@@ -354,23 +358,23 @@ function insertRequirementsInSpec_asTable_fromTemplate(projectId, requirements, 
   return [tableIndex, DocumentApp.getActiveDocument().getChild(tableIndex), numOfCells]
 }
 
-function PropertiesCache(local, propertyName){
+function PropertiesCache(local, propertyName) {
   cache = CacheService.getScriptCache()
 
-  if (cache.get(propertyName) == null){
-    if (local == "Document"){
+  if (cache.get(propertyName) == null) {
+    if (local == "Document") {
       property = PropertiesService.getDocumentProperties().getProperty(propertyName)
       cache.put(propertyName, property)
-    } else if (local == "User"){
+    } else if (local == "User") {
       property = PropertiesService.getUserProperties().getProperty(propertyName)
       cache.put(propertyName, property)
     } else {
       console.log('Error: Use either Document or User Properties')
     }
   } else {
-    if (local == "Document"){
+    if (local == "Document") {
       property = cache.get(propertyName)
-    } else if (local == "User"){
+    } else if (local == "User") {
       property = cache.get(propertyName)
     } else {
       console.log('Error: Use either Document or User Properties')
@@ -380,7 +384,7 @@ function PropertiesCache(local, propertyName){
 }
 
 function getUserFrom(origin, usersData, user_groupsData) {
-  if (origin == null){
+  if (origin == null) {
     return "-"
   }
   text = '-'
@@ -406,14 +410,14 @@ function replaceAttributesWithId(attribute, objectsList, objectToSearch, attribu
     return '-';
   }
   objectsIds = objectToSearch[attribute];
-    objectsIds = Array.isArray(objectsIds) ? objectsIds : [objectsIds];
-    objectAttributes = objectsIds.map(objectId=>objectsList.find(x => x['id'] === objectId)[attributeToInsert]);
-    if (objectAttributes){
-      return objectAttributes.join(',');
-    }
-    else{
-      return '-';
-    }
+  objectsIds = Array.isArray(objectsIds) ? objectsIds : [objectsIds];
+  objectAttributes = objectsIds.map(objectId => objectsList.find(x => x['id'] === objectId)[attributeToInsert]);
+  if (objectAttributes) {
+    return objectAttributes.join(',');
+  }
+  else {
+    return '-';
+  }
 }
 
 function getFilesInRequirement(filesList, requirement) {
@@ -454,13 +458,13 @@ function getImagesinFilesInRequirement(filesList, requirement) {
   return textToInsert
 }
 
-function generateFileURL(file){
+function generateFileURL(file) {
   var imageURL = file['download_url']
   text = '$START_IMG_META=' +
     '$START_IMG_ID=files_' + file['id'] + '$END_IMG_ID' +
     '$START_IMG_URL=' + imageURL + '$END_IMG_URL' +
     '$END_IMG_META'
-    return text
+  return text
 }
 
 function escapeRegExp(text) {
@@ -492,11 +496,10 @@ function replaceImagesURLToFile(element) {
 
       maxWidth = 500
       maxHeight = 500
-      if (img.getWidth()>maxWidth | img.getHeight()>maxHeight){
-        console.log("Rescale Image")
-        ratio = maxWidth/img.getWidth()
-        img.setWidth(img.getWidth()*ratio)
-        img.setHeight(img.getHeight()*ratio)
+      if (img.getWidth() > maxWidth | img.getHeight() > maxHeight) {
+        ratio = maxWidth / img.getWidth()
+        img.setWidth(img.getWidth() * ratio)
+        img.setHeight(img.getHeight() * ratio)
       }
 
 
@@ -531,38 +534,38 @@ function formatingTable(table, styleTableMapping, urlMapping, templateTableCellA
 
 
       // TODO: There might be a better way of doing this. This is needed because the Caching of the cellAtributes doesn't return the object of documentApp.alignment
-      if ('VERTICAL_ALIGNMENT' in styleCellAttributes){
-        if (styleCellAttributes['VERTICAL_ALIGNMENT']=="TOP"){
+      if ('VERTICAL_ALIGNMENT' in styleCellAttributes) {
+        if (styleCellAttributes['VERTICAL_ALIGNMENT'] == "TOP") {
           styleCellAttributes['VERTICAL_ALIGNMENT'] = DocumentApp.VerticalAlignment.TOP
         }
-        else if (styleCellAttributes['VERTICAL_ALIGNMENT']=="CENTER"){
+        else if (styleCellAttributes['VERTICAL_ALIGNMENT'] == "CENTER") {
           styleCellAttributes['VERTICAL_ALIGNMENT'] = DocumentApp.VerticalAlignment.CENTER
         }
-        else if (styleCellAttributes['VERTICAL_ALIGNMENT']=="BOTTOM"){
+        else if (styleCellAttributes['VERTICAL_ALIGNMENT'] == "BOTTOM") {
           styleCellAttributes['VERTICAL_ALIGNMENT'] = DocumentApp.VerticalAlignment.BOTTOM
         }
       }
 
-      if ('HORIZONTAL_ALIGNMENT' in styleCellAttributes){
-        if (styleCellAttributes['HORIZONTAL_ALIGNMENT']=="TOP"){
+      if ('HORIZONTAL_ALIGNMENT' in styleCellAttributes) {
+        if (styleCellAttributes['HORIZONTAL_ALIGNMENT'] == "TOP") {
           styleCellAttributes['HORIZONTAL_ALIGNMENT'] = DocumentApp.HorizontalAlignment.TOP
         }
-        else if (styleCellAttributes['HORIZONTAL_ALIGNMENT']=="CENTER"){
+        else if (styleCellAttributes['HORIZONTAL_ALIGNMENT'] == "CENTER") {
           styleCellAttributes['HORIZONTAL_ALIGNMENT'] = DocumentApp.HorizontalAlignment.CENTER
         }
-        else if (styleCellAttributes['VERTICAL_ALIGNMENT']=="BOTTOM"){
+        else if (styleCellAttributes['VERTICAL_ALIGNMENT'] == "BOTTOM") {
           styleCellAttributes['HORIZONTAL_ALIGNMENT'] = DocumentApp.HorizontalAlignment.BOTTOM
         }
       }
 
-      if ('TEXT_ALIGNMENT' in styleCellAttributes){
-        if (styleCellAttributes['TEXT_ALIGNMENT']=="NORMAL"){
+      if ('TEXT_ALIGNMENT' in styleCellAttributes) {
+        if (styleCellAttributes['TEXT_ALIGNMENT'] == "NORMAL") {
           styleCellAttributes['TEXT_ALIGNMENT'] = DocumentApp.TextAlignment.NORMAL
         }
-        else if (styleCellAttributes['TEXT_ALIGNMENT']=="SUPERSCRIPT"){
+        else if (styleCellAttributes['TEXT_ALIGNMENT'] == "SUPERSCRIPT") {
           styleCellAttributes['TEXT_ALIGNMENT'] = DocumentApp.TextAlignment.SUPERSCRIPT
         }
-        else if (styleCellAttributes['TEXT_ALIGNMENT']=="SUBSCRIPT"){
+        else if (styleCellAttributes['TEXT_ALIGNMENT'] == "SUBSCRIPT") {
           styleCellAttributes['TEXT_ALIGNMENT'] = DocumentApp.TextAlignment.SUBSCRIPT
         }
       }
