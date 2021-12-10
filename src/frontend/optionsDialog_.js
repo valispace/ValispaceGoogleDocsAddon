@@ -30,3 +30,15 @@ function clearDocumentProperties(){
 function printCurrentTemplateID(){
   currentTemplateId = PropertiesService.getDocumentProperties().getProperty('TemplateDocumentId_requirements')
 }
+
+function setIndividualTables(setting) {
+  PropertiesService.getDocumentProperties().setProperty('individual_tables', setting);
+}
+
+function check_individual_tables() {
+  // Checking if individual_tables is set to true
+  var property = PropertiesService.getDocumentProperties().getProperty('individual_tables')
+  // Extra step because Properties are stored as type string, evaluating to boolean
+  var checked = (property === 'true')
+  return checked
+}

@@ -7,6 +7,7 @@ var releaseVersion = "1.2.0"
 var TemplateDocumentId_requirements_original = '1ta4E39lwjjB8sVk2UPRBPZiy-rH9P_cmhCpLyyIQbXE';
 var TemplateDocumentId_files_original = '1Io4O2yciHZw0Sqw3tSB0SfKp2zHKxKnawN1B1AV6EJY';
 var defaultDeployment = 'https://demo.valispace.com';
+var individual_tables = false;
 
 function onInstall(e) {
   onOpen(e);
@@ -33,6 +34,9 @@ function showSidebar() {
   if (PropertiesService.getUserProperties().getProperty('savedUsername') === null) {
     PropertiesService.getUserProperties().setProperty('savedUsername', '');
   };
+  if (PropertiesService.getDocumentProperties().getProperty('individual_tables') === true || PropertiesService.getDocumentProperties().getProperty('individual_tables') === null) {
+    PropertiesService.getDocumentProperties().setProperty('individual_tables', false);
+  }
   // Check if Connection is still valid and skip login page if valid.
   if (checkValispaceConnexion()) {
     var template = HtmlService.createTemplateFromFile('frontend/sidebarTemplate');

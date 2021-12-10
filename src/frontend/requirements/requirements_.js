@@ -32,9 +32,9 @@ function get_data(projectId, dataType) {
     case 'user_groupsData':
       return JSON.parse(getAuthenticatedValispaceUrl('group'));
     case 'fileFoldersData':
-        return JSON.parse(getAuthenticatedValispaceUrl('files/folders/?project=' + projectId));
+      return JSON.parse(getAuthenticatedValispaceUrl('files/folders/?project=' + projectId));
     case 'versionsData':
-        return JSON.parse(getAuthenticatedValispaceUrl('files/versions/?project='+projectId))
+      return JSON.parse(getAuthenticatedValispaceUrl('files/versions/?project='+projectId));
   }
 }
 
@@ -155,7 +155,6 @@ function insert_spec_or_group_using_template(insertion_array, all_data) {
 
       // Add Specification or Section Name Name
       last_index = direct_insert(all_data, line[0], line[1], true);
-
       if (reqs.length > 0) {
         reqs.reverse();
         [tableIndex, tableIndex_, numOfCells] = insertRequirementsInSpec_asTable_fromTemplate(projectId, reqs, all_data, null, numOfCells);
@@ -193,7 +192,10 @@ function insertRequirementsInSpec_asTable_fromTemplate(projectId, requirements, 
   usersData = all_data['users']
   user_groupsData = all_data['user_groups']
 
-  individual_tables = true;
+  // Checking if individual_tables is set to true
+  individual_tables_property = PropertiesService.getDocumentProperties().getProperty('individual_tables');
+  // Extra step because Properties are stored as type string, evaluating to boolean
+  individual_tables = (individual_tables_property === 'true')
 
   var cache = CacheService.getScriptCache();
   if (cache.get('templateTableCellAttributes') == null || cache.get('templateTableData') == null) {
@@ -229,7 +231,7 @@ function insertRequirementsInSpec_asTable_fromTemplate(projectId, requirements, 
     for (let rowIndex = 0; rowIndex < templateTableData.length; rowIndex++) {
       // Header
 
-      if (insertHeader == true && rowIndex == 0 && ((previousTableIndex == null && req == 0) || individual_tables == true)) {
+      if (insertHeader == true && rowIndex == 0 && ((previousTableIndex == null && req == 0) || individual_tables === true)) {
         header = []
         headerStyle = []
         headerUrl = []
@@ -280,16 +282,14 @@ function insertRequirementsInSpec_asTable_fromTemplate(projectId, requirements, 
       table = [];
       styleTableMapping = [];
       urlMapping = [];
-    };
-
-    if (!individual_tables) {
-      tables.push(table);
-      tables_styleTableMapping.push(styleTableMapping);
-      tables_urlMapping.push(urlMapping);
-    };
-
+    }
   }
 
+  if (!individual_tables) {
+    tables.push(table);
+    tables_styleTableMapping.push(styleTableMapping);
+    tables_urlMapping.push(urlMapping);
+  };
 
   // Inserting Tables
   for (i in tables) {

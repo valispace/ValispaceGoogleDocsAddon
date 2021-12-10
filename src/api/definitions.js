@@ -43,7 +43,7 @@ var types = {
               data:'fileFoldersData'},
   versions:{name:'versions',
               url:'',
-              data:'versionsData'}
+              data:'versionsData'},
 }
 
 function get_types(){

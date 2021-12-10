@@ -207,7 +207,6 @@
 		for (var i = 0; i < children.length; i++) {
 			insertion = insertion.concat(recursive_insertion(all_data, children.item(i)));
 		}
-
 		google.script.run
 			.withFailureHandler(function () { document.getElementById("updating-status").innerHTML = 'Error Inserting ' })
 			.withSuccessHandler(function () { document.getElementById("updating-status").innerHTML = '' })

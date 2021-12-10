@@ -24,7 +24,8 @@
 				'fileFolders': JSON.parse(document.getElementById(types.fileFolders.data).getAttribute('data')),
 				'versions': JSON.parse(document.getElementById(types.versions.data).getAttribute('data')),
 				'files': JSON.parse(document.getElementById(types.files.data).getAttribute('data')),
-				'users': JSON.parse(document.getElementById(types.users.data).getAttribute('data'))
+				'users': JSON.parse(document.getElementById(types.users.data).getAttribute('data')),
+				'content_types': JSON.parse(document.getElementById(types.content_types.data).getAttribute('data'))
 			}
 			google.script.run
 				.withFailureHandler(function () { reject("Error Updating References") })
@@ -41,7 +42,7 @@
 		var folders = JSON.parse(document.getElementById(types.fileFolders.data).getAttribute('data'));
 		var files = JSON.parse(document.getElementById(types.files.data).getAttribute('data'));
 
-		// Order groups
+		// Order folders
 		folders.sort((a, b) => a.name.toString().localeCompare(b.name.toString(), navigator.languages[0] || navigator.language, { numeric: true, ignorePunctuation: true }))
 
 		// HTML Initial
