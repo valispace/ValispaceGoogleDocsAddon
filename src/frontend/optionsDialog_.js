@@ -11,10 +11,10 @@ function changeTableTemplate(module, TemplateDocumentId_requirements){
     PropertiesService.getDocumentProperties().setProperty('TemplateDocumentId_' + module, TemplateDocumentId_requirements);
 
     // Try to get the table to see if the user has access (permission) to it.
-    var body = DocumentApp.openById(documentId).getBody()
+    var body = DocumentApp.openById(TemplateDocumentId_requirements).getBody()
     table = body.getTables()[0]
   } catch (error) {
-    DocumentApp.getUi().alert("Could not find the document. Confirm it was not deleted and that anyone have read access with the link. Reverting to default tempalte.");
+    DocumentApp.getUi().alert("Could not find the document. Confirm it was not deleted and that anyone have read access with the link. Reverting to default template.");
     resetTableTemplate(module) // Revert back to the default template.
   }
 }
