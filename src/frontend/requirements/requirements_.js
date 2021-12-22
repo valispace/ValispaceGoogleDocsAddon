@@ -197,7 +197,7 @@ function insertRequirementsInSpec_asTable_fromTemplate(projectId, requirements, 
 
   var cache = CacheService.getScriptCache();
   if (cache.get('templateTableCellAttributes') == null || cache.get('templateTableData') == null) {
-    documentId = PropertiesService.getDocumentProperties().getProperty('requirements_TemplateDocumentId_requirements')
+    documentId = PropertiesService.getDocumentProperties().getProperty('TemplateDocumentId_requirements')
     values = getTemplateTable(documentId)
     templateTableData = values[0]
     templateTableCellAttributes = values[1]

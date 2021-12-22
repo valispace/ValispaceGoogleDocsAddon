@@ -3,10 +3,14 @@
    */
 
 
-var releaseVersion = "1.2.0"
-var TemplateDocumentId_requirements_original = '1ta4E39lwjjB8sVk2UPRBPZiy-rH9P_cmhCpLyyIQbXE';
-var TemplateDocumentId_files_original = '1Io4O2yciHZw0Sqw3tSB0SfKp2zHKxKnawN1B1AV6EJY';
+var releaseVersion = "1.2.1"
 var defaultDeployment = 'https://demo.valispace.com';
+var TemplateDocumentId_default = {}
+TemplateDocumentId_default['requirements'] = '1ta4E39lwjjB8sVk2UPRBPZiy-rH9P_cmhCpLyyIQbXE'
+TemplateDocumentId_default['files'] = '1Io4O2yciHZw0Sqw3tSB0SfKp2zHKxKnawN1B1AV6EJY'
+
+
+// TemplateDocumentId_requirements_original  Original variable name, should be replaced
 
 function onInstall(e) {
   onOpen(e);
@@ -22,10 +26,10 @@ function onOpen(e) {
 function showSidebar() {
 
   if (PropertiesService.getDocumentProperties().getProperty('TemplateDocumentId_requirements') === null) {
-    PropertiesService.getDocumentProperties().setProperty('TemplateDocumentId_requirements', TemplateDocumentId_requirements_original);
+    PropertiesService.getDocumentProperties().setProperty('TemplateDocumentId_requirements', TemplateDocumentId_default['requirements']);
   };
   if (PropertiesService.getDocumentProperties().getProperty('TemplateDocumentId_files') === null) {
-    PropertiesService.getDocumentProperties().setProperty('TemplateDocumentId_files', TemplateDocumentId_files_original);
+    PropertiesService.getDocumentProperties().setProperty('TemplateDocumentId_files', TemplateDocumentId_default['files']);
   };
   if (PropertiesService.getUserProperties().getProperty('savedDeployment') === null) {
     PropertiesService.getUserProperties().setProperty('savedDeployment', defaultDeployment);

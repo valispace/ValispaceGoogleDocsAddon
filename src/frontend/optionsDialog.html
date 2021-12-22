@@ -14,7 +14,7 @@
       <label for="TemplateDocumentId_requirements">Requirement Table Template ID: </label>
     </div>
     <div>
-      <input type="text" class="input-field" id="requirements_TemplateDocumentId_requirements" name="TemplateDocumentId_requirements">
+      <input type="text" class="input-field" id="TemplateDocumentId_requirements" name="TemplateDocumentId_requirements">
     </div>
   </div>
 
@@ -58,12 +58,13 @@
     };
 
     function changeTable(module) {
-      var TemplateDocumentId_requirements = $('#' + module + '_TemplateDocumentId_requirements').val();
-      google.script.run.withSuccessHandler(closeIt).changeReqTableTemplate(TemplateDocumentId_requirements, module);
+      var TemplateDocumentId_requirements = $('#TemplateDocumentId_' + module).val();
+      console.log(TemplateDocumentId_requirements)
+      google.script.run.withSuccessHandler(closeIt).changeTableTemplate(module, TemplateDocumentId_requirements);
     };
 
     function resetTable(module) {
-      google.script.run.withSuccessHandler(closeIt).resetReqTableTemplate(module);
+      google.script.run.withSuccessHandler(closeIt).resetTableTemplate(module);
     };
 
 
