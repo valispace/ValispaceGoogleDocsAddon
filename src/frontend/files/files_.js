@@ -81,29 +81,50 @@ function files_replaceAttributesWithId(attribute, objectsList, objectToSearch, a
 }
 
 function files_replaceReferencesWithObject(attribute, objectList, objectToSearch) {
-  let content_types = [
+  let content_types_mapping = [
     {
-      'id': 21,
-      'url': 'components/',
-      'property': 'name'
+      'model' : 'component',
+      'url' : 'components/',
+      'property' : 'name'
     },
     {
-      'id': 120,
+      'model': 'requirement',
       'url': 'requirements/',
       'property': 'identifier'
     },
     {
-      'id': 38,
+      'model': 'vali',
       'url': 'valis/',
       'property': 'name'
     },
     {
-      'id': 13,
-      'url': 'project/',
-      'property': 'name'
+      'model' : 'testprocedure',
+      'url' : 'testing/test-procedures/',
+      'property' : 'name'
+    },
+    {
+      'model' : 'testprocedurestep',
+      'url' : 'testing/test-procedure-steps/',
+      'property' : 'title'
+    },
+    {
+      'model' : 'testrun',
+      'url' : 'testing/test-runs/',
+      'property' : 'name'
+    },
+    {
+      'model' : 'project',
+      'url' : 'project/',
+      'property' : 'name'
+    },
+    {
+      'model' : 'specification',
+      'url' : 'requirements/specifications/',
+      'property' : 'name'
     }
   ]
 
+  content_types = JSON.parse(getAuthenticatedValispaceUrl('contenttypes/'))
   //reference_files = objectList.filter(x => x['file_type'] == 3);
   referenced_files = objectList.filter(x => x['reference_file'] == objectToSearch['id']);
 
@@ -115,10 +136,13 @@ function files_replaceReferencesWithObject(attribute, objectList, objectToSearch
       reference_objects = reference_objects + ' ';
     } else {
       object_id = file[attribute];
-      request_url = content_types.find(x => x['id'] == file['content_type'])['url'];
-      request_url = request_url + object_id + '/';
+      object_type = content_types.find(x => x['id'] == file['content_type']);
+      console.log(object_type)
+      type_url = content_types_mapping.find(x => x['model'] == object_type['model'])['url']
+      request_url = type_url + object_id +'/'
       object = JSON.parse(getAuthenticatedValispaceUrl(request_url));
-      reference = object[content_types.find(x => x['id'] == file['content_type'])['property']]
+      console.log(object)
+      reference = object[content_types_mapping.find(x => x['model'] == object_type['model'])['property']]
       if (reference_objects.length == 0) {
         reference_objects = reference_objects + reference;
       } else {
@@ -184,7 +208,10 @@ function insertFiles_asTable_fromTemplate(projectId, files, all_data, previousTa
   usersData = all_data['users']
   user_groupsData = all_data['user_groups']
 
-  individual_tables = true;
+  // Checking if individual_tables is set to true
+  individual_tables_property = PropertiesService.getDocumentProperties().getProperty('individual_tables');
+  // Extra step because Properties are stored as type string, evaluating to boolean
+  individual_tables = (individual_tables_property === 'true')
 
   var cache = CacheService.getScriptCache();
   if (cache.get('templateTableCellAttributes') == null || cache.get('templateTableData') == null) {
@@ -220,7 +247,7 @@ function insertFiles_asTable_fromTemplate(projectId, files, all_data, previousTa
     for (let rowIndex = 0; rowIndex < templateTableData.length; rowIndex++) {
       // Header
 
-      if (insertHeader == true && rowIndex == 0 && ((previousTableIndex == null && file == 0) || individual_tables == true)) {
+      if (insertHeader == true && rowIndex == 0 && ((previousTableIndex == null && file == 0) || individual_tables === true)) {
         header = []
         headerStyle = []
         headerUrl = []
@@ -265,14 +292,13 @@ function insertFiles_asTable_fromTemplate(projectId, files, all_data, previousTa
       styleTableMapping = [];
       urlMapping = [];
     };
-
-    if (!individual_tables) {
-      tables.push(table);
-      tables_styleTableMapping.push(styleTableMapping);
-      tables_urlMapping.push(urlMapping);
-    };
-
   }
+
+  if (!individual_tables) {
+    tables.push(table);
+    tables_styleTableMapping.push(styleTableMapping);
+    tables_urlMapping.push(urlMapping);
+  };
 
 
   // Inserting Tables
