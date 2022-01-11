@@ -3,7 +3,7 @@
    */
 
 
-var releaseVersion = "1.2.1"
+var releaseVersion = "1.2.2"
 var defaultDeployment = 'https://demo.valispace.com';
 
 var TemplateDocumentId_default = {}
