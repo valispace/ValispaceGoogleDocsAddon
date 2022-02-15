@@ -239,7 +239,11 @@ function insertRequirementsInSpec_asTable_fromTemplate(projectId, requirements, 
         for (let cellIndex = 0; cellIndex < templateTableData[0].length; cellIndex++) {
           header.push(templateTableData[rowIndex][cellIndex])
           headerStyle.push([[rowIndex], [cellIndex]])
-          headerUrl.push([])
+          headerUrl.push({
+            url: "",
+            startoffset : 0,
+            endoffset  : 0
+          })
         }
         table.push(header)
         styleTableMapping.push(headerStyle)
@@ -260,13 +264,25 @@ function insertRequirementsInSpec_asTable_fromTemplate(projectId, requirements, 
 
           cellText = cellText.trim();
           subTableRow.push(text_to_insert)
+          urlObject = {
+            url: "",
+            startoffset : 0,
+            endoffset  : 0
+          }
           if (text_to_insert != cellText) {
-            subUrlMapping.push(urlTranslator(requirements[req], types['requirements'], base_path) + `${VALI_PARAMETER_STR}requirements_${requirements[req].id}__${cellText.replace('$', '')}`);
-          }
-          else {
-            subUrlMapping.push([])
-          }
+            property = cellText.split('$')[1].trim().replace('$', '')
+            urlObject.url = urlTranslator(requirements[req], types['requirements'], base_path) + `${VALI_PARAMETER_STR}requirements_${requirements[req].id}__${property}`
+            //This is a test whaveergsfdgsfgr and this is after
 
+            object = requirements[req][property]
+            urlObject.startoffset = cellText.indexOf("$");
+
+            if (object !== undefined) {urlObject.endoffset = urlObject.startoffset + object.length - 1};
+            if (urlObject.endoffset < 0) {
+              urlObject.endoffset = 0
+            }
+          }
+          subUrlMapping.push(urlObject);
           subTableStyleRow.push([[rowIndex], [cellIndex]])
 
         }
@@ -523,7 +539,6 @@ function findAndReplaceImages(origin) {
 function formatingTable(table, styleTableMapping, urlMapping, templateTableCellAttributes, startingRow, cellLimit) {
   counter = 0
 
-
   numColumns = table.getRow(0).getNumCells()
   for (let rowIndex = startingRow; rowIndex < table.getNumRows(); rowIndex++) {
     for (let columnIndex = 0; columnIndex < numColumns; columnIndex++) {
@@ -571,10 +586,15 @@ function formatingTable(table, styleTableMapping, urlMapping, templateTableCellA
       }
 
       delete styleCellAttributes[DocumentApp.Attribute.LINK_URL]
-      table.getCell(rowIndex, columnIndex).setLinkUrl(urlMapping[rowIndex][columnIndex])
+      startOffset = urlMapping[rowIndex][columnIndex].startoffset
+      endOffset = urlMapping[rowIndex][columnIndex].endoffset
+      if(startOffset == 0 && endOffset == 0){
+        table.getCell(rowIndex, columnIndex).editAsText().setLinkUrl(urlMapping[rowIndex][columnIndex].url)
+      } else {
+        table.getCell(rowIndex, columnIndex).editAsText().setLinkUrl(urlMapping[rowIndex][columnIndex].startoffset, urlMapping[rowIndex][columnIndex].endoffset , urlMapping[rowIndex][columnIndex].url)
+      }
+
       table.getCell(rowIndex, columnIndex).setAttributes(styleCellAttributes)
-
-
     }
     if (counter > cellLimit) {
       return rowIndex

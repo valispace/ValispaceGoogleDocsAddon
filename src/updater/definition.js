@@ -150,10 +150,10 @@ function update_text(el, objectList, mergeAdjacent=false, base_path){
   // go over all styling segments in text element
   var attributeIndices_top = el.getTextAttributeIndices();
   var lastLink = null;
-
   attributeIndices_top.forEach(function(startOffset, i, attributeIndices) {
     startOffset=attributeIndices_top[i]
     var url = el.getLinkUrl(startOffset);
+
     if (url != null) {
       // we hit a link
       var endOffsetInclusive = (i+1 < attributeIndices.length?
@@ -212,6 +212,7 @@ function update_text(el, objectList, mergeAdjacent=false, base_path){
           var new_url =  urlTranslator(objData, types[objType], base_path);
           var attributes = el.getAttributes(startOffset)
           delete attributes[DocumentApp.Attribute.LINK_URL]
+
           if(text !== new_data) {el.replaceText(text, new_data)}
           var new_length = new_data.length - text.length
           el.setLinkUrl(startOffset,endOffsetInclusive-1+new_length,new_url + `${VALI_PARAMETER_STR}${urlName}`)
