@@ -50,7 +50,7 @@ function files_direct_insert(all_data, objectName, property, new_line = false) {
   var base_path = PropertiesService.getUserProperties().getProperty('deployment_url');
 
   var object = all_data[types[parentType].name].find(x => x['id'] === parentId);
-  //var url_meta = urlTranslator(object, types[parentType], base_path);
+  var url_meta = urlTranslator(object, types['files'], base_path);
 
   projectId = PropertiesService.getUserProperties().getProperty('projectID');
   var text_to_insert = getFilesTextToInsert(all_data, object, property, projectId);
@@ -137,11 +137,9 @@ function files_replaceReferencesWithObject(attribute, objectList, objectToSearch
     } else {
       object_id = file[attribute];
       object_type = content_types.find(x => x['id'] == file['content_type']);
-      console.log(object_type)
       type_url = content_types_mapping.find(x => x['model'] == object_type['model'])['url']
       request_url = type_url + object_id +'/'
       object = JSON.parse(getAuthenticatedValispaceUrl(request_url));
-      console.log(object)
       reference = object[content_types_mapping.find(x => x['model'] == object_type['model'])['property']]
       if (reference_objects.length == 0) {
         reference_objects = reference_objects + reference;
@@ -174,8 +172,12 @@ function getFilesTextToInsert(all_data, object, property, projectId) {
 
     text_to_insert = func.apply(this, args);
 
-  } else if (object.hasOwnProperty(property)) {
+  }
+  else if (object.hasOwnProperty(property)) {
     text_to_insert = object[property] ? object[property] : '-';
+  }
+  else if (!object.hasOwnProperty(property)) {
+    text_to_insert = '-';
   }
 
   return text_to_insert;
@@ -255,7 +257,11 @@ function insertFiles_asTable_fromTemplate(projectId, files, all_data, previousTa
         for (let cellIndex = 0; cellIndex < templateTableData[0].length; cellIndex++) {
           header.push(templateTableData[rowIndex][cellIndex])
           headerStyle.push([[rowIndex], [cellIndex]])
-          headerUrl.push([])
+          headerUrl.push({
+            url: "",
+            startoffset : 0,
+            endoffset  : 0
+          })
         }
         table.push(header)
         styleTableMapping.push(headerStyle)
@@ -276,6 +282,30 @@ function insertFiles_asTable_fromTemplate(projectId, files, all_data, previousTa
 
           cellText = cellText.trim();
           subTableRow.push(text_to_insert)
+          urlObject = {
+            url: "",
+            startoffset : 0,
+            endoffset  : 0
+          }
+          if (text_to_insert != cellText) {
+            property = cellText.split('$')[1].trim().replace('$', '')
+            urlObject.url = urlTranslator(files[file], types['files'], base_path) + `${VALI_PARAMETER_STR}files_${files[file].id}`
+            //This is a test whaveergsfdgsfgr and this is after
+
+            object = files[file][property]
+            urlObject.startoffset = cellText.indexOf("$");
+            if (object !== undefined) {
+              urlObject.endoffset = urlObject.startoffset + object.length - 1
+            }
+
+            if (typeof(object) == 'number') {
+              urlObject.endoffset = urlObject.startoffset + text_to_insert.length - 1
+            }
+            if (urlObject.endoffset < 0 || urlObject.endoffset == NaN) {
+              urlObject.endoffset = 0
+            }
+          }
+          subUrlMapping.push(urlObject);
           subTableStyleRow.push([[rowIndex], [cellIndex]])
 
         }
@@ -339,7 +369,7 @@ function insertFiles_asTable_fromTemplate(projectId, files, all_data, previousTa
         docTable = body.getChild(tableIndex);
       }
 
-
+      console.log(urlMapping);
       rowIndex = formatingTable(docTable, styleTableMapping, urlMapping, templateTableCellAttributes, rowIndex, cellLimit)
 
       for (row = 0; row < docTable.getNumRows(); row++) {

@@ -36,7 +36,7 @@ var types = {
               url: '',
               data:'tagsData'},
   files:{name:'files',
-              url: '',
+              url: ['project','%project','files'],
               data:'filesData'},
   fileFolders:{name:'fileFolders',
               url:'',

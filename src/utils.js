@@ -12,7 +12,6 @@ function sortNameAlphabeticaly(a, b) {
 var urlTranslator = function(item_data, type, base_path){
   var rel_path = type.url
   base_path += base_path.endsWith("/") ? "" : "/"
-
   var key_str;
   rel_path = rel_path.map(part=>{
     if (part.startsWith('%')){
@@ -37,9 +36,9 @@ var VALI_PARAMETER_STR = "?from=valispace&name="
 //   var id = parseInt(objectSplit[1]);
 //   return url, type, id, property;
 // }
-// 
+//
 // var encodeValiURL = function(type, id, property){
-// 
+//
 //   return
 // }
 
@@ -84,7 +83,7 @@ function iterateSections(doc, func) {
   }
 }
 
-			
+
 function getSavedDeployment(){
   return PropertiesService.getUserProperties().getProperty('savedDeployment')
 }
