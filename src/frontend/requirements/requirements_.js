@@ -441,17 +441,17 @@ function getFilesInRequirement(filesList, requirement) {
   textToInsert = ''
   var filesOnReq = filesList.filter(x => x['object_id'] === requirement['id'])
 
-
+  console.log(filesOnReq);
   for (fileIndex in filesOnReq) {
-
+    console.log(filesOnReq[fileIndex]);
     if (filesOnReq[fileIndex]['file_type'] === 1) {
-      textToInsert += filesOnReq[fileIndex]['name'] + ", "
+      textToInsert += filesOnReq[fileIndex]['name'] + "\n"
     } else if (filesOnReq[fileIndex]['file_type'] === 2) {
-      textToInsert += filesOnReq[fileIndex]['name'] + ", "
+      textToInsert += filesOnReq[fileIndex]['name'] + "\n"
     } else if (filesOnReq[fileIndex]['file_type'] === 3) {
       referenceFileId = filesOnReq[fileIndex]['reference_file']
       originalFileId = filesList.find(x => x['id'] === referenceFileId)
-      textToInsert += originalFileId['name'] + ", "
+      textToInsert += originalFileId['name'] + "\n"
     }
 
   }
