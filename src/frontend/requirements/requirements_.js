@@ -91,6 +91,9 @@ function getTextToInsert(all_data, object, property, projectId) {
   else if (object.hasOwnProperty(property)) {
     text_to_insert = object[property] ? object[property] : '-';
   }
+  else if (!object.hasOwnProperty(property)) {
+    text_to_insert = '-'
+  }
 
   return text_to_insert;
 }
@@ -110,6 +113,7 @@ function direct_insert(all_data, objectName, property, new_line = false) {
 
   var insertion_data = new InsertionData(
     text_to_insert,
+
     url_meta,
     objectName,
     property
@@ -588,6 +592,8 @@ function formatingTable(table, styleTableMapping, urlMapping, templateTableCellA
       delete styleCellAttributes[DocumentApp.Attribute.LINK_URL]
       startOffset = urlMapping[rowIndex][columnIndex].startoffset
       endOffset = urlMapping[rowIndex][columnIndex].endoffset
+      //console.log(urlMapping)
+      //console.log(table.getCell(rowIndex, columnIndex).getText());
       if(startOffset == 0 && endOffset == 0){
         table.getCell(rowIndex, columnIndex).editAsText().setLinkUrl(urlMapping[rowIndex][columnIndex].url)
       } else {
