@@ -10,7 +10,7 @@
 	var sectionIcon = '<i class="tree_icon fas fa-list-ul"></i>'
 	var plusIcon = '<i class="add-element fas fa-plus-circle"></i>'
 	var propertiesIcon = '<i class="show-properties fas fa-ellipsis-v"></i>'
-	// var childAddIcon = '<i class="add-element fas fa-plus"></i>' // 
+	// var childAddIcon = '<i class="add-element fas fa-plus"></i>' //
 
 	$(function () {
 		// ReDownloads Requirement Data when refresh button is pressed
@@ -171,7 +171,7 @@
 			'tags': JSON.parse(document.getElementById(types.tags.data).getAttribute('data')),
 			'files': JSON.parse(document.getElementById(types.files.data).getAttribute('data')),
 			'users': JSON.parse(document.getElementById(types.users.data).getAttribute('data'))
-		} // Here we just user [specifications, folders, requirements, groups], 
+		} // Here we just user [specifications, folders, requirements, groups],
 		var identifiers = []
 		for (data of all_data) {
 			data.filter(x => {
@@ -398,19 +398,30 @@
 				// If Parent is a Another Group, it has "children"
 				if (parent.hasOwnProperty('children')) {
 					var parentId_html = types.groups.name + '_' + parent['id']
-
-					htmlToWrite = htmlToWrite.concat('<li class="reqSearcheableObj group" id="', parentId_html, '">', expandIcon, sectionIcon, '<div class="truncated-text">', String(parent['name']), '</div>', plusIcon, propertiesIcon, '</li>')
-					// subHtml.concat(parent['name'])
-
 					var parentId = parent['id']
 					var groupsInside2 = groups.filter(x => x['parent'] === parentId)
 
+					htmlToWrite = htmlToWrite.concat('<li class="reqSearcheableObj group" id="', parentId_html, '">');
+					if (parent.requirements.length > 0) {
+						htmlToWrite = htmlToWrite.concat(expandIcon)
+					}
+					else {
+						htmlToWrite = htmlToWrite.concat("<i>&nbsp;</i>")
+					}
+					htmlToWrite = htmlToWrite.concat(sectionIcon, '<div class="truncated-text">', String(parent['name']), '</div>', plusIcon, propertiesIcon, '</li>');
+					// subHtml.concat(parent['name'])
 
 					htmlToWrite = htmlToWrite.concat('<div class="nested dropdown-content" id="children_', parentId_html, '">')
 					if (groupsInside2.length != 0) {
 						getSpecificationsAndGroups(groupsInside2)
 					}
+
 					htmlToWrite = htmlToWrite.concat('</div>')
+
+
+					if (parent.requirements.length <= 0) {
+						htmlToWrite = htmlToWrite.concat("<div class=\"empty-section\">No Requirements on Section</div>");
+					}
 				}
 			}
 		}
