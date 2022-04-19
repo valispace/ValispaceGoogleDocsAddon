@@ -89,7 +89,9 @@
     }
 
     function redirectTemplate(module) {
-      google.script.run.withSuccessHandler(closeIt).redirectToTemplate(module);
+      google.script.run.withSuccessHandler(function(url){
+        window.open(url)
+      }).redirectToTemplate(module);
     }
 
 

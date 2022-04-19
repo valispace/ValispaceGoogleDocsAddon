@@ -48,8 +48,8 @@ function check_individual_tables() {
 function redirectToTemplate(module) {
   PropertiesService.getDocumentProperties().setProperty('TemplateDocumentId_' + module, TemplateDocumentId_default[module]);
   var url = DocumentApp.openById(TemplateDocumentId_default[module]).getUrl();
-
-
+  return url;
+/*
   // Try to get the table to see if the user has access (permission) to it.
   var url = DocumentApp.openById(TemplateDocumentId_default[module]).getUrl();
 
@@ -74,6 +74,6 @@ function redirectToTemplate(module) {
   var link_paragraph = body.insertParagraph(newIndex, url);
   console.log(url.length);
   link_paragraph.editAsText().setLinkUrl(0, url.length - 1, url);
-
+*/
 }
 
