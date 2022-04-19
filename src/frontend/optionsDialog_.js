@@ -48,32 +48,7 @@ function check_individual_tables() {
 function redirectToTemplate(module) {
   PropertiesService.getDocumentProperties().setProperty('TemplateDocumentId_' + module, TemplateDocumentId_default[module]);
   var url = DocumentApp.openById(TemplateDocumentId_default[module]).getUrl();
-  return url;
-/*
-  // Try to get the table to see if the user has access (permission) to it.
-  var url = DocumentApp.openById(TemplateDocumentId_default[module]).getUrl();
 
-  var doc = DocumentApp.getActiveDocument();
-  var body = doc.getBody();
-  var cursor = doc.getCursor();
-  if (cursor) {
-    var element = cursor.getElement();
-    // Get the first Body Section parent of the element
-    while (element.getParent().getType() != DocumentApp.ElementType.BODY_SECTION) {
-      element = element.getParent();
-    }
-    var index = body.getChildIndex(element);
-  }
-  else {
-    DocumentApp.getUi().alert("Could not find current position. Please click on the text where you want to add the requirement.");
-    return;
-  }
-  //var indexCursor = previousTableIndex(body, cursor);
-  var paragraph = body.insertParagraph(index, "To edit the " + module + " template you need to create a copy of this document : ");
-  var newIndex = index + 1;
-  var link_paragraph = body.insertParagraph(newIndex, url);
-  console.log(url.length);
-  link_paragraph.editAsText().setLinkUrl(0, url.length - 1, url);
-*/
+  return url;
 }
 
