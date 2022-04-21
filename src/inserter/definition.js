@@ -6,7 +6,7 @@ function InsertionData(data, url, name, property){
 }
 
 var Inserter = {
-  insert: function(object, type='text', new_line=false){
+  insert: function(object, type='text', new_line=false, append=false){
     id = `${object.name}__${object.property}`
 
     var doc=DocumentApp.getActiveDocument();
@@ -20,8 +20,14 @@ var Inserter = {
     if (text_to_insert == ''){
       text_to_insert = '-'
     }
-    el = body.insertParagraph(index, text_to_insert)
-    el = el.getChild(0);
+
+    if (append) {
+      el = cursor.insertText(text_to_insert);
+    } else {
+      el = body.insertParagraph(index, text_to_insert)
+      el = el.getChild(0);
+    }
+
 
 
     el.setLinkUrl(object.url + `${VALI_PARAMETER_STR}${id}`)
