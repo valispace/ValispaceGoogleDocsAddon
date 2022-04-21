@@ -179,7 +179,7 @@ function insert_spec_or_group_using_template(insertion_array, all_data) {
 
 // TODO: Why are the functions insertRequirementsInSpec_asTable_fromTemplate and insert_spec_or_group_using_template separated? There is no clear distinction/
 function insertRequirementsInSpec_asTable_fromTemplate(projectId, requirements, all_data, previousTableIndex = null, numOfCells = 0, objectProperty) {
-  console.log(objectProperty);
+
   if (requirements.length == 0 && objectProperty == 'name') {
     text_to_insert = "No requirements in section";
     var body = DocumentApp.getActiveDocument().getBody();
