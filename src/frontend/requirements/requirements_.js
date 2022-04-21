@@ -151,19 +151,33 @@ function insert_spec_or_group_using_template(insertion_array, all_data) {
 
   numOfCells = 0;
   var reqs = [];
+  // Check if after inserting a section/group we have inserted requirements
+  var req_inserted = false;
+  var section_inserted = false;
   insertion_array.reverse();
   for (line of insertion_array) {
     // If this is a Group
     if (Array.isArray(line)) {
-
+      // if(section_inserted && !req_inserted){
+      //   text_to_insert = "No requirements in section";
+      //   var body = DocumentApp.getActiveDocument().getBody();
+      //   var cursor = DocumentApp.getActiveDocument().getCursor();
+      //   var indexCursor = getCursorIndex(body, cursor);
+      //   var paragraph = body.insertParagraph(indexCursor + 1, text_to_insert);
+      // }
       // Add Specification or Section Name Name
       last_index = direct_insert(all_data, line[0], line[1], true);
-      reqs.reverse();
-      [tableIndex, tableIndex_, numOfCells] = insertRequirementsInSpec_asTable_fromTemplate(projectId, reqs, all_data, null, numOfCells, line[1]);
-      reqs = [];
+      if (reqs.length > 0){
+        reqs.reverse();
+        [tableIndex, tableIndex_, numOfCells] = insertRequirementsInSpec_asTable_fromTemplate(projectId, reqs, all_data, null, numOfCells);
+        reqs = [];
+      }
+      section_inserted = true;
+      req_inserted = false;
     }
     else {
       reqs.push(line);
+      req_inserted = true;
     }
   }
 
@@ -178,15 +192,7 @@ function insert_spec_or_group_using_template(insertion_array, all_data) {
 }
 
 // TODO: Why are the functions insertRequirementsInSpec_asTable_fromTemplate and insert_spec_or_group_using_template separated? There is no clear distinction/
-function insertRequirementsInSpec_asTable_fromTemplate(projectId, requirements, all_data, previousTableIndex = null, numOfCells = 0, objectProperty) {
-
-  if (requirements.length == 0 && objectProperty == 'name') {
-    text_to_insert = "No requirements in section";
-    var body = DocumentApp.getActiveDocument().getBody();
-    var cursor = DocumentApp.getActiveDocument().getCursor();
-    var indexCursor = getCursorIndex(body, cursor);
-    var paragraph = body.insertParagraph(indexCursor + 1, text_to_insert);
-  }
+function insertRequirementsInSpec_asTable_fromTemplate(projectId, requirements, all_data, previousTableIndex = null, numOfCells = 0) {
   var base_path = PropertiesCache('User', 'deployment_url')
 
   specificationsData = all_data['specifications']
