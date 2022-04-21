@@ -6,7 +6,7 @@ function update_all_values(objectList){
   var imgList = []
 
   var base_path = PropertiesService.getUserProperties().getProperty('deployment_url')
-  iterateSections(doc, function(section, sectionIndex, isFirstPageSection) {
+  iterateSections(doc, function(section, sectionIndex, isFirstPageSection, counter = 0) {
 
     if (!("getParagraphs" in section)) {
       // as we're using some undocumented API, adding this to avoid cryptic
@@ -22,32 +22,34 @@ function update_all_values(objectList){
       if (par.getNumChildren() == 0) {
         return;
       }
-
-      // go over all text elements in paragraph / list-item
-      for (var el=par.getChild(0); el!=null; el=el.getNextSibling()) {
-        if (el.getType() == DocumentApp.ElementType.TABLE ||
-        el.getType() == DocumentApp.ElementType.TABLE_ROW ||
-        el.getType() == DocumentApp.ElementType.TABLE_CELL ||
-        el.getType() == DocumentApp.ElementType.PARAGRAPH){
-          // find_links(el);
-        }
-        if (el.getType() == DocumentApp.ElementType.TEXT) {
-          update_text(el, objectList, mergeAdjacent, base_path)
-        }
-
-        if (el.getType() == DocumentApp.ElementType.TEXT && el.getText() == '-') {
-          // TODO: Maybe this can be done outside the if, even though it only executes once inside the if
-          update_placeholder_to_image(el, objectList, base_path);
-        }
-
-        if (el.getType() == DocumentApp.ElementType.INLINE_IMAGE &&
-        update_images && el.asInlineImage() != NaN) {
-          imgList.push(el.asInlineImage());
-        }
-      }
     };
+    // go over all text elements in paragraph / list-item
+    //for (var el=par.getChild(0); el!=null; el=el.getNextSibling()) {
+    var el = section.getChild(0);
+    if (el.getType() == DocumentApp.ElementType.TABLE ||
+    el.getType() == DocumentApp.ElementType.TABLE_ROW ||
+    el.getType() == DocumentApp.ElementType.TABLE_CELL ||
+    el.getType() == DocumentApp.ElementType.PARAGRAPH){
+      // find_links(el);
+    }
+    if (el.getType() == DocumentApp.ElementType.TEXT) {
+      update_text(el, objectList, mergeAdjacent, base_path, counter)
+    }
+
+    if (el.getType() == DocumentApp.ElementType.TEXT && el.getText() == '-') {
+      // TODO: Maybe this can be done outside the if, even though it only executes once inside the if
+      update_placeholder_to_image(el, objectList, base_path);
+    }
+
+    if (el.getType() == DocumentApp.ElementType.INLINE_IMAGE &&
+    update_images && el.asInlineImage() != NaN) {
+      imgList.push(el.asInlineImage());
+    }
+    //}
+
     section.getParagraphs().forEach(find_links);
     section.getTables().forEach(find_links)
+    counter = counter + 1
   });
 
   verify_and_update_images(imgList, objectList, base_path);
@@ -146,91 +148,92 @@ function verify_and_update_images(imgList, objectList, base_path){
   }
 }
 
-function update_text(el, objectList, mergeAdjacent=false, base_path){
+function update_text(el, objectList, mergeAdjacent=false, base_path, i){
   // go over all styling segments in text element
   var attributeIndices_top = el.getTextAttributeIndices();
   var lastLink = null;
-  attributeIndices_top.forEach(function(startOffset, i, attributeIndices) {
-    startOffset=attributeIndices_top[i]
-    var url = el.getLinkUrl(startOffset);
+  //attributeIndices_top.forEach(function(startOffset, i, attributeIndices) {
+  var attributeIndices = 0;
+  var startOffset=attributeIndices_top[i]
+  var url = el.getLinkUrl(startOffset);
 
-    if (url != null) {
-      // we hit a link
-      var endOffsetInclusive = (i+1 < attributeIndices.length?
-        attributeIndices[i+1] : el.getText().length);
-      var text = el.getText().substring(startOffset, endOffsetInclusive)
-      // check if this and the last found link are continuous
-      if (mergeAdjacent && lastLink != null && lastLink.url == url &&
-      lastLink.endOffsetInclusive == startOffset) {
-        // this and the previous style segment are continuous
-        lastLink.endOffsetInclusive = endOffsetInclusive;
-        return;
-      }
-      if (url.includes(VALI_PARAMETER_STR)){
-        urlName = url.split(VALI_PARAMETER_STR)[1]
-        //TODO: Figure out a better way to define names. This is not general and is split between files.
-        //Smth like a translator in the inserter
-        var objectName = urlName.split('__')
-        var objProperty = objectName[1];
-        objectName = objectName[0].split("_");
-        var objType = objectName[0].toString();
-        var objId = parseInt(objectName[1]);
-        var objData = objectList[objType].find(x => x['id'] === objId);
-        text_to_insert = "-"
-        if(objData){
-          if (objData[objProperty]) {
-            text_to_insert = objData[objProperty];
-          }
-          if (objProperty == 'owner') {
-            text_to_insert = getUserFrom(objData[objProperty], objectList['users'], objectList['user_groups']);
-          }
-          else if (objProperty == 'tags') {
-            text_to_insert = replaceAttributesWithId('tags', objectList[types.tags.name], objData, 'name')
-          }
-          // Replacing Group (Section) Name
-          else if (objProperty == 'section') {
-            text_to_insert = replaceAttributesWithId('group', objectList[types.groups.name], objData, 'name')
-          }
-          // Replacing Parent Name
-          else if (objProperty == 'parents') {
-            text_to_insert = replaceAttributesWithId('parents', objectList[types.requirements.name], objData, 'identifier')
-          }
-          // Replacing Children Name
-          else if (objProperty == 'children') {
-            text_to_insert = replaceAttributesWithId('children', objectList[types.requirements.name], objData, 'identifier')
-          }
-          // Replacing Files Names
-          else if (objProperty == 'files') {
-            reqId = objId
-            text_to_insert = getFilesInRequirement(objectList[types.files.name], reqId)
-          }
-          else if (objProperty == 'images') {
-            reqId = objId
-            // TODO - It function here for the updater.
-          }
-          var new_data = text_to_insert;
-          var new_url =  urlTranslator(objData, types[objType], base_path);
-          var attributes = el.getAttributes(startOffset)
-          delete attributes[DocumentApp.Attribute.LINK_URL]
-
-          if(text !== new_data) {el.replaceText(text, new_data)}
-          var new_length = new_data.length - text.length
-          el.setLinkUrl(startOffset,endOffsetInclusive-1+new_length,new_url + `${VALI_PARAMETER_STR}${urlName}`)
-
-          el.setAttributes(startOffset,endOffsetInclusive-1+new_length,attributes)
-          attributeIndices_top = el.getTextAttributeIndices();
-        }
-        else{//(`Not updated: ${objectName} ${new_data}`)
-        }
-      }
-
-      lastLink = {
-        "startOffset": startOffset,
-        "endOffsetInclusive": endOffsetInclusive,
-        "url": url
-      };
+  if (url != null) {
+    // we hit a link
+    var endOffsetInclusive = (i+1 < attributeIndices.length?
+      attributeIndices[i+1] : el.getText().length);
+    var text = el.getText().substring(startOffset, endOffsetInclusive)
+    // check if this and the last found link are continuous
+    if (mergeAdjacent && lastLink != null && lastLink.url == url &&
+    lastLink.endOffsetInclusive == startOffset) {
+      // this and the previous style segment are continuous
+      lastLink.endOffsetInclusive = endOffsetInclusive;
+      return;
     }
-  });
+    if (url.includes(VALI_PARAMETER_STR)){
+      urlName = url.split(VALI_PARAMETER_STR)[1]
+      //TODO: Figure out a better way to define names. This is not general and is split between files.
+      //Smth like a translator in the inserter
+      var objectName = urlName.split('__')
+      var objProperty = objectName[1];
+      objectName = objectName[0].split("_");
+      var objType = objectName[0].toString();
+      var objId = parseInt(objectName[1]);
+      var objData = objectList[objType].find(x => x['id'] === objId);
+      text_to_insert = "-"
+      if(objData){
+        if (objData[objProperty]) {
+          text_to_insert = objData[objProperty];
+        }
+        if (objProperty == 'owner') {
+          text_to_insert = getUserFrom(objData[objProperty], objectList['users'], objectList['user_groups']);
+        }
+        else if (objProperty == 'tags') {
+          text_to_insert = replaceAttributesWithId('tags', objectList[types.tags.name], objData, 'name')
+        }
+        // Replacing Group (Section) Name
+        else if (objProperty == 'section') {
+          text_to_insert = replaceAttributesWithId('group', objectList[types.groups.name], objData, 'name')
+        }
+        // Replacing Parent Name
+        else if (objProperty == 'parents') {
+          text_to_insert = replaceAttributesWithId('parents', objectList[types.requirements.name], objData, 'identifier')
+        }
+        // Replacing Children Name
+        else if (objProperty == 'children') {
+          text_to_insert = replaceAttributesWithId('children', objectList[types.requirements.name], objData, 'identifier')
+        }
+        // Replacing Files Names
+        else if (objProperty == 'files') {
+          reqId = objId
+          text_to_insert = getFilesInRequirement(objectList[types.files.name], objData)
+        }
+        else if (objProperty == 'images') {
+          reqId = objId
+          // TODO - It function here for the updater.
+        }
+        var new_data = text_to_insert;
+        var new_url =  urlTranslator(objData, types[objType], base_path);
+        var attributes = el.getAttributes(startOffset)
+        delete attributes[DocumentApp.Attribute.LINK_URL]
+
+        if(text !== new_data) {el.replaceText(text, new_data)}
+        var new_length = new_data.length - text.length
+        el.setLinkUrl(startOffset,endOffsetInclusive-1+new_length,new_url + `${VALI_PARAMETER_STR}${urlName}`)
+
+        el.setAttributes(startOffset,endOffsetInclusive-1+new_length,attributes)
+        attributeIndices_top = el.getTextAttributeIndices();
+      }
+      else{//(`Not updated: ${objectName} ${new_data}`)
+      }
+    }
+
+    lastLink = {
+      "startOffset": startOffset,
+      "endOffsetInclusive": endOffsetInclusive,
+      "url": url
+    };
+  }
+  //});
 }
 
 function update_image(image, objectList, base_path){

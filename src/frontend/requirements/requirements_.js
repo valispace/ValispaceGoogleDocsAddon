@@ -444,10 +444,7 @@ function getFilesInRequirement(filesList, requirement) {
 
   textToInsert = ''
   var filesOnReq = filesList.filter(x => x['object_id'] === requirement['id'])
-
-  console.log(filesOnReq);
   for (fileIndex in filesOnReq) {
-    console.log(filesOnReq[fileIndex]);
     if (filesOnReq[fileIndex]['file_type'] === 1) {
       textToInsert += filesOnReq[fileIndex]['name'] + "\n"
     } else if (filesOnReq[fileIndex]['file_type'] === 2) {
@@ -592,8 +589,6 @@ function formatingTable(table, styleTableMapping, urlMapping, templateTableCellA
       delete styleCellAttributes[DocumentApp.Attribute.LINK_URL]
       startOffset = urlMapping[rowIndex][columnIndex].startoffset
       endOffset = urlMapping[rowIndex][columnIndex].endoffset
-      //console.log(urlMapping)
-      //console.log(table.getCell(rowIndex, columnIndex).getText());
       if(startOffset == 0 && endOffset == 0){
         table.getCell(rowIndex, columnIndex).editAsText().setLinkUrl(urlMapping[rowIndex][columnIndex].url)
       } else {
