@@ -118,7 +118,12 @@ function direct_insert(all_data, objectName, property, new_line = false) {
     objectName,
     property
   );
-  return Inserter.insert(insertion_data, insertion_type, new_line);
+
+  var append = false;
+  if (parentType == "requirements") {
+    append = true
+  }
+  return Inserter.insert(insertion_data, insertion_type, new_line, append);
 }
 
 function getTemplateTable(documentId) {
