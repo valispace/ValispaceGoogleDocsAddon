@@ -158,26 +158,26 @@ function insert_spec_or_group_using_template(insertion_array, all_data) {
   for (line of insertion_array) {
     // If this is a Group
     if (Array.isArray(line)) {
-      // if(section_inserted && !req_inserted){
-      //   text_to_insert = "No requirements in section";
-      //   var body = DocumentApp.getActiveDocument().getBody();
-      //   var cursor = DocumentApp.getActiveDocument().getCursor();
-      //   var indexCursor = getCursorIndex(body, cursor);
-      //   var paragraph = body.insertParagraph(indexCursor + 1, text_to_insert);
-      // }
+       if(section_inserted && !req_inserted){
+         text_to_insert = "No requirements in section";
+         var body = DocumentApp.getActiveDocument().getBody();
+         var cursor = DocumentApp.getActiveDocument().getCursor();
+         var indexCursor = getCursorIndex(body, cursor);
+         var paragraph = body.insertParagraph(indexCursor + 1, text_to_insert);
+       }
       // Add Specification or Section Name Name
       last_index = direct_insert(all_data, line[0], line[1], true);
       if (reqs.length > 0){
         reqs.reverse();
         [tableIndex, tableIndex_, numOfCells] = insertRequirementsInSpec_asTable_fromTemplate(projectId, reqs, all_data, null, numOfCells);
         reqs = [];
+        req_inserted = true;
       }
       section_inserted = true;
       req_inserted = false;
     }
     else {
       reqs.push(line);
-      req_inserted = true;
     }
   }
 
