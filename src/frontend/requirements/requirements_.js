@@ -156,19 +156,30 @@ function insert_spec_or_group_using_template(insertion_array, all_data) {
 
   numOfCells = 0;
   var reqs = [];
+  // Check if after inserting a section/group we have inserted requirements
+  var req_inserted = false;
+  var section_inserted = false;
   insertion_array.reverse();
-
   for (line of insertion_array) {
     // If this is a Group
     if (Array.isArray(line)) {
-
+       if(section_inserted && !req_inserted){
+         text_to_insert = "No requirements in section";
+         var body = DocumentApp.getActiveDocument().getBody();
+         var cursor = DocumentApp.getActiveDocument().getCursor();
+         var indexCursor = getCursorIndex(body, cursor);
+         var paragraph = body.insertParagraph(indexCursor + 1, text_to_insert);
+       }
       // Add Specification or Section Name Name
       last_index = direct_insert(all_data, line[0], line[1], true);
-      if (reqs.length > 0) {
+      if (reqs.length > 0){
         reqs.reverse();
         [tableIndex, tableIndex_, numOfCells] = insertRequirementsInSpec_asTable_fromTemplate(projectId, reqs, all_data, null, numOfCells);
         reqs = [];
+        req_inserted = true;
       }
+      section_inserted = true;
+      req_inserted = false;
     }
     else {
       reqs.push(line);
@@ -176,10 +187,8 @@ function insert_spec_or_group_using_template(insertion_array, all_data) {
   }
 
   // Insert Single Requirement
-  if (reqs.length > 0) {
-    [tableIndex, tableIndex_, numOfCells] = insertRequirementsInSpec_asTable_fromTemplate(projectId, reqs, all_data, null, numOfCells);
-    reqs = []
-  }
+  [tableIndex, tableIndex_, numOfCells] = insertRequirementsInSpec_asTable_fromTemplate(projectId, reqs, all_data, null, numOfCells);
+  reqs = []
 
 
   CacheService.getScriptCache().remove('templateTableData')
@@ -450,9 +459,7 @@ function getFilesInRequirement(filesList, requirement) {
   textToInsert = ''
   var filesOnReq = filesList.filter(x => x['object_id'] === requirement['id'])
 
-  console.log(filesOnReq);
   for (fileIndex in filesOnReq) {
-    console.log(filesOnReq[fileIndex]);
     if (filesOnReq[fileIndex]['file_type'] === 1) {
       textToInsert += filesOnReq[fileIndex]['name'] + "\n"
     } else if (filesOnReq[fileIndex]['file_type'] === 2) {

@@ -62,8 +62,6 @@
     });
 
     function setCheckboxState(value, el) {
-      console.log("HEY");
-      console.log(value)
       $(el).attr('checked', value);
     }
 
@@ -73,7 +71,6 @@
 
     function changeTable(module) {
       var TemplateDocumentId_requirements = $('#TemplateDocumentId_' + module).val();
-      console.log(TemplateDocumentId_requirements)
       google.script.run.withSuccessHandler(closeIt).changeTableTemplate(module, TemplateDocumentId_requirements);
     };
 

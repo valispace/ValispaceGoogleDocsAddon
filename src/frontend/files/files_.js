@@ -369,7 +369,6 @@ function insertFiles_asTable_fromTemplate(projectId, files, all_data, previousTa
         docTable = body.getChild(tableIndex);
       }
 
-      console.log(urlMapping);
       rowIndex = formatingTable(docTable, styleTableMapping, urlMapping, templateTableCellAttributes, rowIndex, cellLimit)
 
       for (row = 0; row < docTable.getNumRows(); row++) {
