@@ -45,3 +45,10 @@ function check_individual_tables() {
   return checked
 }
 
+function redirectToTemplate(module) {
+  PropertiesService.getDocumentProperties().setProperty('TemplateDocumentId_' + module, TemplateDocumentId_default[module]);
+  var url = DocumentApp.openById(TemplateDocumentId_default[module]).getUrl();
+
+  return url;
+}
+

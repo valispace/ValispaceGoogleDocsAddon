@@ -22,6 +22,7 @@
   <div id="RequirementsTemplate">
     <input type="submit" value="Modify Template Table" class="action button" onclick="changeTable('requirements')">
     <input type="submit" value="Reset to Default Table" class="action button" onclick="resetTable('requirements')">
+    <input type="submit" value="Edit Template" class="action button" onclick="redirectTemplate('requirements')">
   </div>
   <br>
 
@@ -40,6 +41,7 @@
   <div id="FilesTemplate">
     <input type="submit" value="Modify Template Table" class="action button" onclick="changeTable('files')">
     <input type="submit" value="Reset to Default Table" class="action button" onclick="resetTable('files')">
+    <input type="submit" value="Edit Template" class="action button" onclick="redirectTemplate('files')">
   </div>
   <br>
 
@@ -81,6 +83,12 @@
     function setIndividualInsertion(el) {
       var setting = $(el).is(':checked')
       google.script.run.withSuccessHandler(closeIt).setIndividualTables(setting);
+    }
+
+    function redirectTemplate(module) {
+      google.script.run.withSuccessHandler(function(url){
+        window.open(url)
+      }).redirectToTemplate(module);
     }
 
 
