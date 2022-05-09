@@ -18,12 +18,28 @@
     </div>
   </div>
 
-
   <div id="RequirementsTemplate">
     <input type="submit" value="Modify Template Table" class="action button" onclick="changeTable('requirements')">
     <input type="submit" value="Reset to Default Table" class="action button" onclick="resetTable('requirements')">
   </div>
+
   <br>
+
+  <div class="imageSizeInputContainer">
+    <div class="input-label">
+      <label for="max_image_size">Max image size (in MB): </label>
+    </div>
+    <div>
+      <input type="text" class="input-field" id="max_image_size" name="max_image_size">
+    </div>
+  </div>
+
+  <br>
+
+  <div id="RequirementsTemplate">
+    <input type="submit" value="Modify" class="action button" onclick="changeSize()">
+    <input type="submit" value="Reset to default" class="action button" onclick="resetSize()">
+  </div>
 
   <br>
 
@@ -36,6 +52,7 @@
     </div>
   </div>
 
+  <br>
 
   <div id="FilesTemplate">
     <input type="submit" value="Modify Template Table" class="action button" onclick="changeTable('files')">
@@ -77,6 +94,34 @@
     function resetTable(module) {
       google.script.run.withSuccessHandler(closeIt).resetTableTemplate(module);
     };
+
+    function changeSize(v) {
+      const min_size = 1.0 / 1024.0 * 128.0;  // 128 KB
+      const max_size = 1024.0;  // 1 GB
+
+      let value = Number(v);
+      if (isNaN(value)) {
+        value = Number($("#max_image_size").val());
+        if (isNaN(value)) {
+          value = 128;
+        }
+      }
+
+      if (value < min_size) {
+        value = min_size;
+      }
+      else {
+        if (value > max_size) {
+        value = max_size;
+        }
+      }
+
+      $("#max_image_size").val(value);
+    }
+
+    function resetSize() {
+      changeSize(128)
+    }
 
     function setIndividualInsertion(el) {
       var setting = $(el).is(':checked')
