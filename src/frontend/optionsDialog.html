@@ -122,22 +122,13 @@
     };
 
     function change_dimension(q, v) {
-      const max_size = 4096;
-
       let value = Number(v);
       if (isNaN(value)) {
-        value = Number($(q).val());
-        if (isNaN(value)) {
-          value = max_size;
-        }
-      }
-
-      if (value < 1) {
-        value = 1;
+        value = "";
       }
       else {
-        if (value > max_size) {
-        value = max_size;
+        if (value < 1) {
+          value = "";
         }
       }
 
@@ -152,8 +143,8 @@
     }
 
     function resetSize() {
-      change_dimension("#max_image_width", 2048);
-      change_dimension("#max_image_height", 2048);
+      change_dimension("#max_image_width", "");
+      change_dimension("#max_image_height", "");
 
       changeSize();
     }
