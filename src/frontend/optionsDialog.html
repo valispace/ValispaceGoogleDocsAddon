@@ -25,12 +25,19 @@
 
   <br>
 
-  <div class="imageSizeInputContainer">
+  <div class="imageSizeInputContainer" style="display: flex; width: 412px;">
     <div class="input-label">
-      <label for="max_image_size">Max image size (in MB): </label>
+      <label for="max_image_width">Max image width: </label>
     </div>
     <div>
-      <input type="text" class="input-field" id="max_image_size" name="max_image_size">
+      <input type="text" class="input-field" id="max_image_width" name="max_image_width">
+    </div>
+
+    <div class="input-label">
+      <label for="max_image_height">Max image height: </label>
+    </div>
+    <div>
+      <input type="text" class="input-field" id="max_image_height" name="max_image_height">
     </div>
   </div>
 
@@ -95,20 +102,19 @@
       google.script.run.withSuccessHandler(closeIt).resetTableTemplate(module);
     };
 
-    function changeSize(v) {
-      const min_size = 1.0 / 1024.0 * 128.0;  // 128 KB
-      const max_size = 1024.0;  // 1 GB
+    function change_dimension(q, v) {
+      const max_size = 4096;
 
       let value = Number(v);
       if (isNaN(value)) {
-        value = Number($("#max_image_size").val());
+        value = Number($(q).val());
         if (isNaN(value)) {
-          value = 128;
+          value = max_size;
         }
       }
 
-      if (value < min_size) {
-        value = min_size;
+      if (value < 1) {
+        value = 1;
       }
       else {
         if (value > max_size) {
@@ -116,11 +122,16 @@
         }
       }
 
-      $("#max_image_size").val(value);
+      $(q).val(value);
+    }
+
+    function changeSize(w, h) {
+      change_dimension("#max_image_width", w);
+      change_dimension("#max_image_height", h);
     }
 
     function resetSize() {
-      changeSize(128)
+      changeSize(2048, 2048)
     }
 
     function setIndividualInsertion(el) {
