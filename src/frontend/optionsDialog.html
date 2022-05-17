@@ -83,7 +83,26 @@
         .withSuccessHandler(setCheckboxState)
         .withUserObject($("#insert_individual_tables"))
         .check_individual_tables();
+
+        google.script.run
+        .withSuccessHandler(setSizeState)
+        .withUserObject($("#max_image_width"))
+        .get_image_width();
+
+        google.script.run
+        .withSuccessHandler(setSizeState)
+        .withUserObject($("#max_image_height"))
+        .get_image_height();
     });
+
+    function setSizeState(value, el) {
+      if (value == null) {
+        resetSize();
+      }
+      else {
+        $(el).val(value);
+      }
+    }
 
     function setCheckboxState(value, el) {
       $(el).attr('checked', value);
@@ -125,13 +144,18 @@
       $(q).val(value);
     }
 
-    function changeSize(w, h) {
-      change_dimension("#max_image_width", w);
-      change_dimension("#max_image_height", h);
+    function changeSize() {
+      let w = $("#max_image_width").val();
+      let h = $("#max_image_height").val();
+
+      google.script.run.withSuccessHandler(closeIt).setMaxImageSize([w, h]);
     }
 
     function resetSize() {
-      changeSize(2048, 2048)
+      change_dimension("#max_image_width", 2048);
+      change_dimension("#max_image_height", 2048);
+
+      changeSize();
     }
 
     function setIndividualInsertion(el) {

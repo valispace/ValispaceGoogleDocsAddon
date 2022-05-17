@@ -45,3 +45,21 @@ function check_individual_tables() {
   return checked
 }
 
+function get_image_width() {
+  let value = PropertiesService.getUserProperties().getProperty('max_image_width');
+  console.log("value2:", value);
+  return value;
+}
+
+function get_image_height() {
+  let value = PropertiesService.getUserProperties().getProperty('max_image_height');
+  console.log("value3:", value);
+  return value
+}
+
+function setMaxImageSize(s) {
+  console.log("setMaxImageSize", s);
+
+  PropertiesService.getUserProperties().setProperty('max_image_width', s[0]);
+  PropertiesService.getUserProperties().setProperty('max_image_height', s[1]);
+}
