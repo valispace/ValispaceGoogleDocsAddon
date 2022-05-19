@@ -150,50 +150,57 @@ function getTemplateTable(documentId) {
 }
 
 function insert_spec_or_group_using_template(insertion_array, all_data) {
-  CacheService.getScriptCache().remove('templateTableData');
-  CacheService.getScriptCache().remove('templateTableCellAttributes');
-  var projectId = PropertiesCache('User', 'projectID');
+  console.log("insert_spec_or_group_using_template", insertion_array, all_data);
 
-  numOfCells = 0;
-  var reqs = [];
-  // Check if after inserting a section/group we have inserted requirements
-  var req_inserted = false;
-  var section_inserted = false;
-  insertion_array.reverse();
-  for (line of insertion_array) {
-    // If this is a Group
-    if (Array.isArray(line)) {
-       if(section_inserted && !req_inserted){
-         text_to_insert = "No requirements in section";
-         var body = DocumentApp.getActiveDocument().getBody();
-         var cursor = DocumentApp.getActiveDocument().getCursor();
-         var indexCursor = getCursorIndex(body, cursor);
-         var paragraph = body.insertParagraph(indexCursor + 1, text_to_insert);
-       }
-      // Add Specification or Section Name Name
-      last_index = direct_insert(all_data, line[0], line[1], true);
-      if (reqs.length > 0){
-        reqs.reverse();
-        [tableIndex, tableIndex_, numOfCells] = insertRequirementsInSpec_asTable_fromTemplate(projectId, reqs, all_data, null, numOfCells);
-        reqs = [];
-        req_inserted = true;
+  try {
+    CacheService.getScriptCache().remove('templateTableData');
+    CacheService.getScriptCache().remove('templateTableCellAttributes');
+    let projectId = PropertiesCache('User', 'projectID');
+
+    numOfCells = 0;
+    let reqs = [];
+    // Check if after inserting a section/group we have inserted requirements
+    let req_inserted = false;
+    let section_inserted = false;
+    insertion_array.reverse();
+
+    for (line of insertion_array) {
+      // If this is a Group
+      if (Array.isArray(line)) {
+        if(section_inserted && !req_inserted){
+          text_to_insert = "No requirements in section";
+          let body = DocumentApp.getActiveDocument().getBody();
+          let cursor = DocumentApp.getActiveDocument().getCursor();
+          let indexCursor = getCursorIndex(body, cursor);
+          let paragraph = body.insertParagraph(indexCursor + 1, text_to_insert);
+        }
+
+        // Add Specification or Section Name Name
+        last_index = direct_insert(all_data, line[0], line[1], true);
+        if (reqs.length > 0){
+          reqs.reverse();
+          [tableIndex, tableIndex_, numOfCells] = insertRequirementsInSpec_asTable_fromTemplate(projectId, reqs, all_data, null, numOfCells);
+          reqs = [];
+          req_inserted = true;
+        }
+        section_inserted = true;
+        req_inserted = false;
       }
-      section_inserted = true;
-      req_inserted = false;
+      else {
+        reqs.push(line);
+      }
     }
-    else {
-      reqs.push(line);
-    }
+
+    // Insert Single Requirement
+    [tableIndex, tableIndex_, numOfCells] = insertRequirementsInSpec_asTable_fromTemplate(projectId, reqs, all_data, null, numOfCells);
+    reqs = []
+
+    CacheService.getScriptCache().remove('templateTableData')
+    CacheService.getScriptCache().remove('templateTableCellAttributes')
   }
-
-  // Insert Single Requirement
-  [tableIndex, tableIndex_, numOfCells] = insertRequirementsInSpec_asTable_fromTemplate(projectId, reqs, all_data, null, numOfCells);
-  reqs = []
-
-
-  CacheService.getScriptCache().remove('templateTableData')
-  CacheService.getScriptCache().remove('templateTableCellAttributes')
-
+  catch (e) {
+    console.log("Error:", e);
+  }
 }
 
 // TODO: Why are the functions insertRequirementsInSpec_asTable_fromTemplate and insert_spec_or_group_using_template separated? There is no clear distinction/
