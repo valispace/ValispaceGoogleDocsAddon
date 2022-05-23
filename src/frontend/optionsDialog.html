@@ -18,12 +18,35 @@
     </div>
   </div>
 
-
   <div id="RequirementsTemplate">
     <input type="submit" value="Modify Template Table" class="action button" onclick="changeTable('requirements')">
     <input type="submit" value="Reset to Default Table" class="action button" onclick="resetTable('requirements')">
   </div>
+
   <br>
+
+  <div class="imageSizeInputContainer" style="display: flex; width: 412px;">
+    <div class="input-label">
+      <label for="max_image_width">Max image width: </label>
+    </div>
+    <div>
+      <input type="text" class="input-field" id="max_image_width" name="max_image_width">
+    </div>
+
+    <div class="input-label">
+      <label for="max_image_height">Max image height: </label>
+    </div>
+    <div>
+      <input type="text" class="input-field" id="max_image_height" name="max_image_height">
+    </div>
+  </div>
+
+  <br>
+
+  <div id="RequirementsTemplate">
+    <input type="submit" value="Modify" class="action button" onclick="changeSize()">
+    <input type="submit" value="Reset to default" class="action button" onclick="resetSize()">
+  </div>
 
   <br>
 
@@ -36,6 +59,7 @@
     </div>
   </div>
 
+  <br>
 
   <div id="FilesTemplate">
     <input type="submit" value="Modify Template Table" class="action button" onclick="changeTable('files')">
@@ -59,7 +83,26 @@
         .withSuccessHandler(setCheckboxState)
         .withUserObject($("#insert_individual_tables"))
         .check_individual_tables();
+
+        google.script.run
+        .withSuccessHandler(setSizeState)
+        .withUserObject($("#max_image_width"))
+        .get_image_width();
+
+        google.script.run
+        .withSuccessHandler(setSizeState)
+        .withUserObject($("#max_image_height"))
+        .get_image_height();
     });
+
+    function setSizeState(value, el) {
+      if (value == null) {
+        resetSize();
+      }
+      else {
+        $(el).val(value);
+      }
+    }
 
     function setCheckboxState(value, el) {
       $(el).attr('checked', value);
@@ -77,6 +120,34 @@
     function resetTable(module) {
       google.script.run.withSuccessHandler(closeIt).resetTableTemplate(module);
     };
+
+    function change_dimension(q, v) {
+      let value = Number(v);
+      if (isNaN(value)) {
+        value = "";
+      }
+      else {
+        if (value < 1) {
+          value = "";
+        }
+      }
+
+      $(q).val(value);
+    }
+
+    function changeSize() {
+      let w = $("#max_image_width").val();
+      let h = $("#max_image_height").val();
+
+      google.script.run.withSuccessHandler(closeIt).setMaxImageSize([w, h]);
+    }
+
+    function resetSize() {
+      change_dimension("#max_image_width", "");
+      change_dimension("#max_image_height", "");
+
+      changeSize();
+    }
 
     function setIndividualInsertion(el) {
       var setting = $(el).is(':checked')

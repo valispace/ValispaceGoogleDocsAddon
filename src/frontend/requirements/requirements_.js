@@ -534,7 +534,30 @@ function replaceImagesURLToFile(element) {
         img.setHeight(img.getHeight() * ratio)
       }
 
+      let max_width = number(PropertiesService.getUserProperties().getProperty('max_image_width'));
+      let max_height = number(PropertiesService.getUserProperties().getProperty('max_image_height'));
+      let img_width = img.getWidth();
+      let img_height = img.getHeight();
 
+      let new_width = img_width;
+      let new_height = img_height;
+
+      if (!isNaN(max_width) && max_width > 0 && img_width > max_width) {
+        new_width = max_width;
+      }
+
+      if (!isNaN(max_height) && max_height > 0 && img_height > max_height) {
+        new_height = max_height;
+      }
+
+      let ws = new_width / img_width;
+      let hs = new_height / img_height;
+      let scale = ws > hs ? hs : ws;
+
+      console.log("new size:", img_width * scale, img_height * scale);
+
+      img.setWidth(img_width * scale);
+      img.setHeight(img_height * scale);
     }
   }
 }
