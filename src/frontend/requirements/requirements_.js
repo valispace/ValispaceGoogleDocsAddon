@@ -150,7 +150,7 @@ function getTemplateTable(documentId) {
 }
 
 function insert_spec_or_group_using_template(insertion_array, all_data) {
-  console.log("insert_spec_or_group_using_template", insertion_array, all_data);
+  //console.log("insert_spec_or_group_using_template", insertion_array, all_data);
 
   try {
     CacheService.getScriptCache().remove('templateTableData');
@@ -159,21 +159,15 @@ function insert_spec_or_group_using_template(insertion_array, all_data) {
 
     numOfCells = 0;
     let reqs = [];
-    // Check if after inserting a section/group we have inserted requirements
-    let req_inserted = false;
-    let section_inserted = false;
+
     insertion_array.reverse();
 
     for (line of insertion_array) {
+      let req_inserted = false;
+      let section_inserted = false;
+
       // If this is a Group
       if (Array.isArray(line)) {
-        if(section_inserted && !req_inserted){
-          text_to_insert = "No requirements in section";
-          let body = DocumentApp.getActiveDocument().getBody();
-          let cursor = DocumentApp.getActiveDocument().getCursor();
-          let indexCursor = getCursorIndex(body, cursor);
-          let paragraph = body.insertParagraph(indexCursor + 1, text_to_insert);
-        }
 
         // Add Specification or Section Name Name
         last_index = direct_insert(all_data, line[0], line[1], true);
@@ -183,8 +177,16 @@ function insert_spec_or_group_using_template(insertion_array, all_data) {
           reqs = [];
           req_inserted = true;
         }
+
+        // Check if after inserting a section/group we have inserted requirements
+        if (section_inserted && !req_inserted) {
+          text_to_insert = "No requirements in section";
+          let body = DocumentApp.getActiveDocument().getBody();
+          let cursor = DocumentApp.getActiveDocument().getCursor();
+          let indexCursor = getCursorIndex(body, cursor);
+          let paragraph = body.insertParagraph(indexCursor + 1, text_to_insert);
+        }
         section_inserted = true;
-        req_inserted = false;
       }
       else {
         reqs.push(line);
@@ -250,7 +252,6 @@ function insertRequirementsInSpec_asTable_fromTemplate(projectId, requirements, 
 
   // TODO: insertHeader property as UserProperty and add option on Options
   var insertHeader = true
-
 
   for (req in requirements) {
     for (let rowIndex = 0; rowIndex < templateTableData.length; rowIndex++) {
