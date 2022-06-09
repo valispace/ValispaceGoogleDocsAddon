@@ -635,8 +635,6 @@ function formatingTable(table, styleTableMapping, urlMapping, templateTableCellA
       delete styleCellAttributes[DocumentApp.Attribute.LINK_URL]
       startOffset = urlMapping[rowIndex][columnIndex].startoffset
       endOffset = urlMapping[rowIndex][columnIndex].endoffset
-      //console.log(urlMapping)
-      //console.log(table.getCell(rowIndex, columnIndex).getText());
       if(startOffset == 0 && endOffset == 0){
         table.getCell(rowIndex, columnIndex).editAsText().setLinkUrl(urlMapping[rowIndex][columnIndex].url)
       } else {
