@@ -171,6 +171,7 @@ function insert_spec_or_group_using_template(insertion_array, all_data) {
 
         // Add Specification or Section Name Name
         last_index = direct_insert(all_data, line[0], line[1], true);
+        section_inserted = true;
         if (reqs.length > 0){
           reqs.reverse();
           [tableIndex, tableIndex_, numOfCells] = insertRequirementsInSpec_asTable_fromTemplate(projectId, reqs, all_data, null, numOfCells);
@@ -186,7 +187,6 @@ function insert_spec_or_group_using_template(insertion_array, all_data) {
           let indexCursor = getCursorIndex(body, cursor);
           let paragraph = body.insertParagraph(indexCursor + 1, text_to_insert);
         }
-        section_inserted = true;
       }
       else {
         reqs.push(line);
