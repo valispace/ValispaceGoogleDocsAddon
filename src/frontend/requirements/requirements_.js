@@ -118,7 +118,12 @@ function direct_insert(all_data, objectName, property, new_line = false) {
     objectName,
     property
   );
-  return Inserter.insert(insertion_data, insertion_type, new_line);
+
+  var append = false;
+  if (parentType == "requirements") {
+    append = true
+  }
+  return Inserter.insert(insertion_data, insertion_type, new_line, append);
 }
 
 function getTemplateTable(documentId) {
@@ -145,41 +150,59 @@ function getTemplateTable(documentId) {
 }
 
 function insert_spec_or_group_using_template(insertion_array, all_data) {
-  CacheService.getScriptCache().remove('templateTableData');
-  CacheService.getScriptCache().remove('templateTableCellAttributes');
-  var projectId = PropertiesCache('User', 'projectID');
+  //console.log("insert_spec_or_group_using_template", insertion_array, all_data);
 
-  numOfCells = 0;
-  var reqs = [];
-  insertion_array.reverse();
+  try {
+    CacheService.getScriptCache().remove('templateTableData');
+    CacheService.getScriptCache().remove('templateTableCellAttributes');
+    let projectId = PropertiesCache('User', 'projectID');
 
-  for (line of insertion_array) {
-    // If this is a Group
-    if (Array.isArray(line)) {
+    numOfCells = 0;
+    let reqs = [];
 
-      // Add Specification or Section Name Name
-      last_index = direct_insert(all_data, line[0], line[1], true);
-      if (reqs.length > 0) {
-        reqs.reverse();
-        [tableIndex, tableIndex_, numOfCells] = insertRequirementsInSpec_asTable_fromTemplate(projectId, reqs, all_data, null, numOfCells);
-        reqs = [];
+    insertion_array.reverse();
+
+    for (line of insertion_array) {
+      let req_inserted = false;
+      let section_inserted = false;
+
+      // If this is a Group
+      if (Array.isArray(line)) {
+
+        // Add Specification or Section Name Name
+        last_index = direct_insert(all_data, line[0], line[1], true);
+        section_inserted = true;
+        if (reqs.length > 0){
+          reqs.reverse();
+          [tableIndex, tableIndex_, numOfCells] = insertRequirementsInSpec_asTable_fromTemplate(projectId, reqs, all_data, null, numOfCells);
+          reqs = [];
+          req_inserted = true;
+        }
+
+        // Check if after inserting a section/group we have inserted requirements
+        if (section_inserted && !req_inserted) {
+          text_to_insert = "No requirements in section";
+          let body = DocumentApp.getActiveDocument().getBody();
+          let cursor = DocumentApp.getActiveDocument().getCursor();
+          let indexCursor = getCursorIndex(body, cursor);
+          let paragraph = body.insertParagraph(indexCursor + 1, text_to_insert);
+        }
+      }
+      else {
+        reqs.push(line);
       }
     }
-    else {
-      reqs.push(line);
-    }
-  }
 
-  // Insert Single Requirement
-  if (reqs.length > 0) {
+    // Insert Single Requirement
     [tableIndex, tableIndex_, numOfCells] = insertRequirementsInSpec_asTable_fromTemplate(projectId, reqs, all_data, null, numOfCells);
     reqs = []
+
+    CacheService.getScriptCache().remove('templateTableData')
+    CacheService.getScriptCache().remove('templateTableCellAttributes')
   }
-
-
-  CacheService.getScriptCache().remove('templateTableData')
-  CacheService.getScriptCache().remove('templateTableCellAttributes')
-
+  catch (e) {
+    console.log("Error:", e);
+  }
 }
 
 // TODO: Why are the functions insertRequirementsInSpec_asTable_fromTemplate and insert_spec_or_group_using_template separated? There is no clear distinction/
@@ -229,7 +252,6 @@ function insertRequirementsInSpec_asTable_fromTemplate(projectId, requirements, 
 
   // TODO: insertHeader property as UserProperty and add option on Options
   var insertHeader = true
-
 
   for (req in requirements) {
     for (let rowIndex = 0; rowIndex < templateTableData.length; rowIndex++) {
@@ -444,6 +466,7 @@ function getFilesInRequirement(filesList, requirement) {
 
   textToInsert = ''
   var filesOnReq = filesList.filter(x => x['object_id'] === requirement['id'])
+
   for (fileIndex in filesOnReq) {
     if (filesOnReq[fileIndex]['file_type'] === 1) {
       textToInsert += filesOnReq[fileIndex]['name'] + "\n"
@@ -519,7 +542,30 @@ function replaceImagesURLToFile(element) {
         img.setHeight(img.getHeight() * ratio)
       }
 
+      let max_width = number(PropertiesService.getUserProperties().getProperty('max_image_width'));
+      let max_height = number(PropertiesService.getUserProperties().getProperty('max_image_height'));
+      let img_width = img.getWidth();
+      let img_height = img.getHeight();
 
+      let new_width = img_width;
+      let new_height = img_height;
+
+      if (!isNaN(max_width) && max_width > 0 && img_width > max_width) {
+        new_width = max_width;
+      }
+
+      if (!isNaN(max_height) && max_height > 0 && img_height > max_height) {
+        new_height = max_height;
+      }
+
+      let ws = new_width / img_width;
+      let hs = new_height / img_height;
+      let scale = ws > hs ? hs : ws;
+
+      console.log("new size:", img_width * scale, img_height * scale);
+
+      img.setWidth(img_width * scale);
+      img.setHeight(img_height * scale);
     }
   }
 }
